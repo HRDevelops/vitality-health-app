@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Action - Quick Menu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#6d60e9",
+                        "on-secondary-container": "#006370",
+                        "on-tertiary-fixed-variant": "#6d3a00",
+                        "on-tertiary-fixed": "#2e1500",
+                        "tertiary-fixed": "#ffdcc2",
+                        "primary-fixed": "#e4dfff",
+                        "secondary-fixed-dim": "#28d9f3",
+                        "on-primary-fixed": "#140067",
+                        "surface-container-highest": "#e5e0f3",
+                        "on-primary-container": "#fffbff",
+                        "surface-container": "#f0ebfe",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004e59",
+                        "secondary-fixed": "#9eefff",
+                        "inverse-on-surface": "#f3eeff",
+                        "background": "#fcf8ff",
+                        "surface": "#fcf8ff",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-high": "#ebe5f8",
+                        "inverse-surface": "#312f3d",
+                        "tertiary": "#8b4c00",
+                        "primary-fixed-dim": "#c5c0ff",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#af6100",
+                        "surface-container-low": "#f6f1ff",
+                        "on-background": "#1c1a27",
+                        "primary": "#5445cf",
+                        "inverse-primary": "#c5c0ff",
+                        "secondary-container": "#3ee5fe",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#5648d1",
+                        "on-error-container": "#93000a",
+                        "secondary": "#006876",
+                        "surface-dim": "#dcd7ea",
+                        "on-surface": "#1c1a27",
+                        "surface-variant": "#e5e0f3",
+                        "tertiary-fixed-dim": "#ffb77a",
+                        "on-secondary-fixed": "#001f24",
+                        "on-primary-fixed-variant": "#3d2bb9",
+                        "outline-variant": "#c8c4d6",
+                        "surface-bright": "#fcf8ff",
+                        "outline": "#787586",
+                        "on-surface-variant": "#474554"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "20px",
+                        "container-margin": "24px",
+                        "section-gap": "32px",
+                        "gutter": "16px",
+                        "element-gap": "12px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "metric-display": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "metric-display": ["24px", { "lineHeight": "30px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-overlay {
+            background: rgba(252, 248, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .action-icon-gradient {
+            background: linear-gradient(135deg, #6d60e9 0%, #3ee5fe 100%);
+        }
+        .action-icon-gradient-2 {
+            background: linear-gradient(135deg, #c5c0ff 0%, #9eefff 100%);
+        }
+        .action-icon-gradient-3 {
+            background: linear-gradient(135deg, #af6100 0%, #ffb77a 100%);
+        }
+        .action-icon-gradient-4 {
+            background: linear-gradient(135deg, #006876 0%, #28d9f3 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body-lg text-on-surface antialiased">
+<!-- Mock Background Content to demonstrate overlay -->
+<div class="min-h-screen p-container-margin pointer-events-none opacity-40">
+<header class="flex justify-between items-center py-4 mb-section-gap">
+<div class="flex items-center gap-element-gap">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="User profile avatar of a young woman with dark hair in a bright, modern setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmjLNtYp5nhN_ZkWSviLVkKKiO2ZHs1X-8owPBCq98Qgnnuz6IV6txox-617VCKnLl_rICPYPiTsPD6GWgvDrtvkTbIVacpfJsMXPj3v50EnpjQcfQNrLXVF-hDm8Ct9zyU0SNeYjgFRFLH65mVrEaOVXnwE9DZ5mSrI2KChUPJskCoVqxdFSbSCrXM3CbIj-TTHAUthO2psQP_AwX96DUHhzw_1CzrmzqiZWGyaJkQsSSn_9-S-cBdQ"/>
+<h1 class="font-headline-md text-headline-md text-on-surface">Hi, Grace</h1>
+</div>
+<span class="material-symbols-outlined text-primary text-3xl">notifications</span>
+</header>
+<div class="grid grid-cols-2 gap-gutter mb-section-gap">
+<div class="bg-surface-container-lowest rounded-lg p-card-padding shadow-[0px_10px_30px_rgba(115,103,240,0.08)]">
+<p class="font-label-bold text-label-bold text-outline uppercase mb-2">Steps</p>
+<p class="font-metric-display text-metric-display text-on-surface">9,890</p>
+</div>
+<div class="bg-surface-container-lowest rounded-lg p-card-padding shadow-[0px_10px_30px_rgba(115,103,240,0.08)]">
+<p class="font-label-bold text-label-bold text-outline uppercase mb-2">Heart Rate</p>
+<p class="font-metric-display text-metric-display text-on-surface">105 <span class="font-body-sm text-outline">bpm</span></p>
+</div>
+</div>
+</div>
+<!-- The Add Action Overlay -->
+<div class="fixed inset-0 z-50 glass-overlay flex flex-col justify-end md:justify-center items-center transition-opacity duration-300" onclick="history.back()">
+<!-- Close Button (Top right on desktop, top of sheet on mobile) -->
+<a class="absolute top-container-margin right-container-margin p-3 rounded-full bg-surface-container-lowest text-on-surface shadow-lg hover:scale-95 transition-transform duration-200 z-50 cursor-pointer" href="javascript:history.back()">
+<span class="material-symbols-outlined">close</span>
+</a>
+<!-- Main Content Container -->
+<div class="w-full max-w-md bg-surface-container-lowest rounded-t-[3rem] md:rounded-[3rem] p-container-margin pb-12 shadow-[0px_-10px_40px_rgba(84,69,207,0.15)] transform transition-transform duration-300 translate-y-0" onclick="event.stopPropagation()">
+<div class="text-center mb-section-gap pt-4">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Quick Actions</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">What would you like to log today?</p>
+</div>
+<!-- Bento Grid for Actions -->
+<div class="grid grid-cols-2 gap-gutter">
+<!-- Action: Add Weight -->
+<a class="flex flex-col items-center justify-center p-card-padding bg-surface-container-low rounded-lg border border-transparent hover:border-primary-fixed-dim hover:bg-surface-container transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer" href="{{DATA:SCREEN:SCREEN_5}}">
+<div class="w-16 h-16 rounded-full action-icon-gradient flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-on-primary text-3xl" style="font-variation-settings: 'FILL' 1;">monitor_weight</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Add Weight</span>
+</a>
+<!-- Action: Add Water -->
+<button class="flex flex-col items-center justify-center p-card-padding bg-surface-container-low rounded-lg border border-transparent hover:border-secondary-fixed-dim hover:bg-surface-container transition-all duration-200 group shadow-sm hover:shadow-md" onclick="showToast()">
+<div class="w-16 h-16 rounded-full action-icon-gradient-4 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200 shadow-lg shadow-secondary/20">
+<span class="material-symbols-outlined text-on-secondary text-3xl" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface group-hover:text-secondary transition-colors">Add Water</span>
+</button>
+<!-- Action: Add Meal -->
+<a class="flex flex-col items-center justify-center p-card-padding bg-surface-container-low rounded-lg border border-transparent hover:border-tertiary-fixed-dim hover:bg-surface-container transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer" href="{{DATA:SCREEN:SCREEN_3}}">
+<div class="w-16 h-16 rounded-full action-icon-gradient-3 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200 shadow-lg shadow-tertiary/20">
+<span class="material-symbols-outlined text-on-tertiary text-3xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface group-hover:text-tertiary transition-colors">Add Meal</span>
+</a>
+<!-- Action: Add Workout -->
+<a class="flex flex-col items-center justify-center p-card-padding bg-surface-container-low rounded-lg border border-transparent hover:border-primary-fixed-dim hover:bg-surface-container transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer" href="{{DATA:SCREEN:SCREEN_2}}">
+<div class="w-16 h-16 rounded-full action-icon-gradient-2 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-on-primary-fixed-variant text-3xl" style="font-variation-settings: 'FILL' 1;">exercise</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Add Workout</span>
+</a>
+<!-- Action: Set Reminder (Spans Full Width) -->
+<button class="col-span-2 flex items-center justify-between p-card-padding bg-surface-container-low rounded-lg border border-transparent hover:border-outline-variant hover:bg-surface-container transition-all duration-200 group shadow-sm hover:shadow-md mt-2">
+<div class="flex items-center gap-element-gap">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-primary-fixed transition-colors duration-200">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors duration-200">alarm_add</span>
+</div>
+<div class="text-left">
+<span class="block font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Set Reminder</span>
+<span class="block font-body-sm text-body-sm text-on-surface-variant">Schedule notifications</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Hydration Toast -->
+<div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-inverse-surface text-inverse-on-surface px-6 py-3 rounded-full shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-[60] font-label-bold text-label-bold" id="hydration-toast">
+    Hydration logged successfully!
+</div>
+<script>
+    function showToast() {
+        const toast = document.getElementById('hydration-toast');
+        toast.classList.remove('opacity-0');
+        setTimeout(() => {
+            toast.classList.add('opacity-0');
+        }, 3000);
+        // Also simulate returning to background screen after a short delay since it's a dismiss action
+        setTimeout(() => {
+            history.back();
+        }, 3000);
+    }
+</script>
+</body></html>

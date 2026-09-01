@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fitness Explore</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#fffbff",
+                      "inverse-on-surface": "#f3eeff",
+                      "surface-container-low": "#f6f1ff",
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed-dim": "#28d9f3",
+                      "tertiary-container": "#af6100",
+                      "background": "#fcf8ff",
+                      "on-primary-fixed-variant": "#3d2bb9",
+                      "surface-container": "#f0ebfe",
+                      "error": "#ba1a1a",
+                      "surface": "#fcf8ff",
+                      "inverse-surface": "#312f3d",
+                      "surface-dim": "#dcd7ea",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#9eefff",
+                      "surface-tint": "#5648d1",
+                      "surface-variant": "#e5e0f3",
+                      "inverse-primary": "#c5c0ff",
+                      "on-secondary-fixed-variant": "#004e59",
+                      "tertiary": "#8b4c00",
+                      "tertiary-fixed": "#ffdcc2",
+                      "outline-variant": "#c8c4d6",
+                      "on-tertiary-fixed": "#2e1500",
+                      "on-secondary-container": "#006370",
+                      "on-surface": "#1c1a27",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#6d3a00",
+                      "primary-fixed-dim": "#c5c0ff",
+                      "outline": "#787586",
+                      "on-surface-variant": "#474554",
+                      "surface-container-highest": "#e5e0f3",
+                      "tertiary-fixed-dim": "#ffb77a",
+                      "primary-fixed": "#e4dfff",
+                      "secondary": "#006876",
+                      "on-background": "#1c1a27",
+                      "primary-container": "#6d60e9",
+                      "surface-bright": "#fcf8ff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "primary": "#5445cf",
+                      "on-primary-fixed": "#140067",
+                      "secondary-container": "#3ee5fe",
+                      "on-secondary-fixed": "#001f24",
+                      "on-tertiary-container": "#fffbff",
+                      "on-primary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#ebe5f8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "32px",
+                      "container-margin": "24px",
+                      "element-gap": "12px",
+                      "gutter": "16px",
+                      "card-padding": "20px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "metric-display": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-bold": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "metric-display": [
+                              "24px",
+                              {
+                                      "lineHeight": "30px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "26px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-bold": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-lg min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary-fixed docked full-width top-0 flat no shadows z-40 sticky">
+<div class="flex justify-between items-center w-full px-container-margin py-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="A small circular avatar of a young woman smiling in a bright, soft-lit setting, modern light-mode aesthetic, optimistic mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb8tIiSoT0YZKmUq0FYhaoC7rAls0ofYrFCha7PfsXrCPZxU_9G7H2IRsM5X7ePvbv4qeru4Hc3zsLxOnYt3PYRtt4_Y5jqMxzQeeK07GgsnocAzXPh7fPnIOJr4eYsr7qVv3OxoeWHLh2O4qOGF75o6l-EXkne1HrXBhiEdFWUg9qYF2N2wQoQluj_nQ_4TX72AGeEIAidr2NPOs-rH-BHQl5JOwoEhhVUSaIEJzz91C87oo300kzeg"/>
+<h1 class="font-headline-md text-headline-md text-on-surface dark:text-on-surface">Hi, Grace</h1>
+</div>
+<button class="hover:opacity-80 transition-opacity duration-200 text-on-surface-variant p-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+</button>
+</div>
+</header>
+<main class="px-container-margin py-section-gap flex flex-col gap-section-gap md:grid md:grid-cols-12 md:gap-gutter max-w-7xl mx-auto">
+<!-- Search & Main Content Area -->
+<div class="md:col-span-8 flex flex-col gap-section-gap">
+<!-- Search -->
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant">search</span>
+<input class="w-full bg-surface-container-low text-on-surface border-none rounded-full py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary shadow-sm font-body-sm transition-shadow outline-none placeholder:text-outline-variant" placeholder="Search topic" type="text"/>
+</div>
+<!-- Challenge Hero -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-on-surface">Challenge</h2>
+<button class="text-primary font-label-bold text-label-bold hover:opacity-80">SEE ALL</button>
+</div>
+<div class="relative w-full rounded-[32px] overflow-hidden bg-primary-container p-6 md:p-8 flex flex-col justify-between min-h-[320px] shadow-[0px_10px_30px_rgba(115,103,240,0.15)] group transition-transform duration-300 hover:scale-[1.01]">
+<div class="absolute inset-0 bg-cover bg-right md:bg-center opacity-80 mix-blend-luminosity group-hover:opacity-90 transition-opacity duration-500" data-alt="A vibrant, high-energy photo of a woman doing a lunge exercise in a modern, brightly lit fitness studio with a soft purple and pink gradient backdrop. Modern health app aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDVzOwA6stNH3p47KDmE4eU2l3_TlZYh_3hSkpyjuSNfCjTzWAb88gRPUqD5pC-Pv_KwABnLnhbNn75mMySMvw6LcnG_l2BxSdNR2HtgHHxk8cuOgu6lFBE5yhJEcr-kX9inR0c0jetpBhf48tMfjFUxz-98Wp3_1ZyEgFpc4gDxLJL4u_idtFp-ucBHqbPKPGo8U7gi4ECbCA_oCQ3WjKUQenmlkA4zEpI9DO8WSJm6WoGi9gC5LOjcQ')"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-primary-container via-primary-container/80 to-transparent"></div>
+<div class="relative z-10 flex flex-col gap-2 max-w-[60%] md:max-w-[50%]">
+<span class="font-label-bold text-label-bold text-primary-fixed uppercase tracking-wider">Fitness</span>
+<h3 class="font-headline-lg text-on-primary font-extrabold text-4xl md:text-5xl leading-tight">Cardio</h3>
+<p class="font-body-sm text-on-primary/90 mt-2">Get active on your off days and challenge your friends</p>
+</div>
+<div class="relative z-10 flex items-center justify-between mt-auto pt-8">
+<div class="flex -space-x-3">
+<img class="w-8 h-8 rounded-full border-2 border-primary-container object-cover" data-alt="Small circular avatar profile picture of a young man, modern bright style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWCLa4cyD1OpbpbdCFzfUAg9LwOt4kSLd0PK5YfFr-BF6d4g1MKUPnwPXcYzRW2TKTYa9NFAe4HCyw2gFUDec8yxe7vyDjkNlafzotMN3kng4FZ4BKm25WErnJDIO3ONgzXPZ6w9V-k8T5W2Xyqq0MNL-wPeoAyEt9dfXe24G4noEL_u5qq9Zzt52GWCM6P66riUJJw02gJnmxTHcPmABfvX50iOIWmj7QkoUHKw7TJj8La_1UnMtZyg"/>
+<img class="w-8 h-8 rounded-full border-2 border-primary-container object-cover" data-alt="Small circular avatar profile picture of a young woman with glasses, modern bright style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3olFs4s-OayzmlMXtGGb3HGfDPAi5pXqBipYNs5_am4-zy1flrrDeF254TF1oa4BJOyawzdGuAbHOECkfK5_yprxGuuxgr9qCeBAvlrU5BXFQe-0Oe3D7En1AI_Rpdf-6tHpM1XS5-sxwB7Pv0DbhJt-2Q9d1GJgmpU-EbGyClTjaddnEtmO2yaiMxKkOHdjmtpHGRT3-ijNXIqiJJFkywT_kQkE03nPVh9_LPVeviCZrMrElc1_cpw"/>
+<div class="w-8 h-8 rounded-full border-2 border-primary-container bg-surface-container-high flex items-center justify-center font-label-bold text-label-bold text-primary text-[10px]">+12</div>
+</div>
+<a class="bg-surface-container-lowest text-primary px-6 py-2 rounded-full font-label-bold text-label-bold shadow-md hover:scale-105 transition-transform duration-200" href="#">Start</a>
+</div>
+</div>
+</section>
+<!-- Trending -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-md text-on-surface">Trending</h2>
+<button class="text-outline-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">more_horiz</span></button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Card 1 -->
+<a class="bg-surface-container-lowest rounded-2xl p-card-padding flex items-center shadow-[0px_8px_24px_rgba(115,103,240,0.06)] hover:-translate-y-1 transition-transform duration-300" href="{{DATA:SCREEN:SCREEN_8}}">
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex gap-1 text-primary-container mb-2">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<span class="material-symbols-outlined text-[16px]">water_drop</span>
+</div>
+<h4 class="font-headline-md text-on-surface text-lg">Office Workout</h4>
+<p class="font-body-sm text-on-surface-variant text-sm">Beginner • 7 mins</p>
+</div>
+<div class="w-24 h-24 rounded-2xl overflow-hidden relative shadow-sm">
+<div class="absolute inset-0 bg-secondary-container opacity-20"></div>
+<img class="w-full h-full object-cover" data-alt="A woman in activewear stretching while sitting on a chair in a bright, modern office space. Soft UI fitness app aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsCINaD_I-UvqGvpImEs6pgYCcrNg-95P7lV9JkHhRY4dY2DhpkrgWuBLZ5RVmRcWVrJTRRZA9VBx-Yjnrub9jbK2o1stg-9zNPAQPhlRKjByN0ifK5r8iCG7ewtiA9tt4-SUckGcvWoKHygjNyhh9e-TgFH_MtPAWZNUKLJ6eu7F7CSiBdZJ31eiH1tBioDYALaePnsH9ED-HskhkTew2ZmjdzL9aBNlSCgZwbAzau_UpWyHjPeR65g"/>
+</div>
+</a>
+<!-- Card 2 -->
+<a class="bg-surface-container-lowest rounded-2xl p-card-padding flex items-center shadow-[0px_8px_24px_rgba(115,103,240,0.06)] hover:-translate-y-1 transition-transform duration-300" href="{{DATA:SCREEN:SCREEN_8}}">
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex gap-1 text-primary-container mb-2">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<h4 class="font-headline-md text-on-surface text-lg">Abs Intermediate</h4>
+<p class="font-body-sm text-on-surface-variant text-sm">Advance • 7 mins</p>
+</div>
+<div class="w-24 h-24 rounded-2xl overflow-hidden relative shadow-sm">
+<div class="absolute inset-0 bg-primary-container opacity-20"></div>
+<img class="w-full h-full object-cover" data-alt="A woman in workout gear doing crunches on a yoga mat in a brightly lit room. Modern, soft, energetic fitness aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPgtHQfbYzkhqu6vGIlpDMm7EJj3JLqhktnH4wNmLYlOE4l6uJ498uptVNl-EMjJggqLD9IC7W-3n5tWRuk8Mzy8ceRNGyGi6sg1iZ0iy3c9ukZaw8pEBk__xxnTP3NRPyGynGJOirTyMmCu2LSn3pnH1IsEaT-NUqj4n2ZAuTAkACtO2WKYYKvaByUKklMri2QNqy1RdP7wche4DVaI93-qmzE90f4TNVHFPu21XRe38bnkqWlgabfg"/>
+</div>
+</a>
+</div>
+</section>
+</div>
+<!-- Sidebar / Secondary Content -->
+<div class="md:col-span-4 flex flex-col gap-section-gap">
+<!-- Daily Goal Ring -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-[0px_8px_24px_rgba(115,103,240,0.06)] flex flex-col items-center gap-4 hidden md:flex">
+<h3 class="font-headline-md text-on-surface self-start w-full">Daily Goal</h3>
+<div class="relative w-40 h-40 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 100 100">
+<!-- Track -->
+<circle class="text-surface-variant" cx="50" cy="50" fill="none" r="40" stroke="currentColor" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Progress -->
+<circle class="text-primary" cx="50" cy="50" fill="none" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="60" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-metric-display text-on-surface text-3xl">75%</span>
+<span class="font-label-bold text-label-bold text-outline">COMPLETED</span>
+</div>
+</div>
+</div>
+<!-- Topics For You -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<h2 class="font-headline-md text-on-surface text-lg">Topics For You</h2>
+<button class="text-outline-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">more_horiz</span></button>
+</div>
+<div class="flex justify-between md:grid md:grid-cols-4 gap-2">
+<a class="flex flex-col items-center gap-2 group cursor-pointer" href="{{DATA:SCREEN:SCREEN_3}}">
+<div class="w-14 h-14 rounded-full bg-error-container/50 flex items-center justify-center text-on-error-container group-hover:bg-error-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[28px]">nutrition</span>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant text-[10px]">Nutrition</span>
+</a>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-14 h-14 rounded-full bg-tertiary-fixed/50 flex items-center justify-center text-on-tertiary-fixed group-hover:bg-tertiary-fixed transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[28px]">eco</span>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant text-[10px]">Organic</span>
+</div>
+<a class="flex flex-col items-center gap-2 group cursor-pointer" href="{{DATA:SCREEN:SCREEN_10}}">
+<div class="w-14 h-14 rounded-full bg-secondary-fixed/50 flex items-center justify-center text-on-secondary-fixed group-hover:bg-secondary-fixed transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[28px]">self_improvement</span>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant text-[10px]">Meditation</span>
+</a>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-14 h-14 rounded-full bg-primary-fixed/50 flex items-center justify-center text-on-primary-fixed group-hover:bg-primary-fixed transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[28px]">restaurant</span>
+</div>
+<span class="font-label-bold text-label-bold text-on-surface-variant text-[10px]">Nutri</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Floating Action Button (FAB) - Centered -->
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 pb-safe bg-surface-container-lowest dark:bg-surface-container-low shadow-[0px_-4px_20px_rgba(115,103,240,0.05)] shadow-lg rounded-t-lg hidden md:hidden px-4 md:!flex"><div class="flex flex-1 justify-around items-center"><a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_13}}"><span class="material-symbols-outlined mb-1">home</span><span class="font-label-bold text-label-bold text-[10px]">Home</span></a><a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim scale-110 hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_2}}"><span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">explore</span><span class="font-label-bold text-label-bold text-[10px]">Explore</span></a></div><div class="relative -top-6 flex-shrink-0"><a class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center transition-transform active:scale-90" href="{{DATA:SCREEN:SCREEN_7}}"><span class="material-symbols-outlined text-[32px]">add</span></a></div><div class="flex flex-1 justify-around items-center"><a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_8}}"><span class="material-symbols-outlined mb-1">monitoring</span><span class="font-label-bold text-label-bold text-[10px]">Activity</span></a><a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_5}}"><span class="material-symbols-outlined mb-1">person</span><span class="font-label-bold text-label-bold text-[10px]">Profile</span></a></div></nav>
+<nav class="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 pb-safe bg-surface-container-lowest dark:bg-surface-container-low shadow-[0px_-4px_20px_rgba(115,103,240,0.05)] shadow-lg rounded-t-lg md:hidden"><div class="flex flex-1 justify-around items-center"><a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_13}}"><span class="material-symbols-outlined mb-1">home</span><span class="font-label-bold text-label-bold text-[10px]">Home</span></a><a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim scale-110 hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_2}}"><span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">explore</span><span class="font-label-bold text-label-bold text-[10px]">Explore</span></a></div><div class="relative -top-6 flex-shrink-0"><a class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center transition-transform active:scale-90" href="{{DATA:SCREEN:SCREEN_7}}"><span class="material-symbols-outlined text-[32px]">add</span></a></div><div class="flex flex-1 justify-around items-center"><a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_8}}"><span class="material-symbols-outlined mb-1">monitoring</span><span class="font-label-bold text-label-bold text-[10px]">Activity</span></a><a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200" href="{{DATA:SCREEN:SCREEN_5}}"><span class="material-symbols-outlined mb-1">person</span><span class="font-label-bold text-label-bold text-[10px]">Profile</span></a></div></nav>
+</body></html>

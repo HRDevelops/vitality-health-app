@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  fullName        String
+  avatarUrl       String?
+  healthScore     Int            @default(84)
+  currentWeightKg Float          @default(58.0)
+  targetWeightKg  Float          @default(55.0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  activityLogs    ActivityLog[]
+  nutritionLogs   NutritionLog[]
+}
+
+model ActivityLog {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logDate        DateTime @db.Date
+  steps          Int      @default(0)
+  goalSteps      Int      @default(10000)
+  caloriesBurned Int      @default(0)
+  distanceKm     Float    @default(0.0)
+  activeMinutes  Int      @default(0)
+
+  @@unique([userId, logDate])
+}
+
+model NutritionLog {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consumedAt   DateTime @default(now())
+  mealType     MealType
+  foodName     String
+  calories     Int
+  carbsGrams   Float    @default(0)
+  proteinGrams Float    @default(0)
+  fatGrams     Float    @default(0)
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+model Podcast {
+  id              String   @id @default(uuid())
+  title           String
+  author          String
+  durationMinutes Int
+  audioUrl        String
+  isPremium       Boolean  @default(false)
+  category        String   @default("Wellness")
+}

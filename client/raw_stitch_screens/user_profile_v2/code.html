@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#6d60e9",
+                        "on-secondary-container": "#006370",
+                        "on-tertiary-fixed-variant": "#6d3a00",
+                        "on-tertiary-fixed": "#2e1500",
+                        "tertiary-fixed": "#ffdcc2",
+                        "primary-fixed": "#e4dfff",
+                        "secondary-fixed-dim": "#28d9f3",
+                        "on-primary-fixed": "#140067",
+                        "surface-container-highest": "#e5e0f3",
+                        "on-primary-container": "#fffbff",
+                        "surface-container": "#f0ebfe",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#004e59",
+                        "secondary-fixed": "#9eefff",
+                        "inverse-on-surface": "#f3eeff",
+                        "background": "#fcf8ff",
+                        "surface": "#fcf8ff",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-high": "#ebe5f8",
+                        "inverse-surface": "#312f3d",
+                        "tertiary": "#8b4c00",
+                        "primary-fixed-dim": "#c5c0ff",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#af6100",
+                        "surface-container-low": "#f6f1ff",
+                        "on-background": "#1c1a27",
+                        "primary": "#5445cf",
+                        "inverse-primary": "#c5c0ff",
+                        "secondary-container": "#3ee5fe",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#5648d1",
+                        "on-error-container": "#93000a",
+                        "secondary": "#006876",
+                        "surface-dim": "#dcd7ea",
+                        "on-surface": "#1c1a27",
+                        "surface-variant": "#e5e0f3",
+                        "tertiary-fixed-dim": "#ffb77a",
+                        "on-secondary-fixed": "#001f24",
+                        "on-primary-fixed-variant": "#3d2bb9",
+                        "outline-variant": "#c8c4d6",
+                        "surface-bright": "#fcf8ff",
+                        "outline": "#787586",
+                        "on-surface-variant": "#474554"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "20px",
+                        "container-margin": "24px",
+                        "section-gap": "32px",
+                        "gutter": "16px",
+                        "element-gap": "12px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "metric-display": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "metric-display": ["24px", { "lineHeight": "30px", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fcf8ff; /* bg-background */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-24 antialiased">
+<!-- Top App Bar -->
+<header class="bg-background dark:bg-background text-primary dark:text-primary-fixed flex justify-between items-center w-full px-container-margin py-4 docked full-width top-0 no-border flat no shadows sticky z-40">
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors mr-1" onclick="history.back()">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-variant flex-shrink-0">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A close up headshot of a fit, young woman with dark hair smiling warmly. Bright, soft light-mode studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCHM03_hTjvRNbqINNjkWV1Z9w6AQbB-C4hdZ01OY1JmL3tu42HHhSsiYFHI6zgh4ALesUhzvwrI28VxV7t8AU4BpKT9H9GjqP64VehmevUkzPhG6iabLNnrTcksza-SeYNA8WNUnjYzsqdUXF0cOMjWhGcHRiCHEvcYdD4gtVkiAmlu_GVQa7jIn48G4OwN_X_i0jgmpwOp4XhZHw7QNOgNAY8BQi9XmKHgesQ_1MBsg5tafIsaZNkQ"/>
+</div>
+<h1 class="font-headline-md text-headline-md text-on-surface dark:text-on-surface">Hi, Grace</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-highest text-primary hover:opacity-80 transition-opacity duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</header>
+<main class="px-container-margin py-section-gap space-y-section-gap max-w-2xl mx-auto">
+<!-- Profile Header Section -->
+<section class="flex flex-col items-center text-center space-y-4">
+<div class="relative w-32 h-32 rounded-full p-1 bg-gradient-to-tr from-primary to-secondary-container shadow-lg">
+<div class="w-full h-full rounded-full overflow-hidden border-4 border-surface-container-lowest">
+<img alt="Grace's Profile Picture" class="w-full h-full object-cover" data-alt="A close up headshot of a fit, young woman with dark hair smiling warmly. Bright, soft light-mode studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9j4py8RQub5EBmO0mZK9--D26LeB-0S32zFYd_V5wgZoZkIY6Qs89B1d14MBaGBXZ-VX0DmnXDtbf0UuY6dzu3ZCY2gRq5g3d4Oe4Th7_AXcxC7ZUwKpACETt3rne9TOCSjufVEKIcPMg6TM6PIh6Qa7IfqLGo1qc-vof552776lLuDGnd_iEpD82xX3Hq3RuKc4t4564RxuFHpIW9CrH1hj5IDtFkoXL6TUMHbDEeCP2s3KXe57WEQ"/>
+</div>
+<button class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md border-2 border-surface-container-lowest hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">edit</span>
+</button>
+</div>
+<div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Grace</h2>
+<a class="font-body-sm text-body-sm text-primary hover:underline mt-1 inline-block" href="#">Go Premium</a>
+</div>
+</section>
+<!-- Stats Grid (Bento Style) -->
+<section class="grid grid-cols-3 gap-element-gap">
+<div class="bg-surface-container-lowest rounded-DEFAULT p-card-padding flex flex-col items-center justify-center shadow-[0px_10px_30px_rgba(115,103,240,0.05)] border border-outline-variant/20 hover:scale-[0.98] transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-primary-container mb-2 text-[28px]" style="font-variation-settings: 'FILL' 0;">height</span>
+<p class="font-metric-display text-metric-display text-on-surface">165<span class="font-body-sm text-body-sm text-outline ml-1">cm</span></p>
+<p class="font-label-bold text-label-bold text-on-surface-variant uppercase mt-1">Height</p>
+</div>
+<div class="bg-primary rounded-DEFAULT p-card-padding flex flex-col items-center justify-center shadow-[0px_10px_30px_rgba(115,103,240,0.2)] hover:scale-[0.98] transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-on-primary mb-2 text-[28px]" style="font-variation-settings: 'FILL' 0;">scale</span>
+<p class="font-metric-display text-metric-display text-on-primary">58<span class="font-body-sm text-body-sm text-primary-fixed ml-1">kg</span></p>
+<p class="font-label-bold text-label-bold text-primary-fixed uppercase mt-1">Weight</p>
+</div>
+<div class="bg-surface-container-lowest rounded-DEFAULT p-card-padding flex flex-col items-center justify-center shadow-[0px_10px_30px_rgba(115,103,240,0.05)] border border-outline-variant/20 hover:scale-[0.98] transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-secondary mb-2 text-[28px]" style="font-variation-settings: 'FILL' 0;">cake</span>
+<p class="font-metric-display text-metric-display text-on-surface">24<span class="font-body-sm text-body-sm text-outline ml-1">yrs</span></p>
+<p class="font-label-bold text-label-bold text-on-surface-variant uppercase mt-1">Age</p>
+</div>
+</section>
+<!-- Menu List -->
+<section class="space-y-4">
+<h3 class="font-headline-md text-headline-md text-on-surface px-2 mb-4">Activity &amp; Settings</h3>
+<div class="bg-surface-container-lowest rounded-lg shadow-[0px_10px_30px_rgba(115,103,240,0.05)] border border-outline-variant/10 overflow-hidden flex flex-col">
+<button class="w-full flex items-center justify-between p-card-padding hover:bg-surface-container/50 transition-colors border-b border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-fixed/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">My Achievements</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-card-padding hover:bg-surface-container/50 transition-colors border-b border-outline-variant/10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">Health Score History</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-card-padding hover:bg-surface-container/50 transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">App Settings</span>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+<!-- Logout Button -->
+<button class="w-full mt-6 bg-error-container text-on-error-container rounded-DEFAULT py-4 px-6 font-label-bold text-label-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity uppercase shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
+                Logout
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="md:hidden bg-surface-container-lowest dark:bg-surface-container-low docked full-width bottom-0 rounded-t-lg shadow-lg fixed left-0 w-full z-50 flex justify-around items-center h-20 pb-safe shadow-[0px_-4px_20px_rgba(115,103,240,0.05)] border-t-0">
+<a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200 w-16 h-full gap-1" href="{{DATA:SCREEN:SCREEN_13}}">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-bold text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200 w-16 h-full gap-1" href="{{DATA:SCREEN:SCREEN_2}}">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">explore</span>
+<span class="font-label-bold text-[10px]">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-outline dark:text-outline-variant hover:text-primary-container transition-transform duration-200 w-16 h-full gap-1" href="{{DATA:SCREEN:SCREEN_8}}">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">monitoring</span>
+<span class="font-label-bold text-[10px]">Activity</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim scale-110 transition-transform duration-200 w-16 h-full gap-1" href="{{DATA:SCREEN:SCREEN_5}}">
+<div class="bg-primary-fixed/30 p-1.5 rounded-full mb-0.5">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<span class="font-label-bold text-[10px]">Profile</span>
+</a>
+</nav>
+</body></html>
