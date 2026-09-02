@@ -1,0 +1,11 @@
+import { Request, Response } from 'express';
+import { dashboardService } from '../services/DashboardService';
+
+export async function getMetrics(req: Request, res: Response) {
+  try {
+    const metrics = await dashboardService.getMetrics();
+    res.json(metrics);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+}
