@@ -78,24 +78,36 @@ export default function ActivityTracker() {
             </section>
 
             <section className="grid grid-cols-3 gap-gutter">
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-surface-container-lowest p-4 shadow-sm">
+              <button
+                onClick={() => setInsightOpen(true)}
+                data-testid="activity-tile-calories"
+                className="flex flex-col items-center justify-center rounded-2xl bg-surface-container-lowest p-4 shadow-sm transition-transform hover:scale-[0.97]"
+              >
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container/20">
                   <Flame size={20} className="text-secondary" />
                 </div>
                 <span className="font-label-bold text-label-bold text-on-surface">{daily.caloriesBurned} kcal</span>
-              </div>
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-surface-container-lowest p-4 shadow-sm">
+              </button>
+              <button
+                onClick={() => setInsightOpen(true)}
+                data-testid="activity-tile-distance"
+                className="flex flex-col items-center justify-center rounded-2xl bg-surface-container-lowest p-4 shadow-sm transition-transform hover:scale-[0.97]"
+              >
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-container/20">
                   <MapPin size={20} className="text-primary" />
                 </div>
                 <span className="font-label-bold text-label-bold text-on-surface">{daily.distanceKm} km</span>
-              </div>
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-surface-container-lowest p-4 shadow-sm">
+              </button>
+              <button
+                onClick={() => setInsightOpen(true)}
+                data-testid="activity-tile-time"
+                className="flex flex-col items-center justify-center rounded-2xl bg-surface-container-lowest p-4 shadow-sm transition-transform hover:scale-[0.97]"
+              >
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary-fixed/30">
                   <Clock size={20} className="text-on-secondary-fixed-variant" />
                 </div>
                 <span className="font-label-bold text-label-bold text-on-surface">{daily.activeMinutes} min</span>
-              </div>
+              </button>
             </section>
 
             <section className="relative overflow-hidden rounded-3xl bg-primary p-6 text-on-primary shadow-lg" data-testid="activity-trends-chart">

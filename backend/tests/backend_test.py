@@ -71,6 +71,34 @@ def test_nutrition_logs_post(client):
     assert r.status_code in (200, 201), r.text
 
 
+def test_nutrition_logs_post_invalid_mealtype_returns_400(client):
+    """FIX 5: Invalid mealType should return 400 (not 500) via handleControllerError."""
+    payload = {"mealType": "INVALID", "foodName": "TEST_ Bad", "calories": 100}
+    r = client.post(f"{API}/nutrition/logs", json=payload, timeout=15)
+    assert r.status_code == 400, f"Expected 400, got {r.status_code}: {r.text}"
+    body = r.json()
+    assert "message" in body or "error" in body, body
+
+
+def test_activity_log_no_500_on_invalid(client):
+    """FIX 5: Activity log with invalid payload must not return 500.
+
+    Note: activity controllers default/coerce values (Number(...) with defaults),
+    so bad payloads may still yield 200/201. Key requirement: never 500.
+    """
+    r = client.post(f"{API}/activity/log", json={"type": "", "duration": "notANumber"}, timeout=15)
+    assert r.status_code != 500, f"Got 500: {r.text}"
+    assert r.status_code in (200, 201, 400), r.text
+
+
+def test_activity_water_no_500_on_invalid(client):
+    """FIX 5: Water log with invalid payload must not return 500."""
+    r = client.post(f"{API}/activity/water", json={"amountMl": "notANumber"}, timeout=15)
+    assert r.status_code != 500, f"Got 500: {r.text}"
+    assert r.status_code in (200, 201, 400), r.text
+
+
+
 # ---------- podcasts ----------
 def test_podcasts_list(client):
     r = client.get(f"{API}/podcasts", timeout=15)

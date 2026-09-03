@@ -9,10 +9,12 @@ import { ListSkeleton } from '../../components/ui/Skeleton';
 import LeaderboardCard from './components/LeaderboardCard';
 import RemindersCard from './components/RemindersCard';
 import EditWeightModal from './components/EditWeightModal';
+import SubscriptionPaywallModal from '../wellness/components/SubscriptionPaywallModal';
 
 export default function UserProfile() {
   const location = useLocation();
   const [weightModalOpen, setWeightModalOpen] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   useEffect(() => {
     if ((location.state as any)?.openWeightEdit) {
@@ -61,7 +63,11 @@ export default function UserProfile() {
                   {user.name}
                 </h2>
                 {!user.isPremium && (
-                  <button className="mt-1 inline-block font-body-sm text-body-sm text-primary hover:underline" data-testid="profile-go-premium-link">
+                  <button
+                    onClick={() => setPaywallOpen(true)}
+                    className="mt-1 inline-block font-body-sm text-body-sm text-primary hover:underline"
+                    data-testid="profile-go-premium-link"
+                  >
                     Go Premium
                   </button>
                 )}
@@ -113,6 +119,7 @@ export default function UserProfile() {
                 </div>
                 <p className="mb-4 font-body-sm text-body-sm opacity-90">Unlock premium meditations, advanced insights and more.</p>
                 <button
+                  onClick={() => setPaywallOpen(true)}
                   className="rounded-full bg-white/20 px-6 py-2 font-label-bold text-label-bold backdrop-blur-md transition-colors hover:bg-white/30"
                   data-testid="profile-upgrade-button"
                 >
@@ -174,6 +181,7 @@ export default function UserProfile() {
       </main>
 
       {weightModalOpen && user && <EditWeightModal currentWeightKg={user.currentWeightKg} onClose={() => setWeightModalOpen(false)} />}
+      {paywallOpen && <SubscriptionPaywallModal onClose={() => setPaywallOpen(false)} />}
     </div>
   );
 }

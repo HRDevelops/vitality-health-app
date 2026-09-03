@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 2 targeted verification of 5 fixes on top of the already-working baseline. Backend: 17/17 pytest cases pass (added 3 new — FIX 5 invalid mealType now returns 400 with clean JSON; activity/log and activity/water no longer 500 on bad payloads). Frontend: all 4 UI fixes verified on 390px viewport — WeeklyCalendar shows all 7 days Sun-Sat with no horizontal overflow, Dashboard Weight card renders a centered Scale icon in a soft circular badge consistent with the other 3 metric cards, Profile avatar loads clean unsplash portrait, both Go-Premium link and Upgrade-Now button open SubscriptionPaywallModal (paywall-modal), all 3 activity tiles are now <button> and open ActivityInsightModal.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/v1/activity/water & /api/v1/activity/log", "issue": "Controllers coerce/default invalid inputs (Number(x ?? default), req.body spread) so bad payloads return 200/201 instead of 400. Not a regression — handleControllerError is wired but never triggered because Mongoose never sees invalid data. Behavioral only; no 500s observed."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Global", "issues": ["React Router v6 future flag warnings still logged (v7_startTransition, v7_relativeSplatPath) — cosmetic, carried over from iter 1"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Tighten activity controller input validation (reject non-numeric amountMl / duration explicitly) so handleControllerError can return 400 on bad data too.",
+    "(Optional, carried over) Opt into React Router v7 future flags to silence console warnings."
+  ],
+  "critical_code_review_comments": [
+    "handleControllerError util is clean and correctly maps mongoose ValidationError/CastError → 400; good shared helper.",
+    "Activity controllers still rely on defensive coercion (Number(x ?? default)) which masks bad input — consider Pydantic-style guard before hitting the model.",
+    "Profile paywall state was correctly lifted into UserProfile.tsx and both entry points wire to the same modal instance — no duplication."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100% (17/17 pass)", "frontend": "100% of the 5 targeted fixes + light regression"},
+  "test_credentials": "None — no auth in this app.",
+  "seed_data_creation": "None new. Used existing seed (Grace, avatar re-seeded to photo-1534528741775-53994a69daeb, today's meals). Tests write TEST_-prefixed nutrition logs and toggle weight/water which persist harmlessly.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 5 iteration-2 fixes verified. Backend URL: REACT_APP_BACKEND_URL=https://health-hub-802.preview.emergentagent.com. Data-testids confirmed live: metric-card-weight, profile-go-premium-link, profile-upgrade-button, paywall-modal, activity-tile-calories/-distance/-time, activity-insight-modal. Backend enum: mealType uppercase only; invalid values now correctly 400. Activity endpoints defensively coerce input so they won't 400 on bad data — only guaranteed never-500. WeeklyCalendar uses flex-1 / px-1 / gap-1 and passes overflow check at 390px.",
+  "rca_of_the_issue": "N/A — no new bugs; all 5 fixes behave as specified."
+}

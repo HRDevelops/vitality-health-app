@@ -1,4 +1,4 @@
-import { Bell, Sun, Droplet, Footprints } from 'lucide-react';
+import { Bell, Sun, Droplet, Footprints, Scale } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
@@ -72,7 +72,11 @@ export default function Dashboard() {
                 unit="kg"
                 subtext="last update"
                 gradient="bg-gradient-to-br from-[#b8a3ff] to-[#8d79fc]"
-                icon={<Footprints size={0} className="hidden" />}
+                icon={
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20">
+                    <Scale size={28} className="text-white" />
+                  </div>
+                }
                 onClick={() => navigate('/profile')}
               />
               <MetricCard

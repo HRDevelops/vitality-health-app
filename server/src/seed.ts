@@ -14,8 +14,7 @@ import { Reminder } from './models/Reminder';
 import { lastNDates } from './utils/date';
 import mongoose from 'mongoose';
 
-const GRACE_AVATAR =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuBsntslxyqeeIUnGSVpqTkOJhCctxna8pHQXYpVkLlixezGsH4VCvEQp0mxtghgGgZRfqC8OMxcMDYWij5CNw5XmixPhJps0vUAWnMqHg6QMZHf3EQrLVu1zgRpPdXnzX0yvhmzmeFtpvwlzoYL0cFE2HT1yDCJLWcVQqucDqx8fyTkU1_bkBP9WJuIb5OTjbwHMJoHLpUgfQzWA0D3gBIO0vWAmTIXLKKX0nq2uwZLAoT0V7AWNwpDKQ';
+const GRACE_AVATAR = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
 
 async function seed() {
   await connectDB();

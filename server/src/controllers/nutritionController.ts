@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { nutritionService } from '../services/NutritionService';
+import { handleControllerError } from '../utils/httpError';
 
 export async function getLogs(req: Request, res: Response) {
   try {
@@ -7,7 +8,7 @@ export async function getLogs(req: Request, res: Response) {
     const data = await nutritionService.getLogsForDate(date);
     res.json(data);
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    handleControllerError(err, res);
   }
 }
 
@@ -19,6 +20,6 @@ export async function createLog(req: Request, res: Response) {
     const log = await nutritionService.createLog(req.body);
     res.status(201).json(log);
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    handleControllerError(err, res);
   }
 }

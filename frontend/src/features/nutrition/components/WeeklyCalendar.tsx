@@ -21,7 +21,7 @@ export default function WeeklyCalendar({ selectedDate, onSelect }: WeeklyCalenda
   const week = buildWeek(selectedDate);
 
   return (
-    <div className="flex items-center justify-between" data-testid="weekly-calendar">
+    <div className="flex items-center justify-between gap-1" data-testid="weekly-calendar">
       {week.map((dateStr) => {
         const d = new Date(dateStr + 'T00:00:00.000Z');
         const isSelected = dateStr === selectedDate;
@@ -30,12 +30,12 @@ export default function WeeklyCalendar({ selectedDate, onSelect }: WeeklyCalenda
             key={dateStr}
             onClick={() => onSelect(dateStr)}
             data-testid={`calendar-day-${dateStr}`}
-            className={`flex flex-col items-center rounded-full px-3 py-2 text-center transition-colors ${
+            className={`flex flex-1 flex-col items-center rounded-full px-1 py-2 text-center transition-colors ${
               isSelected ? 'bg-on-primary text-primary' : 'text-on-primary/80 hover:bg-white/10'
             }`}
           >
-            <p className="mb-1 font-label-bold text-label-bold uppercase">{WEEKDAY_LABELS[d.getUTCDay()]}</p>
-            <p className="font-headline-md text-headline-md">{d.getUTCDate()}</p>
+            <p className="mb-1 font-label-bold text-[10px] uppercase">{WEEKDAY_LABELS[d.getUTCDay()]}</p>
+            <p className="font-headline-md text-headline-md text-base">{d.getUTCDate()}</p>
           </button>
         );
       })}
