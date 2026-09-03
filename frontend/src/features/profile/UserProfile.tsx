@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Pencil, Ruler, Cake, Weight, Award, TrendingUp, Settings, LogOut, ChevronRight, Sparkles } from 'lucide-react';
 import TopBar from '../../core/components/TopBar';
 import { useUserProfile } from '../../services/api/user';
 import { useLeaderboard } from '../../services/api/community';
 import { useReminders } from '../../services/api/reminders';
+import { useAuth } from '../../core/context/AuthContext';
 import { ListSkeleton } from '../../components/ui/Skeleton';
 import LeaderboardCard from './components/LeaderboardCard';
 import RemindersCard from './components/RemindersCard';
@@ -18,6 +19,8 @@ import AppSettingsModal from './components/AppSettingsModal';
 
 export default function UserProfile() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [weightModalOpen, setWeightModalOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
@@ -193,6 +196,10 @@ export default function UserProfile() {
                 </button>
               </div>
               <button
+                onClick={() => {
+                  logout();
+                  navigate('/login', { replace: true });
+                }}
                 className="flex w-full items-center justify-center gap-2 rounded-DEFAULT bg-error-container px-6 py-4 font-label-bold text-label-bold uppercase text-on-error-container shadow-sm transition-opacity hover:opacity-90"
                 data-testid="profile-logout-button"
               >

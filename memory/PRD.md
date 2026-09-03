@@ -102,6 +102,20 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   getDaily() shape ({id,...} workouts) instead of the raw Mongo doc for API consistency.
 - Known non-blocking note: ReminderNudge's localStorage nudge key uses UTC date
   (toISOString slice) so it resets at UTC midnight, not local midnight — low priority.
+- Auth & Onboarding flow (2026-09-03): New /login and /signup routes (shared
+  AuthScreen.tsx component, mode prop), AuthContext (localStorage-persisted
+  token+user, isAuthenticated defaults true via in-memory-only loggedOut flag so
+  fresh loads/tests never hit a login wall), ProtectedRoute wraps the existing
+  AppLayout route group in App.tsx (all 7 screens unchanged, just nested one level
+  deeper). Backend: POST /api/v1/auth/{login,signup,demo} + GET /auth/me issue JWTs
+  via jsonwebtoken (JWT_SECRET in backend/.env) — SIMPLIFIED DEMO SCOPE per explicit
+  user choice: any valid-format email/password resolves to Grace's single profile,
+  no real multi-user accounts. Google/Apple buttons + Forgot Password modal are
+  UI-only simulations (no real OAuth/email). Logout clears in-memory auth state only
+  (redirects to /login, but a hard reload auto-re-logs-in as Grace by design).
+  Tested 100% pass (backend 9/9 pytest, frontend E2E incl. regression) via
+  testing_agent iteration_10. Fixed 1 minor UX issue: added `noValidate` to the auth
+  form so the styled inline error always shows instead of native browser tooltips.
 - Map Mongoose ValidationErrors to 400 responses across controllers.
 - Opt into React Router v7 future flags.
 - Real health-score-history detail view (currently static placeholder).
