@@ -4,6 +4,7 @@ import { useDashboardMetrics } from '../../services/api/dashboard';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import HealthScoreCard from './components/HealthScoreCard';
 import MetricCard from './components/MetricCard';
+import WeeklyRecapBanner from './components/WeeklyRecapBanner';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ export default function Dashboard() {
         {data && (
           <>
             <HealthScoreCard score={data.healthScore} note={data.healthScoreNote} />
+            <WeeklyRecapBanner />
             <div className="mb-element-gap flex items-center justify-between">
               <h2 className="font-headline-md text-headline-md text-on-surface">Metrics</h2>
             </div>

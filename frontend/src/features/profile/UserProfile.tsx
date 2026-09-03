@@ -10,11 +10,13 @@ import LeaderboardCard from './components/LeaderboardCard';
 import RemindersCard from './components/RemindersCard';
 import EditWeightModal from './components/EditWeightModal';
 import SubscriptionPaywallModal from '../wellness/components/SubscriptionPaywallModal';
+import AchievementsModal from './components/AchievementsModal';
 
 export default function UserProfile() {
   const location = useLocation();
   const [weightModalOpen, setWeightModalOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
 
   useEffect(() => {
     if ((location.state as any)?.openWeightEdit) {
@@ -132,6 +134,7 @@ export default function UserProfile() {
               <h3 className="px-2 font-headline-md text-headline-md text-on-surface">Activity &amp; Settings</h3>
               <div className="flex flex-col overflow-hidden rounded-lg border border-outline-variant/10 bg-surface-container-lowest shadow-soft">
                 <button
+                  onClick={() => setAchievementsOpen(true)}
                   className="flex items-center justify-between border-b border-outline-variant/10 p-card-padding transition-colors hover:bg-surface-container/50"
                   data-testid="profile-achievements-button"
                 >
@@ -182,6 +185,7 @@ export default function UserProfile() {
 
       {weightModalOpen && user && <EditWeightModal currentWeightKg={user.currentWeightKg} onClose={() => setWeightModalOpen(false)} />}
       {paywallOpen && <SubscriptionPaywallModal onClose={() => setPaywallOpen(false)} />}
+      {achievementsOpen && <AchievementsModal onClose={() => setAchievementsOpen(false)} />}
     </div>
   );
 }

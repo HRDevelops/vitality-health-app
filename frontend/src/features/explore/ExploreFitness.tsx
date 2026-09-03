@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Bell, Search, MoreHorizontal, Droplet, Apple, Leaf, Flower2, Utensils } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
@@ -8,6 +9,7 @@ const trendingWorkouts = [
     title: 'Office Workout',
     meta: 'Beginner • 7 mins',
     intensity: 2,
+    tags: ['office', 'cardio', 'beginner'],
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuCsCINaD_I-UvqGvpImEs6pgYCcrNg-95P7lV9JkHhRY4dY2DhpkrgWuBLZ5RVmRcWVrJTRRZA9VBx-Yjnrub9jbK2o1stg-9zNPAQPhlRKjByN0ifK5r8iCG7ewtiA9tt4-SUckGcvWoKHygjNyhh9e-TgFH_MtPAWZNUKLJ6eu7F7CSiBdZJ31eiH1tBioDYALaePnsH9ED-HskhkTew2ZmjdzL9aBNlSCgZwbAzau_UpWyHjPeR65g',
   },
@@ -16,10 +18,22 @@ const trendingWorkouts = [
     title: 'Abs Intermediate',
     meta: 'Advance • 7 mins',
     intensity: 3,
+    tags: ['abs', 'core', 'advance'],
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuCPgtHQfbYzkhqu6vGIlpDMm7EJj3JLqhktnH4wNmLYlOE4l6uJ498uptVNl-EMjJggqLD9IC7W-3n5tWRuk8Mzy8ceRNGyGi6sg1iZ0iy3c9ukZaw8pEBk__xxnTP3NRPyGynGJOirTyMmCu2LSn3pnH1IsEaT-NUqj4n2ZAuTAkACtO2WKYYKvaByUKklMri2QNqy1RdP7wche4DVaI93-qmzE90f4TNVHFPu21XRe38bnkqWlgabfg',
   },
+  {
+    id: 'cardio-blast',
+    title: 'Cardio Blast',
+    meta: 'Intermediate • 15 mins',
+    intensity: 3,
+    tags: ['cardio', 'intermediate'],
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDVzOwA6stNH3p47KDmE4eU2l3_TlZYh_3hSkpyjuSNfCjTzWAb88gRPUqD5pC-Pv_KwABnLnhbNn75mMySMvw6LcnG_l2BxSdNR2HtgHHxk8cuOgu6lFBE5yhJEcr-kX9inR0c0jetpBhf48tMfjFUxz-98Wp3_1ZyEgFpc4gDxLJL4u_idtFp-ucBHqbPKPGo8U7gi4ECbCA_oCQ3WjKUQenmlkA4zEpI9DO8WSJm6WoGi9gC5LOjcQ',
+  },
 ];
+
+const workoutCategories = ['All', 'Cardio', 'Office', 'Abs'];
 
 const topics = [
   { id: 'nutrition', label: 'Nutrition', icon: Apple, bg: 'bg-error-container/50', fg: 'text-on-error-container', route: '/nutrition' },
@@ -31,6 +45,17 @@ const topics = [
 export default function ExploreFitness() {
   const navigate = useNavigate();
   const { data } = useDashboardMetrics();
+  const [search, setSearch] = useState('');
+  const [activeWorkoutCategory, setActiveWorkoutCategory] = useState('All');
+
+  const filteredWorkouts = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return trendingWorkouts.filter((w) => {
+      const matchesCategory = activeWorkoutCategory === 'All' || w.tags.includes(activeWorkoutCategory.toLowerCase());
+      const matchesSearch = query === '' || w.title.toLowerCase().includes(query) || w.tags.some((t) => t.includes(query));
+      return matchesCategory && matchesSearch;
+    });
+  }, [search, activeWorkoutCategory]);
 
   return (
     <div data-testid="explore-screen">
@@ -49,6 +74,8 @@ export default function ExploreFitness() {
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant" />
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search topic"
             className="w-full rounded-full border-none bg-surface-container-low py-4 pl-12 pr-4 font-body-sm text-body-sm text-on-surface shadow-sm outline-none transition-shadow placeholder:text-outline-variant focus:ring-2 focus:ring-primary"
             data-testid="explore-search-input"
@@ -104,8 +131,27 @@ export default function ExploreFitness() {
               <MoreHorizontal size={20} />
             </button>
           </div>
+          <div className="no-scrollbar -mx-container-margin flex gap-2 overflow-x-auto px-container-margin pb-1">
+            {workoutCategories.map((c) => (
+              <button
+                key={c}
+                onClick={() => setActiveWorkoutCategory(c)}
+                data-testid={`explore-category-${c.toLowerCase()}`}
+                className={`flex-shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-body-sm transition-colors ${
+                  activeWorkoutCategory === c ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-variant text-on-surface-variant hover:bg-surface-dim'
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
           <div className="grid grid-cols-1 gap-4">
-            {trendingWorkouts.map((w) => (
+            {filteredWorkouts.length === 0 && (
+              <p className="py-6 text-center font-body-sm text-body-sm text-outline" data-testid="explore-trending-empty">
+                No workouts match your search.
+              </p>
+            )}
+            {filteredWorkouts.map((w) => (
               <button
                 key={w.id}
                 onClick={() => navigate('/activity')}

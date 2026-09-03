@@ -17,7 +17,7 @@ export default function BottomSheet({ title, subtitle, onClose, children, testId
       data-testid={testId ?? 'bottom-sheet-overlay'}
     >
       <div
-        className="w-full max-w-md rounded-t-[2rem] bg-surface-container-lowest p-container-margin pb-10 shadow-[0px_-10px_40px_rgba(84,69,207,0.2)] animate-sheet-up"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-[2rem] bg-surface-container-lowest p-container-margin pb-10 shadow-[0px_-10px_40px_rgba(84,69,207,0.2)] animate-sheet-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-outline-variant" />

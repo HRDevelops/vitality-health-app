@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Play, Pause, Lock, Search } from 'lucide-react';
 import TopBar from '../../core/components/TopBar';
 import { usePodcasts } from '../../services/api/podcasts';
@@ -6,16 +6,33 @@ import { ListSkeleton } from '../../components/ui/Skeleton';
 import { Podcast } from '../../types/domain';
 import SubscriptionPaywallModal from './components/SubscriptionPaywallModal';
 
-const categories = ['New', 'Now', 'Popular', 'Trending'];
+const categories = ['New', 'Now', 'Popular', 'Trending', 'Mindset', 'Sleep'];
+
+const CATEGORY_MATCHERS: Record<string, (p: Podcast) => boolean> = {
+  New: () => true,
+  Now: () => true,
+  Popular: () => true,
+  Trending: () => true,
+  Mindset: (p) => p.category.toLowerCase() === 'mindset',
+  Sleep: (p) => p.category.toLowerCase() === 'sleep',
+};
 
 export default function MindfulnessPodcast() {
   const { data: podcasts, isLoading } = usePodcasts();
   const [activeCategory, setActiveCategory] = useState('New');
+  const [search, setSearch] = useState('');
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
 
   const dailyPick = podcasts?.find((p) => p.isDailyPick);
-  const trackList = podcasts?.filter((p) => !p.isDailyPick) ?? [];
+
+  const trackList = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return (podcasts ?? [])
+      .filter((p) => !p.isDailyPick)
+      .filter((p) => CATEGORY_MATCHERS[activeCategory](p))
+      .filter((p) => query === '' || p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+  }, [podcasts, activeCategory, search]);
 
   const handleTrackClick = (track: Podcast) => {
     if (track.isPremium) {
@@ -74,6 +91,19 @@ export default function MindfulnessPodcast() {
               See All
             </button>
           </div>
+
+          <div className="relative mb-4">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search episodes"
+              className="w-full rounded-full border-none bg-surface-container-low py-3 pl-11 pr-4 font-body-sm text-body-sm text-on-surface shadow-sm outline-none transition-shadow placeholder:text-outline-variant focus:ring-2 focus:ring-primary"
+              data-testid="podcast-search-input"
+            />
+          </div>
+
           <div className="no-scrollbar -mx-container-margin flex gap-3 overflow-x-auto px-container-margin pb-2">
             {categories.map((c) => (
               <button
@@ -90,6 +120,12 @@ export default function MindfulnessPodcast() {
           </div>
 
           {isLoading && <ListSkeleton rows={4} />}
+
+          {!isLoading && trackList.length === 0 && (
+            <p className="py-10 text-center font-body-sm text-body-sm text-outline" data-testid="podcast-empty-state">
+              No episodes match your search.
+            </p>
+          )}
 
           <div className="mt-4 grid grid-cols-2 gap-gutter">
             {trackList.map((track) => (
