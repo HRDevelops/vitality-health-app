@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import TopBar from '../../core/components/TopBar';
@@ -14,11 +14,14 @@ function todayString() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const VISIBLE_MEAL_TYPES = ['BREAKFAST', 'LUNCH', 'SNACK'];
+
 export default function NutritionJournal() {
   const location = useLocation();
   const [selectedDate, setSelectedDate] = useState(todayString());
   const [selectedItem, setSelectedItem] = useState<NutritionLogItem | null>(null);
   const [addMealOpen, setAddMealOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if ((location.state as any)?.openAddMeal) {
@@ -27,6 +30,17 @@ export default function NutritionJournal() {
   }, [location.state]);
 
   const { data, isLoading } = useNutritionLogs(selectedDate);
+
+  const visibleMeals = useMemo(() => {
+    if (!data) return [];
+    const query = search.trim().toLowerCase();
+    return data.meals
+      .filter((m) => VISIBLE_MEAL_TYPES.includes(m.mealType))
+      .map((m) => ({
+        ...m,
+        items: query === '' ? m.items : m.items.filter((item) => item.foodName.toLowerCase().includes(query)),
+      }));
+  }, [data, search]);
 
   const mealLabels: Record<string, string> = { BREAKFAST: 'Breakfast', LUNCH: 'Lunch', DINNER: 'Dinner', SNACK: 'Snack' };
 
@@ -41,6 +55,8 @@ export default function NutritionJournal() {
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" />
             <input
               type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search meal.."
               className="w-full rounded-full border-none bg-surface py-3 pl-12 pr-4 font-body-sm text-body-sm text-on-surface outline-none focus:ring-2 focus:ring-primary-container"
               data-testid="nutrition-search-input"
@@ -52,17 +68,15 @@ export default function NutritionJournal() {
 
         {data && (
           <>
-            {data.meals
-              .filter((m) => m.mealType === 'BREAKFAST' || m.mealType === 'LUNCH')
-              .map((meal) => (
-                <MealCard
-                  key={meal.mealType}
-                  meal={meal}
-                  label={mealLabels[meal.mealType]}
-                  onAdd={() => setAddMealOpen(true)}
-                  onItemClick={setSelectedItem}
-                />
-              ))}
+            {visibleMeals.map((meal) => (
+              <MealCard
+                key={meal.mealType}
+                meal={meal}
+                label={mealLabels[meal.mealType]}
+                onAdd={() => setAddMealOpen(true)}
+                onItemClick={setSelectedItem}
+              />
+            ))}
 
             <section className="rounded-xl bg-surface-container-lowest p-card-padding shadow-soft" data-testid="nutrition-macro-facts">
               <h3 className="mb-6 font-headline-md text-headline-md text-on-surface">Nutrition Fact</h3>

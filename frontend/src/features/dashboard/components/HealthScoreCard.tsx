@@ -1,9 +1,10 @@
 interface HealthScoreCardProps {
   score: number;
   note: string;
+  onReadMore: () => void;
 }
 
-export default function HealthScoreCard({ score, note }: HealthScoreCardProps) {
+export default function HealthScoreCard({ score, note, onReadMore }: HealthScoreCardProps) {
   return (
     <section className="mb-section-gap" data-testid="health-score-card">
       <div className="flex items-center gap-container-margin rounded-[24px] bg-surface-container-lowest p-card-padding shadow-soft">
@@ -16,7 +17,7 @@ export default function HealthScoreCard({ score, note }: HealthScoreCardProps) {
         <div className="flex-1">
           <h2 className="mb-1 font-headline-md text-headline-md text-on-surface">Health Score</h2>
           <p className="mb-2 font-body-sm text-body-sm text-on-surface-variant">{note}</p>
-          <button className="font-label-bold text-label-bold text-primary hover:underline" data-testid="health-score-read-more">
+          <button onClick={onReadMore} className="font-label-bold text-label-bold text-primary hover:underline" data-testid="health-score-read-more">
             Read more
           </button>
         </div>

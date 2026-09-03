@@ -11,12 +11,16 @@ import RemindersCard from './components/RemindersCard';
 import EditWeightModal from './components/EditWeightModal';
 import SubscriptionPaywallModal from '../wellness/components/SubscriptionPaywallModal';
 import AchievementsModal from './components/AchievementsModal';
+import HealthScoreModal from '../dashboard/components/HealthScoreModal';
+import NotificationsSheet from '../../components/ui/NotificationsSheet';
 
 export default function UserProfile() {
   const location = useLocation();
   const [weightModalOpen, setWeightModalOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     if ((location.state as any)?.openWeightEdit) {
@@ -35,6 +39,7 @@ export default function UserProfile() {
         showBack
         rightSlot={
           <button
+            onClick={() => setNotificationsOpen(true)}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-highest text-primary transition-opacity hover:opacity-80"
             data-testid="profile-notifications-button"
           >
@@ -147,6 +152,7 @@ export default function UserProfile() {
                   <ChevronRight size={18} className="text-outline" />
                 </button>
                 <button
+                  onClick={() => setHealthScoreModalOpen(true)}
                   className="flex items-center justify-between border-b border-outline-variant/10 p-card-padding transition-colors hover:bg-surface-container/50"
                   data-testid="profile-health-history-button"
                 >
@@ -186,6 +192,8 @@ export default function UserProfile() {
       {weightModalOpen && user && <EditWeightModal currentWeightKg={user.currentWeightKg} onClose={() => setWeightModalOpen(false)} />}
       {paywallOpen && <SubscriptionPaywallModal onClose={() => setPaywallOpen(false)} />}
       {achievementsOpen && <AchievementsModal onClose={() => setAchievementsOpen(false)} />}
+      {healthScoreModalOpen && user && <HealthScoreModal score={user.healthScore} onClose={() => setHealthScoreModalOpen(false)} />}
+      {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
     </div>
   );
 }

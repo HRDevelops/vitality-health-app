@@ -2,14 +2,21 @@ import { useMemo, useState } from 'react';
 import { Bell, Search, MoreHorizontal, Droplet, Apple, Leaf, Flower2, Utensils } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
+import NotificationsSheet from '../../components/ui/NotificationsSheet';
+import WorkoutDetailModal, { WorkoutDetail } from './components/WorkoutDetailModal';
 
-const trendingWorkouts = [
+const trendingWorkouts: (WorkoutDetail & { meta: string; intensity: number; tags: string[]; image: string })[] = [
   {
     id: 'office-workout',
     title: 'Office Workout',
     meta: 'Beginner • 7 mins',
     intensity: 2,
     tags: ['office', 'cardio', 'beginner'],
+    difficulty: 'Beginner',
+    durationLabel: '7 mins',
+    calorieTarget: 60,
+    steps: ['Desk push-ups — 45 sec', 'Seated leg raises — 45 sec', 'Chair squats — 45 sec'],
+    logPayload: { steps: 400, caloriesBurned: 60, distanceKm: 0.3, activeMinutes: 7 },
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuCsCINaD_I-UvqGvpImEs6pgYCcrNg-95P7lV9JkHhRY4dY2DhpkrgWuBLZ5RVmRcWVrJTRRZA9VBx-Yjnrub9jbK2o1stg-9zNPAQPhlRKjByN0ifK5r8iCG7ewtiA9tt4-SUckGcvWoKHygjNyhh9e-TgFH_MtPAWZNUKLJ6eu7F7CSiBdZJ31eiH1tBioDYALaePnsH9ED-HskhkTew2ZmjdzL9aBNlSCgZwbAzau_UpWyHjPeR65g',
   },
@@ -19,6 +26,11 @@ const trendingWorkouts = [
     meta: 'Advance • 7 mins',
     intensity: 3,
     tags: ['abs', 'core', 'advance'],
+    difficulty: 'Advance',
+    durationLabel: '7 mins',
+    calorieTarget: 70,
+    steps: ['Plank hold — 60 sec', 'Bicycle crunches — 45 sec', 'Leg raises — 45 sec'],
+    logPayload: { steps: 150, caloriesBurned: 70, distanceKm: 0, activeMinutes: 7 },
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuCPgtHQfbYzkhqu6vGIlpDMm7EJj3JLqhktnH4wNmLYlOE4l6uJ498uptVNl-EMjJggqLD9IC7W-3n5tWRuk8Mzy8ceRNGyGi6sg1iZ0iy3c9ukZaw8pEBk__xxnTP3NRPyGynGJOirTyMmCu2LSn3pnH1IsEaT-NUqj4n2ZAuTAkACtO2WKYYKvaByUKklMri2QNqy1RdP7wche4DVaI93-qmzE90f4TNVHFPu21XRe38bnkqWlgabfg',
   },
@@ -28,10 +40,25 @@ const trendingWorkouts = [
     meta: 'Intermediate • 15 mins',
     intensity: 3,
     tags: ['cardio', 'intermediate'],
+    difficulty: 'Intermediate',
+    durationLabel: '15 mins',
+    calorieTarget: 180,
+    steps: ['Jumping jacks — 60 sec', 'High knees — 60 sec', 'Burpees — 45 sec'],
+    logPayload: { steps: 1800, caloriesBurned: 180, distanceKm: 1.2, activeMinutes: 15 },
     image:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuDVzOwA6stNH3p47KDmE4eU2l3_TlZYh_3hSkpyjuSNfCjTzWAb88gRPUqD5pC-Pv_KwABnLnhbNn75mMySMvw6LcnG_l2BxSdNR2HtgHHxk8cuOgu6lFBE5yhJEcr-kX9inR0c0jetpBhf48tMfjFUxz-98Wp3_1ZyEgFpc4gDxLJL4u_idtFp-ucBHqbPKPGo8U7gi4ECbCA_oCQ3WjKUQenmlkA4zEpI9DO8WSJm6WoGi9gC5LOjcQ',
   },
 ];
+
+const cardioChallenge: WorkoutDetail = {
+  id: 'cardio-challenge',
+  title: 'Cardio Challenge',
+  difficulty: 'Intermediate',
+  durationLabel: '20 mins',
+  calorieTarget: 250,
+  steps: ['Warm-up jog — 5 min', 'Interval sprints — 10 min', 'Cool-down stretch — 5 min'],
+  logPayload: { steps: 2500, caloriesBurned: 250, distanceKm: 2, activeMinutes: 20 },
+};
 
 const workoutCategories = ['All', 'Cardio', 'Office', 'Abs'];
 
@@ -47,6 +74,8 @@ export default function ExploreFitness() {
   const { data } = useDashboardMetrics();
   const [search, setSearch] = useState('');
   const [activeWorkoutCategory, setActiveWorkoutCategory] = useState('All');
+  const [selectedWorkout, setSelectedWorkout] = useState<WorkoutDetail | null>(null);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const filteredWorkouts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -64,7 +93,11 @@ export default function ExploreFitness() {
           {data?.avatarUrl && <img src={data.avatarUrl} alt="Profile" className="h-10 w-10 rounded-full object-cover shadow-sm" />}
           <h1 className="font-headline-md text-headline-md text-on-surface">Hi, {data?.greetingName ?? 'Grace'}</h1>
         </div>
-        <button className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant" data-testid="explore-notifications-button">
+        <button
+          onClick={() => setNotificationsOpen(true)}
+          className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant"
+          data-testid="explore-notifications-button"
+        >
           <Bell size={22} />
         </button>
       </header>
@@ -115,6 +148,7 @@ export default function ExploreFitness() {
                 </div>
               </div>
               <button
+                onClick={() => setSelectedWorkout(cardioChallenge)}
                 className="rounded-full bg-surface-container-lowest px-6 py-2 font-label-bold text-label-bold text-primary shadow-md transition-transform duration-200 hover:scale-105"
                 data-testid="explore-challenge-start-button"
               >
@@ -154,7 +188,7 @@ export default function ExploreFitness() {
             {filteredWorkouts.map((w) => (
               <button
                 key={w.id}
-                onClick={() => navigate('/activity')}
+                onClick={() => setSelectedWorkout(w)}
                 data-testid={`explore-trending-${w.id}`}
                 className="flex items-center rounded-2xl bg-surface-container-lowest p-card-padding text-left shadow-[0px_8px_24px_rgba(115,103,240,0.06)] transition-transform duration-300 hover:-translate-y-1"
               >
@@ -202,6 +236,9 @@ export default function ExploreFitness() {
           </div>
         </section>
       </main>
+
+      {selectedWorkout && <WorkoutDetailModal workout={selectedWorkout} onClose={() => setSelectedWorkout(null)} />}
+      {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
     </div>
   );
 }

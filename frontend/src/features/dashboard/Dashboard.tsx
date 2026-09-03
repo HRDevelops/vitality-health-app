@@ -1,14 +1,19 @@
+import { useState } from 'react';
 import { Bell, Sun, Droplet, Footprints, Scale } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
+import NotificationsSheet from '../../components/ui/NotificationsSheet';
 import HealthScoreCard from './components/HealthScoreCard';
+import HealthScoreModal from './components/HealthScoreModal';
 import MetricCard from './components/MetricCard';
 import WeeklyRecapBanner from './components/WeeklyRecapBanner';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { data, isLoading, isError } = useDashboardMetrics();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
 
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase();
 
@@ -34,6 +39,7 @@ export default function Dashboard() {
           </div>
         </div>
         <button
+          onClick={() => setNotificationsOpen(true)}
           className="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container"
           data-testid="dashboard-notifications-button"
         >
@@ -50,7 +56,7 @@ export default function Dashboard() {
         )}
         {data && (
           <>
-            <HealthScoreCard score={data.healthScore} note={data.healthScoreNote} />
+            <HealthScoreCard score={data.healthScore} note={data.healthScoreNote} onReadMore={() => setHealthScoreModalOpen(true)} />
             <WeeklyRecapBanner />
             <div className="mb-element-gap flex items-center justify-between">
               <h2 className="font-headline-md text-headline-md text-on-surface">Metrics</h2>
@@ -106,6 +112,9 @@ export default function Dashboard() {
           </>
         )}
       </main>
+
+      {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
+      {healthScoreModalOpen && data && <HealthScoreModal score={data.healthScore} onClose={() => setHealthScoreModalOpen(false)} />}
     </div>
   );
 }
