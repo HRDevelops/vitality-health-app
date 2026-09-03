@@ -130,3 +130,16 @@ export interface Reminder {
   time: string;
   enabled: boolean;
 }
+
+export interface WeeklyDigest {
+  startDate: string;
+  endDate: string;
+  totalSteps: number;
+  bestStepDay: { date: string; label: string; steps: number };
+  totalCaloriesConsumed: number;
+  macroAdherencePercent: number;
+  mindfulnessMinutes: number;
+  podcastSessionsCompleted: number;
+  podcastStreakCount: number;
+  milestones: string[];
+}

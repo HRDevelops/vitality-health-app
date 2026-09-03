@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Pencil, Ruler, Cake, Weight, Award, TrendingUp, Settings, LogOut, ChevronRight, Sparkles } from 'lucide-react';
+import { Bell, Pencil, Ruler, Cake, Weight, Award, TrendingUp, Settings, LogOut, ChevronRight, Sparkles, FileText } from 'lucide-react';
 import TopBar from '../../core/components/TopBar';
 import { useUserProfile } from '../../services/api/user';
 import { useLeaderboard } from '../../services/api/community';
@@ -13,6 +13,7 @@ import EditWeightModal from './components/EditWeightModal';
 import SubscriptionPaywallModal from '../wellness/components/SubscriptionPaywallModal';
 import AchievementsModal from './components/AchievementsModal';
 import HealthScoreModal from '../dashboard/components/HealthScoreModal';
+import WeeklyDigestModal from '../dashboard/components/WeeklyDigestModal';
 import NotificationsSheet from '../../components/ui/NotificationsSheet';
 import EditProfileModal from './components/EditProfileModal';
 import AppSettingsModal from './components/AppSettingsModal';
@@ -25,6 +26,7 @@ export default function UserProfile() {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
+  const [weeklyDigestOpen, setWeeklyDigestOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [appSettingsOpen, setAppSettingsOpen] = useState(false);
@@ -182,6 +184,19 @@ export default function UserProfile() {
                   <ChevronRight size={18} className="text-outline" />
                 </button>
                 <button
+                  onClick={() => setWeeklyDigestOpen(true)}
+                  className="flex items-center justify-between border-b border-outline-variant/10 p-card-padding transition-colors hover:bg-surface-container/50"
+                  data-testid="profile-weekly-digest-button"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-container/30 text-primary">
+                      <FileText size={18} />
+                    </div>
+                    <span className="font-body-lg text-body-lg font-semibold text-on-surface">Weekly Digest</span>
+                  </div>
+                  <ChevronRight size={18} className="text-outline" />
+                </button>
+                <button
                   onClick={() => setAppSettingsOpen(true)}
                   className="flex items-center justify-between p-card-padding transition-colors hover:bg-surface-container/50"
                   data-testid="profile-settings-button"
@@ -215,6 +230,7 @@ export default function UserProfile() {
       {paywallOpen && <SubscriptionPaywallModal onClose={() => setPaywallOpen(false)} />}
       {achievementsOpen && <AchievementsModal onClose={() => setAchievementsOpen(false)} />}
       {healthScoreModalOpen && user && <HealthScoreModal score={user.healthScore} onClose={() => setHealthScoreModalOpen(false)} />}
+      {weeklyDigestOpen && <WeeklyDigestModal onClose={() => setWeeklyDigestOpen(false)} />}
       {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
       {editProfileOpen && user && <EditProfileModal user={user} onClose={() => setEditProfileOpen(false)} />}
       {appSettingsOpen && <AppSettingsModal onClose={() => setAppSettingsOpen(false)} />}

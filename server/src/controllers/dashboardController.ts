@@ -9,3 +9,12 @@ export async function getMetrics(req: Request, res: Response) {
     res.status(500).json({ message: err.message });
   }
 }
+
+export async function getWeeklyDigest(req: Request, res: Response) {
+  try {
+    const digest = await dashboardService.getWeeklyDigest();
+    res.json(digest);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+}

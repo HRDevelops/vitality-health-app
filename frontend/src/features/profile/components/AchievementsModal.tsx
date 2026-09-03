@@ -105,7 +105,7 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
     <BottomSheet title="Achievements" subtitle="Your milestones so far" onClose={onClose} testId="achievements-modal-overlay">
       <div className="grid grid-cols-2 gap-3" data-testid="achievements-modal">
         {badges.map((badge) => {
-          const Icon = badge.icon;
+          const Icon = badge.id === 'mindful-streak' && badge.status === 'unlocked' ? Flame : badge.icon;
           const style = STATUS_STYLES[badge.status];
           return (
             <div

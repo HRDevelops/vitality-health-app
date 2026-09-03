@@ -122,3 +122,30 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
 - App Settings screen content.
 - Consider making POST /podcasts/:id/listen idempotent per-track-per-day (currently
   increments on every play click, not just unique sessions) — deferred, non-blocking.
+
+## What's been implemented (as of 2026-09-03, session 3 — fork resume)
+- Root cause of prior session's "abrupt stop": the Express backend runs via plain
+  `ts-node` with no file watcher, so the previously-coded `/dashboard/weekly-digest`
+  route was 404ing until `sudo supervisorctl restart backend` was run this session.
+  Verified 200 OK via curl post-restart.
+- Signup Name Persistence: AuthContext gained `displayName`/`setDisplayName`
+  (localStorage key `vitality_display_name`). AuthScreen signup calls
+  `setDisplayName(name)` + toasts "Welcome to Vitality, {name}!"; login toasts
+  "Welcome back, {displayName}!" if a name was previously persisted. Dashboard
+  greeting header now reads `displayName ?? data?.greetingName` (falls back to
+  "Grace" from backend if no local name yet) — cosmetic personalization layer only,
+  backend/profile data still always Grace's, per explicit demo-scope user choice.
+- Shareable Weekly Digest: WeeklyDigestModal gained a "Share Digest" button
+  (`weekly-digest-share-button`) — uses `navigator.share()` when available, falls
+  back to `navigator.clipboard.writeText()` + toast "Weekly digest copied to
+  clipboard!", or a graceful "Unable to share right now." toast if neither works.
+- Fixed low-priority toast race: ReminderNudge's initial reminder check now fires
+  after a 4s delay (was immediate on mount) so it no longer overwrites the
+  welcome/login toast that fires right after auth navigation.
+- Tested via testing_agent (iteration_11): backend 41/41 pytest (added
+  test_weekly_digest.py), frontend 100% — signup name persistence, Remember Me
+  visibility/persistence, Weekly Digest Modal + Share button (success + fallback
+  paths), Mindful Streak Flame icon, full regression on dashboard/activity/profile/
+  podcast/auth. No critical or minor bugs; only a cosmetic toast-overlap note which
+  was fixed post-test (see above, not re-tested but is a 1-line, low-risk timing
+  change).

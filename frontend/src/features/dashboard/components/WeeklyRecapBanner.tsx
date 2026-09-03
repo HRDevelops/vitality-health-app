@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles, X, ChevronRight } from 'lucide-react';
 import { triggerCelebration } from '../../../lib/celebration';
 import { useToast } from '../../../components/ui/ToastContext';
 
-export default function WeeklyRecapBanner() {
+interface WeeklyRecapBannerProps {
+  onViewDigest: () => void;
+}
+
+export default function WeeklyRecapBanner({ onViewDigest }: WeeklyRecapBannerProps) {
   const [dismissed, setDismissed] = useState(false);
   const { showToast } = useToast();
   if (dismissed) return null;
@@ -34,10 +38,23 @@ export default function WeeklyRecapBanner() {
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
           <Sparkles size={18} />
         </div>
-        <p className="font-body-sm text-body-sm leading-relaxed">
-          <span className="font-headline-md text-sm">Weekly Milestone:</span> You hit 99% of your step goal yesterday! Top fuel: Quinoa Power
-          Bowl.
-        </p>
+        <div>
+          <p className="font-body-sm text-body-sm leading-relaxed">
+            <span className="font-headline-md text-sm">Weekly Milestone:</span> You hit 99% of your step goal yesterday! Top fuel: Quinoa
+            Power Bowl.
+          </p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDigest();
+            }}
+            className="mt-2 flex items-center gap-1 font-label-bold text-[11px] uppercase text-white underline-offset-2 hover:underline"
+            data-testid="dashboard-weekly-recap-view-digest"
+          >
+            View Full Digest
+            <ChevronRight size={14} />
+          </button>
+        </div>
       </div>
     </section>
   );

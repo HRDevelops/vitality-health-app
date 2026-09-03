@@ -1,7 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HeartPulse, Mail, Lock, Loader2 } from 'lucide-react';
+import { HeartPulse, Mail, Lock, User, Check, Loader2 } from 'lucide-react';
 import { useAuth } from '../../core/context/AuthContext';
+import { useToast } from '../../components/ui/ToastContext';
 import ForgotPasswordModal from './components/ForgotPasswordModal';
 
 interface AuthScreenProps {
@@ -29,9 +30,11 @@ function AppleIcon() {
 
 export default function AuthScreen({ mode }: AuthScreenProps) {
   const navigate = useNavigate();
-  const { login, signup, loginAsDemo } = useAuth();
+  const { login, signup, loginAsDemo, rememberMe, setRememberMe, displayName, setDisplayName } = useAuth();
+  const { showToast } = useToast();
   const isSignup = mode === 'signup';
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +44,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   const validate = (): string | null => {
+    if (isSignup && !name.trim()) return 'Enter your full name.';
     if (!/^\S+@\S+\.\S+$/.test(email)) return 'Enter a valid email address.';
     if (password.length < 6) return 'Password must be at least 6 characters.';
     return null;
@@ -58,8 +62,11 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
     try {
       if (isSignup) {
         await signup(email, password);
+        setDisplayName(name.trim());
+        showToast(`Welcome to Vitality, ${name.trim()}!`, { duration: 3500 });
       } else {
         await login(email, password);
+        showToast(displayName ? `Welcome back, ${displayName}!` : 'Welcome back!', { duration: 3000 });
       }
       navigate('/', { replace: true });
     } catch (err: any) {
@@ -149,6 +156,25 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            {isSignup && (
+              <div>
+                <label className="mb-1 block font-label-bold text-[10px] uppercase text-outline" htmlFor="auth-name">
+                  Full Name
+                </label>
+                <div className="flex items-center gap-2 rounded-2xl border border-outline-variant/40 bg-surface px-4 py-3">
+                  <User size={16} className="text-outline" />
+                  <input
+                    id="auth-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Grace Adeyemi"
+                    className="w-full bg-transparent font-body-lg text-body-lg text-on-surface outline-none"
+                    data-testid="auth-name-input"
+                  />
+                </div>
+              </div>
+            )}
             <div>
               <label className="mb-1 block font-label-bold text-[10px] uppercase text-outline" htmlFor="auth-email">
                 Email
@@ -191,14 +217,33 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
             )}
 
             {!isSignup && (
-              <button
-                type="button"
-                onClick={() => setForgotOpen(true)}
-                className="block font-body-sm text-body-sm text-primary hover:underline"
-                data-testid="auth-forgot-password-link"
-              >
-                Forgot password?
-              </button>
+              <div className="flex items-center justify-between">
+                <label className="flex cursor-pointer items-center gap-2" data-testid="auth-remember-me-label">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="sr-only"
+                    data-testid="auth-remember-me-checkbox"
+                  />
+                  <span
+                    className={`flex h-5 w-5 items-center justify-center rounded-md border transition-colors ${
+                      rememberMe ? 'border-primary bg-primary text-on-primary' : 'border-outline-variant/50 bg-surface'
+                    }`}
+                  >
+                    {rememberMe && <Check size={14} />}
+                  </span>
+                  <span className="font-body-sm text-body-sm text-on-surface-variant">Remember me</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setForgotOpen(true)}
+                  className="font-body-sm text-body-sm text-primary hover:underline"
+                  data-testid="auth-forgot-password-link"
+                >
+                  Forgot password?
+                </button>
+              </div>
             )}
 
             <button

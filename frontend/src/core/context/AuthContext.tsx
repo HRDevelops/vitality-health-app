@@ -3,6 +3,8 @@ import { apiClient } from '../../services/api/client';
 import { UserProfile } from '../../types/domain';
 
 const STORAGE_KEY = 'vitality_auth';
+const REMEMBER_KEY = 'vitality_remember_me';
+const DISPLAY_NAME_KEY = 'vitality_display_name';
 
 interface AuthSession {
   token: string;
@@ -13,6 +15,10 @@ interface AuthContextValue {
   user: UserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
+  rememberMe: boolean;
+  setRememberMe: (value: boolean) => void;
+  displayName: string | null;
+  setDisplayName: (name: string) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   loginAsDemo: () => Promise<void>;
@@ -30,12 +36,24 @@ function readStoredSession(): AuthSession | null {
   }
 }
 
+function readRememberMe(): boolean {
+  const raw = localStorage.getItem(REMEMBER_KEY);
+  return raw === null ? true : raw === 'true';
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(() => readStoredSession());
-  const [loggedOut, setLoggedOut] = useState(false);
+  const [rememberMe, setRememberMeState] = useState<boolean>(() => readRememberMe());
+  const [loggedOut, setLoggedOut] = useState<boolean>(() => !readStoredSession() && !readRememberMe());
+  const [displayName, setDisplayNameState] = useState<string | null>(() => localStorage.getItem(DISPLAY_NAME_KEY));
+
+  const setDisplayName = (name: string) => {
+    setDisplayNameState(name);
+    localStorage.setItem(DISPLAY_NAME_KEY, name);
+  };
 
   useEffect(() => {
-    if (session || loggedOut) return;
+    if (session || loggedOut || !rememberMe) return;
     apiClient
       .post<AuthSession>('/auth/demo')
       .then(({ data }) => {
@@ -43,12 +61,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       })
       .catch(() => {});
-  }, [session, loggedOut]);
+  }, [session, loggedOut, rememberMe]);
 
   const persist = (data: AuthSession) => {
     setSession(data);
     setLoggedOut(false);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  };
+
+  const setRememberMe = (value: boolean) => {
+    setRememberMeState(value);
+    localStorage.setItem(REMEMBER_KEY, String(value));
   };
 
   const login = async (email: string, password: string) => {
@@ -78,6 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: session?.user ?? null,
         token: session?.token ?? null,
         isAuthenticated: !loggedOut,
+        rememberMe,
+        setRememberMe,
+        displayName,
+        setDisplayName,
         login,
         signup,
         loginAsDemo,

@@ -5,7 +5,6 @@ import ReminderNudge from './ReminderNudge';
 import { ActionModalProvider, useActionModal } from '../context/ActionModalContext';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import AddActionModal from '../../features/actions/AddActionModal';
-import { ToastProvider } from '../../components/ui/ToastContext';
 
 function ShellContent() {
   const { isOpen, close } = useActionModal();
@@ -25,12 +24,10 @@ function ShellContent() {
 
 export default function AppLayout() {
   return (
-    <ToastProvider>
-      <AudioPlayerProvider>
-        <ActionModalProvider>
-          <ShellContent />
-        </ActionModalProvider>
-      </AudioPlayerProvider>
-    </ToastProvider>
+    <AudioPlayerProvider>
+      <ActionModalProvider>
+        <ShellContent />
+      </ActionModalProvider>
+    </AudioPlayerProvider>
   );
 }

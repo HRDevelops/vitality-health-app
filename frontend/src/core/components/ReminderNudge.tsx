@@ -37,9 +37,10 @@ export default function ReminderNudge() {
       }
     };
 
-    check();
+    const initialDelay = setTimeout(check, 4000);
     intervalRef.current = setInterval(check, 60000);
     return () => {
+      clearTimeout(initialDelay);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [reminders, showToast]);
