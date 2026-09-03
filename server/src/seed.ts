@@ -11,7 +11,7 @@ import { NutritionLog } from './models/NutritionLog';
 import { Podcast } from './models/Podcast';
 import { CommunityMember } from './models/CommunityMember';
 import { Reminder } from './models/Reminder';
-import { lastNDates } from './utils/date';
+import { lastNDates, addDaysString, todayString } from './utils/date';
 import mongoose from 'mongoose';
 
 const GRACE_AVATAR = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
@@ -42,6 +42,8 @@ async function seed() {
     age: 24,
     isPremium: false,
     podcastSessionsCompleted: 2,
+    podcastStreakCount: 2,
+    lastListenDate: addDaysString(todayString(), -1),
   });
 
   console.log('[seed] creating 7 days of activity logs...');

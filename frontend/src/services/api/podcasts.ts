@@ -17,7 +17,7 @@ export function useLogPodcastListen() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (podcastId: string) => {
-      const { data } = await apiClient.post<{ podcastSessionsCompleted: number }>(`/podcasts/${podcastId}/listen`);
+      const { data } = await apiClient.post<{ podcastSessionsCompleted: number; podcastStreakCount: number }>(`/podcasts/${podcastId}/listen`);
       return data;
     },
     onSuccess: (result) => {

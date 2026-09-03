@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { Trophy, Droplet, Headphones, Flame, PieChart } from 'lucide-react';
+import { Trophy, Droplet, Headphones, Flame, PieChart, Moon } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { useDashboardMetrics } from '../../../services/api/dashboard';
 import { useActivityTrends } from '../../../services/api/activity';
@@ -34,7 +34,9 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
   const daysLogged = trends ? trends.points.filter((p) => p.steps > 0).length : 0;
   const totalDays = trends?.points.length ?? 7;
   const podcastSessions = user?.podcastSessionsCompleted ?? 0;
+  const podcastStreak = user?.podcastStreakCount ?? 0;
   const PODCAST_GOAL = 3;
+  const STREAK_GOAL = 3;
 
   const statusFor = (ratio: number): BadgeStatus => (ratio >= 0.95 ? 'unlocked' : ratio > 0 ? 'in-progress' : 'locked');
 
@@ -62,6 +64,13 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
         icon: Headphones,
       },
       {
+        id: 'mindful-streak',
+        title: 'Mindful Streak',
+        subtitle: `3-Day Zen Streak — ${Math.min(podcastStreak, STREAK_GOAL)}/${STREAK_GOAL} days in a row`,
+        status: statusFor(podcastStreak / STREAK_GOAL),
+        icon: Moon,
+      },
+      {
         id: '7-day-streak',
         title: '7-Day Streak',
         subtitle: `${daysLogged}/${totalDays} days logged`,
@@ -76,7 +85,7 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
         icon: PieChart,
       },
     ],
-    [steps, stepsGoal, waterMl, waterGoalMl, podcastSessions, daysLogged, totalDays]
+    [steps, stepsGoal, waterMl, waterGoalMl, podcastSessions, podcastStreak, daysLogged, totalDays]
   );
 
   useEffect(() => {

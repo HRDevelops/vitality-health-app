@@ -17,8 +17,12 @@ export class UserRepository {
     return User.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
   }
 
-  async incrementPodcastSessions(id: string): Promise<IUser | null> {
-    return User.findByIdAndUpdate(id, { $inc: { podcastSessionsCompleted: 1 } }, { new: true }).exec();
+  async recordPodcastListen(id: string, streakCount: number, listenDate: string): Promise<IUser | null> {
+    return User.findByIdAndUpdate(
+      id,
+      { $inc: { podcastSessionsCompleted: 1 }, $set: { podcastStreakCount: streakCount, lastListenDate: listenDate } },
+      { new: true }
+    ).exec();
   }
 }
 

@@ -50,7 +50,7 @@ export function useLogWorkout() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { title?: string; steps?: number; caloriesBurned?: number; distanceKm?: number; activeMinutes?: number }) => {
-      const { data } = await apiClient.post('/activity/log', payload);
+      const { data } = await apiClient.post<ActivityDaily>('/activity/log', payload);
       return data;
     },
     onSuccess: () => {

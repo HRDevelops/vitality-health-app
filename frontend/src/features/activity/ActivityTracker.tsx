@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2, Trash2 } from 'lucide-react';
-import { useActivityDaily, useActivityTrends, useDeleteWorkout } from '../../services/api/activity';
+import { useActivityDaily, useActivityTrends, useDeleteWorkout, useLogWorkout } from '../../services/api/activity';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import ProgressRing from '../../components/ui/ProgressRing';
 import ActivityInsightModal from './components/ActivityInsightModal';
 import AddWorkoutModal from './components/AddWorkoutModal';
 import { useToast } from '../../components/ui/ToastContext';
+import { WorkoutEntry } from '../../types/domain';
 
 type RangeOption = 'daily' | 'week' | 'month';
 
@@ -17,6 +18,7 @@ export default function ActivityTracker() {
   const [insightOpen, setInsightOpen] = useState(false);
   const [addWorkoutOpen, setAddWorkoutOpen] = useState(false);
   const deleteWorkout = useDeleteWorkout();
+  const logWorkout = useLogWorkout();
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -31,8 +33,26 @@ export default function ActivityTracker() {
 
   const maxSteps = trends ? Math.max(...trends.points.map((p) => p.steps), 1) : 1;
 
-  const handleDeleteWorkout = (workoutId: string) => {
-    deleteWorkout.mutate(workoutId, { onSuccess: () => showToast('Workout removed') });
+  const handleDeleteWorkout = (workout: WorkoutEntry) => {
+    deleteWorkout.mutate(workout.id, {
+      onSuccess: () => {
+        showToast('Workout removed', {
+          duration: 5000,
+          action: {
+            label: 'Undo',
+            onClick: () => {
+              logWorkout.mutate({
+                title: workout.title,
+                steps: workout.steps,
+                caloriesBurned: workout.caloriesBurned,
+                distanceKm: workout.distanceKm,
+                activeMinutes: workout.activeMinutes,
+              });
+            },
+          },
+        });
+      },
+    });
   };
 
   return (
@@ -149,7 +169,7 @@ export default function ActivityTracker() {
                     </div>
                     <CheckCircle2 size={20} className="flex-shrink-0 text-primary" />
                     <button
-                      onClick={() => handleDeleteWorkout(w.id)}
+                      onClick={() => handleDeleteWorkout(w)}
                       disabled={deleteWorkout.isPending}
                       className="flex-shrink-0 rounded-full p-1.5 text-outline-variant transition-colors hover:bg-error-container/40 hover:text-error disabled:opacity-50"
                       data-testid={`todays-workout-delete-${i}`}

@@ -111,6 +111,7 @@ export interface UserProfile {
   age: number;
   isPremium: boolean;
   podcastSessionsCompleted: number;
+  podcastStreakCount: number;
 }
 
 export interface LeaderboardEntry {

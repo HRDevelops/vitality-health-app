@@ -88,6 +88,20 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   frontend E2E) via testing_agent iteration_8, no regressions.
 - Known non-blocking code review note: removeWorkoutEntry is findOne+findOneAndUpdate
   (not atomic) — fine for single-user demo, would need a transaction for multi-user.
+- Iteration 9 features (2026-09-03): Undo Delete for Workouts (5s toast with Undo action
+  re-logs via useLogWorkout, ToastContext extended to support {action,duration} while
+  staying backward compatible), Session Streaks Badge (User.podcastStreakCount +
+  lastListenDate track consecutive-day podcast listening; new "Mindful Streak" badge in
+  AchievementsModal), Weekly Confetti Recap (tapping WeeklyRecapBanner fires
+  triggerCelebration()+toast, X dismiss uses stopPropagation), In-App Reminder Push Nudge
+  (new ReminderNudge.tsx mounted in AppLayout, checks enabled reminders whose time has
+  passed + not yet nudged today via localStorage, shows toast with "Got it" action).
+  Tested 100% pass (backend 5/5 new + 22/22 regression, frontend E2E) via testing_agent
+  iteration_9. Fixed 2 low-priority issues it flagged: rounded distanceKm to 1 decimal in
+  ActivityService.getDaily, and normalized POST /activity/log to return the full
+  getDaily() shape ({id,...} workouts) instead of the raw Mongo doc for API consistency.
+- Known non-blocking note: ReminderNudge's localStorage nudge key uses UTC date
+  (toISOString slice) so it resets at UTC midnight, not local midnight — low priority.
 - Map Mongoose ValidationErrors to 400 responses across controllers.
 - Opt into React Router v7 future flags.
 - Real health-score-history detail view (currently static placeholder).

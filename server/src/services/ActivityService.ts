@@ -18,7 +18,7 @@ export class ActivityService {
       goalSteps,
       progressPercent: Math.min(100, Math.round((steps / goalSteps) * 100)),
       caloriesBurned: log?.caloriesBurned ?? 0,
-      distanceKm: log?.distanceKm ?? 0,
+      distanceKm: Math.round((log?.distanceKm ?? 0) * 10) / 10,
       activeMinutes: log?.activeMinutes ?? 0,
       waterMl: log?.waterMl ?? 0,
       waterGoalMl: log?.waterGoalMl ?? 2000,
@@ -88,7 +88,8 @@ export class ActivityService {
         activeMinutes: payload.activeMinutes ?? 0,
       }
     );
-    return log;
+    if (!log) throw new Error('Failed to log workout');
+    return this.getDaily(logDate);
   }
 
   async deleteWorkout(workoutId: string) {

@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import MiniPlayer from './MiniPlayer';
+import ReminderNudge from './ReminderNudge';
 import { ActionModalProvider, useActionModal } from '../context/ActionModalContext';
 import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import AddActionModal from '../../features/actions/AddActionModal';
@@ -17,6 +18,7 @@ function ShellContent() {
       {!hideMiniPlayer && <MiniPlayer />}
       <BottomNav />
       {isOpen && <AddActionModal onClose={close} />}
+      <ReminderNudge />
     </div>
   );
 }

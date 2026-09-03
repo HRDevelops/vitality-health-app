@@ -14,6 +14,8 @@ export interface IUser extends Document {
   age: number;
   isPremium: boolean;
   podcastSessionsCompleted: number;
+  podcastStreakCount: number;
+  lastListenDate: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +36,8 @@ const UserSchema = new Schema<IUser>(
     age: { type: Number, default: 24 },
     isPremium: { type: Boolean, default: false },
     podcastSessionsCompleted: { type: Number, default: 0 },
+    podcastStreakCount: { type: Number, default: 0 },
+    lastListenDate: { type: String, default: null },
   },
   { timestamps: true }
 );
