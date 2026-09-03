@@ -36,6 +36,10 @@ node_process: subprocess.Popen | None = None
 @app.on_event("startup")
 async def start_node_backend():
     global node_process
+    # Defensively free the internal port in case a previous reload cycle
+    # left an orphaned Express process bound to it.
+    subprocess.run(["fuser", "-k", f"{NODE_PORT}/tcp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    await asyncio.sleep(1)
     child_env = {**os.environ, "PORT": NODE_PORT}
     node_process = subprocess.Popen(
         ["yarn", "dev"],
@@ -57,6 +61,11 @@ async def start_node_backend():
 def stop_node_backend():
     if node_process is not None:
         node_process.terminate()
+        try:
+            node_process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            node_process.kill()
+    subprocess.run(["fuser", "-k", f"{NODE_PORT}/tcp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
