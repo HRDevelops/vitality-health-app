@@ -44,7 +44,7 @@ export class ActivityRepository {
   async addWorkoutEntry(
     userId: string,
     logDate: string,
-    entry: { title: string; caloriesBurned: number; activeMinutes: number; distanceKm: number },
+    entry: { title: string; steps: number; caloriesBurned: number; activeMinutes: number; distanceKm: number },
     increments: Partial<Pick<IActivityLog, 'steps' | 'caloriesBurned' | 'distanceKm' | 'activeMinutes'>>
   ): Promise<IActivityLog> {
     const doc = await ActivityLog.findOneAndUpdate(
@@ -57,6 +57,26 @@ export class ActivityRepository {
       { upsert: true, new: true }
     ).exec();
     return doc as IActivityLog;
+  }
+
+  async removeWorkoutEntry(userId: string, logDate: string, workoutId: string): Promise<IActivityLog | null> {
+    const log = await ActivityLog.findOne({ userId, logDate }).exec();
+    if (!log) return null;
+    const entry = log.workouts.find((w) => w._id.toString() === workoutId);
+    if (!entry) return null;
+    return ActivityLog.findOneAndUpdate(
+      { userId, logDate },
+      {
+        $inc: {
+          steps: -entry.steps,
+          caloriesBurned: -entry.caloriesBurned,
+          distanceKm: -entry.distanceKm,
+          activeMinutes: -entry.activeMinutes,
+        },
+        $pull: { workouts: { _id: entry._id } },
+      },
+      { new: true }
+    ).exec();
   }
 }
 

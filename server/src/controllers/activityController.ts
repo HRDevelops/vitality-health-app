@@ -40,3 +40,15 @@ export async function logWorkout(req: Request, res: Response) {
     handleControllerError(err, res);
   }
 }
+
+export async function deleteWorkout(req: Request, res: Response) {
+  try {
+    const data = await activityService.deleteWorkout(req.params.workoutId);
+    res.json(data);
+  } catch (err: any) {
+    if (err.message === 'Workout not found') {
+      return res.status(404).json({ message: err.message });
+    }
+    handleControllerError(err, res);
+  }
+}

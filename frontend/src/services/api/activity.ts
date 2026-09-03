@@ -59,3 +59,14 @@ export function useLogWorkout() {
     },
   });
 }
+
+export function useDeleteWorkout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (workoutId: string) => {
+      const { data } = await apiClient.delete<ActivityDaily>(`/activity/workout/${workoutId}`);
+      return data;
+    },
+    onSuccess: () => invalidateAll(queryClient),
+  });
+}

@@ -16,7 +16,9 @@ export interface DashboardMetrics {
 }
 
 export interface WorkoutEntry {
+  id: string;
   title: string;
+  steps: number;
   caloriesBurned: number;
   activeMinutes: number;
   distanceKm: number;

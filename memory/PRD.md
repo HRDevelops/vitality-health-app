@@ -79,7 +79,15 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
 - Tested via testing_agent (iteration_6): backend 20/20 pytest, frontend all 5 features
   verified end-to-end. Fixed 1 minor cosmetic bug (uncapped "4/3" numerator after unlock).
 
-## Backlog / next candidates
+- Workout Delete (2026-09-03): ActivityLog.workouts subdocs now retain `_id` and `steps`
+  (was `_id:false`, no steps). New `DELETE /activity/workout/:workoutId` finds the entry,
+  decrements steps/caloriesBurned/distanceKm/activeMinutes by its exact values, then $pull
+  removes it; returns 404 "Workout not found" if missing. Frontend: trash icon per workout
+  card in Today's Workouts (`todays-workout-delete-{i}`), `useDeleteWorkout()` hook
+  invalidates SYNC_KEYS + shows "Workout removed" toast. Tested 100% pass (backend 6/6,
+  frontend E2E) via testing_agent iteration_8, no regressions.
+- Known non-blocking code review note: removeWorkoutEntry is findOne+findOneAndUpdate
+  (not atomic) — fine for single-user demo, would need a transaction for multi-user.
 - Map Mongoose ValidationErrors to 400 responses across controllers.
 - Opt into React Router v7 future flags.
 - Real health-score-history detail view (currently static placeholder).

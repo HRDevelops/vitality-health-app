@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2 } from 'lucide-react';
-import { useActivityDaily, useActivityTrends } from '../../services/api/activity';
+import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2, Trash2 } from 'lucide-react';
+import { useActivityDaily, useActivityTrends, useDeleteWorkout } from '../../services/api/activity';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import ProgressRing from '../../components/ui/ProgressRing';
 import ActivityInsightModal from './components/ActivityInsightModal';
 import AddWorkoutModal from './components/AddWorkoutModal';
+import { useToast } from '../../components/ui/ToastContext';
 
 type RangeOption = 'daily' | 'week' | 'month';
 
@@ -15,6 +16,8 @@ export default function ActivityTracker() {
   const [range, setRange] = useState<RangeOption>('daily');
   const [insightOpen, setInsightOpen] = useState(false);
   const [addWorkoutOpen, setAddWorkoutOpen] = useState(false);
+  const deleteWorkout = useDeleteWorkout();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if ((location.state as any)?.openAddWorkout) {
@@ -27,6 +30,10 @@ export default function ActivityTracker() {
   const { data: trends } = useActivityTrends(range === 'month' ? 'month' : 'week');
 
   const maxSteps = trends ? Math.max(...trends.points.map((p) => p.steps), 1) : 1;
+
+  const handleDeleteWorkout = (workoutId: string) => {
+    deleteWorkout.mutate(workoutId, { onSuccess: () => showToast('Workout removed') });
+  };
 
   return (
     <div data-testid="activity-tracker-screen">
@@ -122,7 +129,7 @@ export default function ActivityTracker() {
               ) : (
                 daily.workouts.map((w, i) => (
                   <div
-                    key={`${w.title}-${w.loggedAt}-${i}`}
+                    key={w.id}
                     data-testid={`todays-workout-item-${i}`}
                     className="flex items-center gap-3 rounded-2xl bg-surface-container-lowest p-4 shadow-sm"
                   >
@@ -141,6 +148,15 @@ export default function ActivityTracker() {
                       </div>
                     </div>
                     <CheckCircle2 size={20} className="flex-shrink-0 text-primary" />
+                    <button
+                      onClick={() => handleDeleteWorkout(w.id)}
+                      disabled={deleteWorkout.isPending}
+                      className="flex-shrink-0 rounded-full p-1.5 text-outline-variant transition-colors hover:bg-error-container/40 hover:text-error disabled:opacity-50"
+                      data-testid={`todays-workout-delete-${i}`}
+                      aria-label={`Remove ${w.title}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))
               )}

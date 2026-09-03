@@ -23,7 +23,9 @@ export class ActivityService {
       waterMl: log?.waterMl ?? 0,
       waterGoalMl: log?.waterGoalMl ?? 2000,
       workouts: (log?.workouts ?? []).map((w) => ({
+        id: w._id.toString(),
         title: w.title,
+        steps: w.steps,
         caloriesBurned: w.caloriesBurned,
         activeMinutes: w.activeMinutes,
         distanceKm: w.distanceKm,
@@ -74,6 +76,7 @@ export class ActivityService {
       logDate,
       {
         title: payload.title ?? 'Workout',
+        steps: payload.steps ?? 0,
         caloriesBurned: payload.caloriesBurned ?? 0,
         activeMinutes: payload.activeMinutes ?? 0,
         distanceKm: payload.distanceKm ?? 0,
@@ -86,6 +89,15 @@ export class ActivityService {
       }
     );
     return log;
+  }
+
+  async deleteWorkout(workoutId: string) {
+    const user = await userRepository.findFirst();
+    if (!user) throw new Error('No user found. Please run the seed script.');
+    const logDate = todayString();
+    const log = await activityRepository.removeWorkoutEntry(user.id, logDate, workoutId);
+    if (!log) throw new Error('Workout not found');
+    return this.getDaily(logDate);
   }
 }
 
