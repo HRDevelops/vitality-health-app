@@ -21,7 +21,7 @@ export default function AddWorkoutModal({ onClose }: AddWorkoutModalProps) {
   const handleSubmit = () => {
     const preset = presets[selectedIndex];
     logWorkout.mutate(
-      { steps: preset.steps, caloriesBurned: preset.caloriesBurned, distanceKm: preset.distanceKm, activeMinutes: preset.activeMinutes },
+      { title: preset.label, steps: preset.steps, caloriesBurned: preset.caloriesBurned, distanceKm: preset.distanceKm, activeMinutes: preset.activeMinutes },
       { onSuccess: () => { showToast('Workout logged!'); onClose(); } }
     );
   };

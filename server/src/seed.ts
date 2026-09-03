@@ -41,6 +41,7 @@ async function seed() {
     heightCm: 165,
     age: 24,
     isPremium: false,
+    podcastSessionsCompleted: 2,
   });
 
   console.log('[seed] creating 7 days of activity logs...');

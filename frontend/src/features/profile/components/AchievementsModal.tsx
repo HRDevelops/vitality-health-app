@@ -1,7 +1,11 @@
+import { useEffect, useMemo } from 'react';
 import { Trophy, Droplet, Headphones, Flame, PieChart } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { useDashboardMetrics } from '../../../services/api/dashboard';
 import { useActivityTrends } from '../../../services/api/activity';
+import { useUserProfile } from '../../../services/api/user';
+import { useToast } from '../../../components/ui/ToastContext';
+import { triggerCelebration } from '../../../lib/celebration';
 
 type BadgeStatus = 'unlocked' | 'in-progress' | 'locked';
 
@@ -15,9 +19,13 @@ const STATUS_STYLES: Record<BadgeStatus, { pill: string; iconWrap: string; label
   locked: { pill: 'bg-surface-variant text-outline', iconWrap: 'bg-surface-variant text-outline', label: 'Locked' },
 };
 
+const UNLOCKED_BADGES_STORAGE_KEY = 'vitality_unlocked_badges';
+
 export default function AchievementsModal({ onClose }: AchievementsModalProps) {
   const { data: metrics } = useDashboardMetrics();
   const { data: trends } = useActivityTrends('week');
+  const { data: user } = useUserProfile();
+  const { showToast } = useToast();
 
   const steps = metrics?.steps ?? 0;
   const stepsGoal = metrics?.stepsGoal ?? 10000;
@@ -25,46 +33,64 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
   const waterGoalMl = metrics?.waterGoalMl ?? 2000;
   const daysLogged = trends ? trends.points.filter((p) => p.steps > 0).length : 0;
   const totalDays = trends?.points.length ?? 7;
+  const podcastSessions = user?.podcastSessionsCompleted ?? 0;
+  const PODCAST_GOAL = 3;
 
   const statusFor = (ratio: number): BadgeStatus => (ratio >= 0.95 ? 'unlocked' : ratio > 0 ? 'in-progress' : 'locked');
 
-  const badges: { id: string; title: string; subtitle: string; status: BadgeStatus; icon: typeof Trophy }[] = [
-    {
-      id: '10k-club',
-      title: '10k Club',
-      subtitle: `${steps.toLocaleString()} / ${stepsGoal.toLocaleString()} steps today`,
-      status: statusFor(steps / stepsGoal),
-      icon: Trophy,
-    },
-    {
-      id: 'hydration-hero',
-      title: 'Hydration Hero',
-      subtitle: `${waterMl.toLocaleString()} / ${waterGoalMl.toLocaleString()} ml today`,
-      status: statusFor(waterMl / waterGoalMl),
-      icon: Droplet,
-    },
-    {
-      id: 'mindful-master',
-      title: 'Mindful Master',
-      subtitle: '3 podcast sessions completed',
-      status: 'unlocked',
-      icon: Headphones,
-    },
-    {
-      id: '7-day-streak',
-      title: '7-Day Streak',
-      subtitle: `${daysLogged}/${totalDays} days logged`,
-      status: statusFor(daysLogged / totalDays),
-      icon: Flame,
-    },
-    {
-      id: 'macro-balancer',
-      title: 'Macro Balancer',
-      subtitle: 'Log balanced macros for 3 days to unlock',
-      status: 'locked',
-      icon: PieChart,
-    },
-  ];
+  const badges = useMemo<{ id: string; title: string; subtitle: string; status: BadgeStatus; icon: typeof Trophy }[]>(
+    () => [
+      {
+        id: '10k-club',
+        title: '10k Club',
+        subtitle: `${steps.toLocaleString()} / ${stepsGoal.toLocaleString()} steps today`,
+        status: statusFor(steps / stepsGoal),
+        icon: Trophy,
+      },
+      {
+        id: 'hydration-hero',
+        title: 'Hydration Hero',
+        subtitle: `${waterMl.toLocaleString()} / ${waterGoalMl.toLocaleString()} ml today`,
+        status: statusFor(waterMl / waterGoalMl),
+        icon: Droplet,
+      },
+      {
+        id: 'mindful-master',
+        title: 'Mindful Master',
+        subtitle: `${Math.min(podcastSessions, PODCAST_GOAL)}/${PODCAST_GOAL} podcast sessions completed`,
+        status: statusFor(podcastSessions / PODCAST_GOAL),
+        icon: Headphones,
+      },
+      {
+        id: '7-day-streak',
+        title: '7-Day Streak',
+        subtitle: `${daysLogged}/${totalDays} days logged`,
+        status: statusFor(daysLogged / totalDays),
+        icon: Flame,
+      },
+      {
+        id: 'macro-balancer',
+        title: 'Macro Balancer',
+        subtitle: 'Log balanced macros for 3 days to unlock',
+        status: 'locked',
+        icon: PieChart,
+      },
+    ],
+    [steps, stepsGoal, waterMl, waterGoalMl, podcastSessions, daysLogged, totalDays]
+  );
+
+  useEffect(() => {
+    if (!metrics || !trends || !user) return;
+    const unlockedNow = badges.filter((b) => b.status === 'unlocked').map((b) => b.id);
+    const prevRaw = localStorage.getItem(UNLOCKED_BADGES_STORAGE_KEY);
+    const prev: string[] = prevRaw ? JSON.parse(prevRaw) : [];
+    const newlyUnlocked = unlockedNow.filter((id) => !prev.includes(id));
+    if (newlyUnlocked.length > 0) {
+      triggerCelebration();
+      showToast('🎉 Milestone Unlocked!');
+    }
+    localStorage.setItem(UNLOCKED_BADGES_STORAGE_KEY, JSON.stringify(unlockedNow));
+  }, [badges, metrics, trends, user]);
 
   return (
     <BottomSheet title="Achievements" subtitle="Your milestones so far" onClose={onClose} testId="achievements-modal-overlay">

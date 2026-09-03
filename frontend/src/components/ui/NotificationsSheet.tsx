@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, TrendingUp, Droplet, Headphones, CheckCheck } from 'lucide-react';
+import { useActionModal } from '../../core/context/ActionModalContext';
 
 interface NotificationsSheetProps {
   onClose: () => void;
@@ -13,6 +15,21 @@ const NOTIFICATIONS = [
 
 export default function NotificationsSheet({ onClose }: NotificationsSheetProps) {
   const [readIds, setReadIds] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const { open: openActionModal } = useActionModal();
+
+  const handleNotificationClick = (id: string) => {
+    setReadIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    onClose();
+    if (id === 'n1') {
+      navigate('/profile', { state: { scrollToLeaderboard: true } });
+    } else if (id === 'n2') {
+      navigate('/dashboard');
+      openActionModal();
+    } else if (id === 'n3') {
+      navigate('/wellness/podcast');
+    }
+  };
 
   return (
     <div
@@ -51,7 +68,8 @@ export default function NotificationsSheet({ onClose }: NotificationsSheetProps)
               <div
                 key={n.id}
                 data-testid={`notification-${n.id}`}
-                className={`flex gap-3 rounded-2xl p-4 transition-colors ${isRead ? 'bg-surface-container-low' : 'bg-primary-fixed/40'}`}
+                onClick={() => handleNotificationClick(n.id)}
+                className={`flex cursor-pointer gap-3 rounded-2xl p-4 transition-colors ${isRead ? 'bg-surface-container-low' : 'bg-primary-fixed/40'} hover:opacity-90`}
               >
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
                   <Icon size={16} />

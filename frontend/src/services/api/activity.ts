@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 import { ActivityDaily, ActivityTrends } from '../../types/domain';
+import { triggerCelebration } from '../../lib/celebration';
+
+const SYNC_KEYS = ['dashboard', 'activity', 'nutrition', 'user'];
+
+function invalidateAll(queryClient: ReturnType<typeof useQueryClient>) {
+  SYNC_KEYS.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+}
 
 export function useActivityDaily(date?: string) {
   return useQuery({
@@ -26,12 +33,15 @@ export function useLogWater() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (amountMl: number) => {
-      const { data } = await apiClient.post('/activity/water', { amountMl });
-      return data;
+      const { data } = await apiClient.post<ActivityDaily>('/activity/water', { amountMl });
+      return { log: data, amountMl };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['activity'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    onSuccess: ({ log, amountMl }) => {
+      invalidateAll(queryClient);
+      const before = log.waterMl - amountMl;
+      if (before < log.waterGoalMl && log.waterMl >= log.waterGoalMl) {
+        triggerCelebration();
+      }
     },
   });
 }
@@ -39,13 +49,13 @@ export function useLogWater() {
 export function useLogWorkout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { steps?: number; caloriesBurned?: number; distanceKm?: number; activeMinutes?: number }) => {
+    mutationFn: async (payload: { title?: string; steps?: number; caloriesBurned?: number; distanceKm?: number; activeMinutes?: number }) => {
       const { data } = await apiClient.post('/activity/log', payload);
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['activity'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateAll(queryClient);
+      triggerCelebration();
     },
   });
 }

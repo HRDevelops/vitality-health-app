@@ -18,3 +18,12 @@ export async function getPodcast(req: Request, res: Response) {
     res.status(404).json({ message: err.message });
   }
 }
+
+export async function logListen(req: Request, res: Response) {
+  try {
+    const result = await podcastService.logListen(req.params.id);
+    res.status(200).json(result);
+  } catch (err: any) {
+    res.status(404).json({ message: err.message });
+  }
+}

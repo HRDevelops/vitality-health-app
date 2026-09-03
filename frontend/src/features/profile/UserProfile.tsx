@@ -13,6 +13,8 @@ import SubscriptionPaywallModal from '../wellness/components/SubscriptionPaywall
 import AchievementsModal from './components/AchievementsModal';
 import HealthScoreModal from '../dashboard/components/HealthScoreModal';
 import NotificationsSheet from '../../components/ui/NotificationsSheet';
+import EditProfileModal from './components/EditProfileModal';
+import AppSettingsModal from './components/AppSettingsModal';
 
 export default function UserProfile() {
   const location = useLocation();
@@ -21,10 +23,17 @@ export default function UserProfile() {
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [appSettingsOpen, setAppSettingsOpen] = useState(false);
 
   useEffect(() => {
     if ((location.state as any)?.openWeightEdit) {
       setWeightModalOpen(true);
+    }
+    if ((location.state as any)?.scrollToLeaderboard) {
+      setTimeout(() => {
+        document.getElementById('friends-leaderboard-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
     }
   }, [location.state]);
 
@@ -59,6 +68,7 @@ export default function UserProfile() {
                   <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
                 </div>
                 <button
+                  onClick={() => setEditProfileOpen(true)}
                   className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface-container-lowest bg-primary text-on-primary shadow-md transition-opacity hover:opacity-90"
                   data-testid="profile-edit-avatar-button"
                 >
@@ -112,7 +122,11 @@ export default function UserProfile() {
               </div>
             </section>
 
-            {leaderboard && <LeaderboardCard entries={leaderboard} />}
+            {leaderboard && (
+              <div id="friends-leaderboard-section">
+                <LeaderboardCard entries={leaderboard} />
+              </div>
+            )}
             {reminders && <RemindersCard reminders={reminders} />}
 
             {!user.isPremium && (
@@ -165,6 +179,7 @@ export default function UserProfile() {
                   <ChevronRight size={18} className="text-outline" />
                 </button>
                 <button
+                  onClick={() => setAppSettingsOpen(true)}
                   className="flex items-center justify-between p-card-padding transition-colors hover:bg-surface-container/50"
                   data-testid="profile-settings-button"
                 >
@@ -194,6 +209,8 @@ export default function UserProfile() {
       {achievementsOpen && <AchievementsModal onClose={() => setAchievementsOpen(false)} />}
       {healthScoreModalOpen && user && <HealthScoreModal score={user.healthScore} onClose={() => setHealthScoreModalOpen(false)} />}
       {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
+      {editProfileOpen && user && <EditProfileModal user={user} onClose={() => setEditProfileOpen(false)} />}
+      {appSettingsOpen && <AppSettingsModal onClose={() => setAppSettingsOpen(false)} />}
     </div>
   );
 }

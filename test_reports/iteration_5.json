@@ -1,0 +1,33 @@
+{
+  "summary": "Iteration 5 — final polish pass. Backend 18/18 pytest passing (added test for new PUT /api/v1/user/profile which correctly persists name/heightCm/targetWeightKg). Frontend NEW features all verified on 390px viewport: (NEW1 Query Cache Sync) — Meal log via AddMealModal on /nutrition made dashboard CALORIES go 1235 -> 1685 (+450) after nav to /dashboard without reload; Add Drink via FAB action-add-drink made WATER go 1000ml -> 1250ml (+250); Update Weight via FAB action-update-weight made WEIGHT go 58.5 -> 59.2 kg; AddWorkoutModal (FAB -> action-add-workout -> preset-0 -> submit) made STEPS jump +2200; WorkoutDetailModal Begin Workout on /explore added +400 steps — all cache invalidations propagated across dashboard/activity/nutrition/user keys. (NEW2a Edit Profile) — profile-edit-avatar-button opens edit-profile-modal with name/height/target-weight inputs; PUT /user/profile succeeded and profile-name updated Grace -> 'Grace Test' immediately with height 167 cm reflected. (NEW2b App Settings) — profile-settings-button opens app-settings-modal; all 3 toggles (units/reminders/sound) visually flipped their pill state and persisted to localStorage keys vitality_use_imperial_units, vitality_daily_reminders, vitality_sound_effects. (NEW3 Mini Player) — Fixed a CSS positioning bug (see updated_files). After fix: mini-player hidden on /wellness/podcast, appears fully within 390px viewport on /dashboard, /explore, /activity, /profile with correct title 'Sleep With Me Bedtime Stories'; toggle-button flips lucide-pause <-> lucide-play; state syncs back to podcast daily-pick icon (paused mini => daily-pick shows play icon); close-button removes the mini entirely. Regression pass: AchievementsModal, HealthScoreModal (from profile), NotificationsSheet, Weekly Milestone banner all still open correctly. No console errors observed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "MiniPlayer", "issue": "FIXED by testing agent — @keyframes fade-slide-up sets `transform: translateY(0)` with animation-fill-mode:both which overrode the `-translate-x-1/2` utility, causing the mini-player to be offset +163px to the right (bbox x=195 width=358 on a 390px viewport, extending to x=553). Replaced centering with `left-4 right-4 mx-auto` in /app/frontend/src/core/components/MiniPlayer.tsx. Now bbox x=16 width=358 ending at 374 (fully within 390 viewport).", "selector": "[data-testid=\"mini-player\"]", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Main agent: consider a more general fix for the fade-slide-up keyframe collision — any other component using both `animate-fade-slide-up` and any translate utility (e.g., -translate-x-1/2 for centering) would suffer the same override. Options: (a) change keyframe end state to `transform: translate(var(--tw-translate-x,0), 0)` or (b) wrap the animated element in an outer positioner. Optional; current MiniPlayer fix uses left/right offsets so it no longer relies on translate."
+  ],
+  "critical_code_review_comments": [
+    "New backend PUT /api/v1/user/profile cleanly persists name/heightCm/targetWeightKg and the response object is used by the frontend to update the profile immediately.",
+    "AudioPlayerContext lifted into AppLayout is a good pattern — MindfulnessPodcast now correctly consumes shared state (isPlaying/currentTrack) so the play icon there reflects mini-player toggle changes.",
+    "MiniPlayer conditionally hidden on /wellness/podcast route is correct — avoids duplicate controls.",
+    "AppSettingsModal uses localStorage with sensible keys (vitality_*) and each Toggle has its own data-testid — matches spec (no backend call by design).",
+    "React Query mutations in user.ts/activity.ts/nutrition.ts uniformly invalidate ['dashboard'],['activity'],['nutrition'],['user'] keys — verified via 5 distinct write actions all reflecting on /dashboard without manual reload."
+  ],
+  "updated_files": [
+    "/app/frontend/src/core/components/MiniPlayer.tsx (fixed centering — replaced left-1/2 + -translate-x-1/2 with left-4 right-4 mx-auto to avoid keyframe transform override)",
+    "/app/backend/tests/backend_test.py (added test_user_update_profile_and_persist for new PUT /user/profile endpoint)"
+  ],
+  "success_rate": {"backend": "100% (18/18)", "frontend": "100% after 1 fix — 4/4 NEW features + 4/4 regression flows"},
+  "test_credentials": "None — no auth.",
+  "seed_data_creation": "None (used seeded Grace user; restored profile after edit).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "MiniPlayer positioning fix applied to /app/frontend/src/core/components/MiniPlayer.tsx. All 4 NEW features verified. Live data-testids: metric-card-{calories,weight,water,steps}, add-meal-modal + add-meal-food-name-input + add-meal-calories-input + add-meal-submit-button, meal-card-add-{breakfast,lunch,dinner,snack}, fab-add-button, action-{update-weight,add-drink,add-meal,add-workout,set-reminder}, add-workout-modal + add-workout-preset-0 + add-workout-submit-button, edit-profile-modal + edit-profile-{name,height,target-weight}-input + edit-profile-submit-button, app-settings-modal + settings-toggle-{units,reminders,sound}, mini-player + mini-player-title + mini-player-toggle-button + mini-player-close-button, nav-{home,explore,activity,profile}, podcast-daily-pick-play-button, workout-detail-modal + workout-detail-begin-button, explore-trending-{office-workout,abs-intermediate,cardio-blast}.",
+  "rca_of_the_issue": "MiniPlayer bug RCA: @keyframes fade-slide-up in /app/frontend/src/index.css declares `to { transform: translateY(0) }` and `.animate-fade-slide-up` uses `animation-fill-mode: both`, which sticks the element at that end-state transform, overriding Tailwind's `-translate-x-1/2` utility (which also compiles to a `transform`). This left the fixed-positioned mini-player at left:50% with no negative X shift, pushing it 163px to the right of the visible 390px viewport. Reproduction: play a podcast track then navigate to /dashboard on a 390px viewport — mini-player thumbnail appears near the right edge and the toggle/close buttons are off-screen. Mitigation applied: rewrote className to use `left-4 right-4 mx-auto max-w-[calc(28rem-2rem)]` so centering no longer depends on transforms; the keyframe animation now only affects opacity/Y offset. Verified new bbox {x:16, width:358} on 390px viewport."
+}

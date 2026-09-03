@@ -4,6 +4,7 @@ import TopBar from '../../core/components/TopBar';
 import { usePodcasts } from '../../services/api/podcasts';
 import { ListSkeleton } from '../../components/ui/Skeleton';
 import { Podcast } from '../../types/domain';
+import { useAudioPlayer } from '../../core/context/AudioPlayerContext';
 import SubscriptionPaywallModal from './components/SubscriptionPaywallModal';
 
 const categories = ['New', 'Now', 'Popular', 'Trending', 'Mindset', 'Sleep'];
@@ -21,7 +22,7 @@ export default function MindfulnessPodcast() {
   const { data: podcasts, isLoading } = usePodcasts();
   const [activeCategory, setActiveCategory] = useState('New');
   const [search, setSearch] = useState('');
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
   const [paywallOpen, setPaywallOpen] = useState(false);
 
   const dailyPick = podcasts?.find((p) => p.isDailyPick);
@@ -39,7 +40,7 @@ export default function MindfulnessPodcast() {
       setPaywallOpen(true);
       return;
     }
-    setPlayingId((current) => (current === track.id ? null : track.id));
+    playTrack(track);
   };
 
   return (
@@ -77,7 +78,7 @@ export default function MindfulnessPodcast() {
                 className="flex items-center gap-2 rounded-full bg-white/20 px-6 py-3 font-body-sm text-on-primary backdrop-blur-md transition-all hover:bg-white/30"
                 data-testid="podcast-daily-pick-play-button"
               >
-                {dailyPick && playingId === dailyPick.id ? <Pause size={18} /> : <Play size={18} />}
+                {dailyPick && currentTrack?.id === dailyPick.id && isPlaying ? <Pause size={18} /> : <Play size={18} />}
                 Let&apos;s start
               </button>
             </div>
@@ -149,7 +150,7 @@ export default function MindfulnessPodcast() {
                     alt={track.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  {playingId === track.id && (
+                  {currentTrack?.id === track.id && isPlaying && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                       <Pause size={28} className="text-white" />
                     </div>

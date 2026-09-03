@@ -98,6 +98,46 @@ def test_activity_water_no_500_on_invalid(client):
     assert r.status_code in (200, 201, 400), r.text
 
 
+# ---------- NEW: workout title + workouts array on daily ----------
+def test_activity_log_with_title_appears_in_daily_workouts(client):
+    title = "TEST_ pytest workout"
+    r = client.post(
+        f"{API}/activity/log",
+        json={"title": title, "activeMinutes": 12, "caloriesBurned": 90, "distanceKm": 1.5},
+        timeout=15,
+    )
+    assert r.status_code in (200, 201), r.text
+    body = r.json()
+    workouts = body.get("workouts") or []
+    assert any(w.get("title") == title for w in workouts), workouts
+    entry = [w for w in workouts if w.get("title") == title][-1]
+    assert entry.get("caloriesBurned") == 90
+    assert entry.get("activeMinutes") == 12
+
+    # daily should also expose workouts array
+    d = client.get(f"{API}/activity/daily", timeout=15).json()
+    assert isinstance(d.get("workouts"), list)
+    assert any(w.get("title") == title for w in d["workouts"])
+
+
+# ---------- NEW: podcast listen increments session counter ----------
+def test_podcast_listen_increments_counter(client):
+    plist = client.get(f"{API}/podcasts", timeout=15).json()
+    non_premium = [p for p in plist if not p.get("isPremium")]
+    assert non_premium, "No non-premium podcasts seeded"
+    pid = non_premium[0].get("id") or non_premium[0].get("_id")
+    before = client.get(f"{API}/user/profile", timeout=15).json().get("podcastSessionsCompleted", 0)
+    r = client.post(f"{API}/podcasts/{pid}/listen", json={}, timeout=15)
+    assert r.status_code in (200, 201), r.text
+    body = r.json()
+    assert "podcastSessionsCompleted" in body, body
+    assert body["podcastSessionsCompleted"] == before + 1
+    # profile reflects the increment
+    after = client.get(f"{API}/user/profile", timeout=15).json().get("podcastSessionsCompleted", 0)
+    assert after == before + 1
+
+
+
 
 # ---------- podcasts ----------
 def test_podcasts_list(client):
@@ -146,6 +186,20 @@ def test_user_reminders_list_and_toggle(client):
     original = reminders[0].get("enabled", True)
     tog = client.put(f"{API}/user/reminders/{rid}", json={"enabled": not original}, timeout=15)
     assert tog.status_code in (200, 204), tog.text
+
+
+def test_user_update_profile_and_persist(client):
+    """NEW: PUT /user/profile should update name/heightCm/targetWeightKg."""
+    payload = {"name": "Grace", "heightCm": 166, "targetWeightKg": 54.5}
+    r = client.put(f"{API}/user/profile", json=payload, timeout=15)
+    assert r.status_code in (200, 204), r.text
+    p = client.get(f"{API}/user/profile", timeout=15).json()
+    text = str(p)
+    assert "166" in text, f"heightCm not persisted: {p}"
+    assert "54.5" in text, f"targetWeightKg not persisted: {p}"
+    # restore
+    client.put(f"{API}/user/profile", json={"name": "Grace", "heightCm": 165, "targetWeightKg": 55}, timeout=15)
+
 
 
 # ---------- community ----------

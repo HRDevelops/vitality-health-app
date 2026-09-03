@@ -2,6 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 import { MealType, NutritionLogsResponse } from '../../types/domain';
 
+const SYNC_KEYS = ['dashboard', 'activity', 'nutrition', 'user'];
+
+function invalidateAll(queryClient: ReturnType<typeof useQueryClient>) {
+  SYNC_KEYS.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+}
+
 export function useNutritionLogs(date?: string) {
   return useQuery({
     queryKey: ['nutrition', 'logs', date ?? 'today'],
@@ -29,9 +35,6 @@ export function useCreateNutritionLog() {
       const { data } = await apiClient.post('/nutrition/logs', payload);
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['nutrition'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-    },
+    onSuccess: () => invalidateAll(queryClient),
   });
 }

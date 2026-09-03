@@ -13,6 +13,7 @@ export interface IUser extends Document {
   heightCm: number;
   age: number;
   isPremium: boolean;
+  podcastSessionsCompleted: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +33,7 @@ const UserSchema = new Schema<IUser>(
     heightCm: { type: Number, default: 165 },
     age: { type: Number, default: 24 },
     isPremium: { type: Boolean, default: false },
+    podcastSessionsCompleted: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

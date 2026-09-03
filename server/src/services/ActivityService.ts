@@ -22,6 +22,13 @@ export class ActivityService {
       activeMinutes: log?.activeMinutes ?? 0,
       waterMl: log?.waterMl ?? 0,
       waterGoalMl: log?.waterGoalMl ?? 2000,
+      workouts: (log?.workouts ?? []).map((w) => ({
+        title: w.title,
+        caloriesBurned: w.caloriesBurned,
+        activeMinutes: w.activeMinutes,
+        distanceKm: w.distanceKm,
+        loggedAt: w.loggedAt,
+      })),
     };
   }
 
@@ -58,16 +65,26 @@ export class ActivityService {
     return log;
   }
 
-  async logWorkout(payload: { steps?: number; caloriesBurned?: number; distanceKm?: number; activeMinutes?: number }) {
+  async logWorkout(payload: { title?: string; steps?: number; caloriesBurned?: number; distanceKm?: number; activeMinutes?: number }) {
     const user = await userRepository.findFirst();
     if (!user) throw new Error('No user found. Please run the seed script.');
     const logDate = todayString();
-    const log = await activityRepository.incrementFields(user.id, logDate, {
-      steps: payload.steps ?? 0,
-      caloriesBurned: payload.caloriesBurned ?? 0,
-      distanceKm: payload.distanceKm ?? 0,
-      activeMinutes: payload.activeMinutes ?? 0,
-    });
+    const log = await activityRepository.addWorkoutEntry(
+      user.id,
+      logDate,
+      {
+        title: payload.title ?? 'Workout',
+        caloriesBurned: payload.caloriesBurned ?? 0,
+        activeMinutes: payload.activeMinutes ?? 0,
+        distanceKm: payload.distanceKm ?? 0,
+      },
+      {
+        steps: payload.steps ?? 0,
+        caloriesBurned: payload.caloriesBurned ?? 0,
+        distanceKm: payload.distanceKm ?? 0,
+        activeMinutes: payload.activeMinutes ?? 0,
+      }
+    );
     return log;
   }
 }

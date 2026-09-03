@@ -56,8 +56,33 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   (Mongoose ValidationError not mapped to 400).
 - React Router v6 future-flag console warnings (cosmetic).
 
+## What's been implemented (as of 2026-09-03, session 2)
+- Notification Deep Links: tapping n1/n2/n3 in NotificationsSheet marks read, closes sheet,
+  and navigates: n1 -> /profile (auto-scrolls to #friends-leaderboard-section), n2 ->
+  /dashboard + opens Quick Actions modal, n3 -> /wellness/podcast.
+- Workout History: ActivityLog model gained `workouts` subdocument array (title,
+  caloriesBurned, activeMinutes, distanceKm, loggedAt). POST /activity/log now accepts
+  `title` and pushes an entry while incrementing daily aggregates in one write. Activity
+  Tracker screen shows a "Today's Workouts" section (cards or empty state) that
+  auto-refreshes via React Query invalidation.
+- Real Podcast Progress: User model gained `podcastSessionsCompleted` (seeded at 2). New
+  POST /podcasts/:id/listen increments it; AudioPlayerContext calls this on every new
+  track play. AchievementsModal's "Mindful Master" badge is now fully dynamic
+  (`min(count,3)/3`, unlocks at 3) instead of hardcoded "unlocked".
+- Confetti Moments: added `canvas-confetti` package + `/frontend/src/lib/celebration.ts`
+  (`triggerCelebration()`, 2s dual burst, brand palette). Wired into: workout logged
+  (always), water logged when crossing the 2000ml goal threshold, podcast session hitting
+  3/3, and AchievementsModal detecting a newly-unlocked badge (tracked via localStorage
+  key `vitality_unlocked_badges`) with a "🎉 Milestone Unlocked!" toast.
+- Verified Mini-Player positioning (bottom-20 left-4 right-4 z-50, truncate on title) was
+  already correct from prior session — no change needed, confirmed via testing_agent.
+- Tested via testing_agent (iteration_6): backend 20/20 pytest, frontend all 5 features
+  verified end-to-end. Fixed 1 minor cosmetic bug (uncapped "4/3" numerator after unlock).
+
 ## Backlog / next candidates
 - Map Mongoose ValidationErrors to 400 responses across controllers.
 - Opt into React Router v7 future flags.
-- Real achievements/health-score-history detail views (currently static placeholders).
+- Real health-score-history detail view (currently static placeholder).
 - App Settings screen content.
+- Consider making POST /podcasts/:id/listen idempotent per-track-per-day (currently
+  increments on every play click, not just unique sessions) — deferred, non-blocking.

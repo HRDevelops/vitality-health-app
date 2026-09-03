@@ -1,14 +1,20 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import BottomNav from './BottomNav';
+import MiniPlayer from './MiniPlayer';
 import { ActionModalProvider, useActionModal } from '../context/ActionModalContext';
+import { AudioPlayerProvider } from '../context/AudioPlayerContext';
 import AddActionModal from '../../features/actions/AddActionModal';
 import { ToastProvider } from '../../components/ui/ToastContext';
 
 function ShellContent() {
   const { isOpen, close } = useActionModal();
+  const location = useLocation();
+  const hideMiniPlayer = location.pathname === '/wellness/podcast';
+
   return (
     <div className="relative mx-auto min-h-screen w-full max-w-md overflow-x-hidden bg-background pb-20 shadow-2xl" data-testid="app-shell">
       <Outlet />
+      {!hideMiniPlayer && <MiniPlayer />}
       <BottomNav />
       {isOpen && <AddActionModal onClose={close} />}
     </div>
@@ -18,9 +24,11 @@ function ShellContent() {
 export default function AppLayout() {
   return (
     <ToastProvider>
-      <ActionModalProvider>
-        <ShellContent />
-      </ActionModalProvider>
+      <AudioPlayerProvider>
+        <ActionModalProvider>
+          <ShellContent />
+        </ActionModalProvider>
+      </AudioPlayerProvider>
     </ToastProvider>
   );
 }

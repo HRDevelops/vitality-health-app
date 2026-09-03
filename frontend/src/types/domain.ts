@@ -15,6 +15,14 @@ export interface DashboardMetrics {
   avatarUrl: string;
 }
 
+export interface WorkoutEntry {
+  title: string;
+  caloriesBurned: number;
+  activeMinutes: number;
+  distanceKm: number;
+  loggedAt: string;
+}
+
 export interface ActivityDaily {
   logDate: string;
   steps: number;
@@ -25,6 +33,7 @@ export interface ActivityDaily {
   activeMinutes: number;
   waterMl: number;
   waterGoalMl: number;
+  workouts: WorkoutEntry[];
 }
 
 export interface ActivityTrendPoint {
@@ -99,6 +108,7 @@ export interface UserProfile {
   heightCm: number;
   age: number;
   isPremium: boolean;
+  podcastSessionsCompleted: number;
 }
 
 export interface LeaderboardEntry {

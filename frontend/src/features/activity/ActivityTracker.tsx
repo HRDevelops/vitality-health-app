@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Footprints, Flame, MapPin, Clock } from 'lucide-react';
+import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2 } from 'lucide-react';
 import { useActivityDaily, useActivityTrends } from '../../services/api/activity';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
@@ -108,6 +108,42 @@ export default function ActivityTracker() {
                 </div>
                 <span className="font-label-bold text-label-bold text-on-surface">{daily.activeMinutes} min</span>
               </button>
+            </section>
+
+            <section className="flex flex-col gap-3" data-testid="todays-workouts-section">
+              <h3 className="font-headline-md text-headline-md text-on-surface">Today&apos;s Workouts</h3>
+              {daily.workouts.length === 0 ? (
+                <div
+                  className="rounded-2xl border border-dashed border-outline-variant/40 bg-surface-container-lowest p-6 text-center"
+                  data-testid="todays-workouts-empty-state"
+                >
+                  <p className="font-body-sm text-body-sm text-outline">No workouts logged yet today. Tap [+] to get started!</p>
+                </div>
+              ) : (
+                daily.workouts.map((w, i) => (
+                  <div
+                    key={`${w.title}-${w.loggedAt}-${i}`}
+                    data-testid={`todays-workout-item-${i}`}
+                    className="flex items-center gap-3 rounded-2xl bg-surface-container-lowest p-4 shadow-sm"
+                  >
+                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-container/20">
+                      <Dumbbell size={18} className="text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-body-lg text-body-lg font-semibold text-on-surface">{w.title}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="rounded-full bg-secondary-fixed/30 px-2 py-0.5 font-label-bold text-[10px] text-on-secondary-fixed-variant">
+                          {w.activeMinutes} mins
+                        </span>
+                        <span className="rounded-full bg-primary-fixed/30 px-2 py-0.5 font-label-bold text-[10px] text-primary">
+                          {w.caloriesBurned} kcal
+                        </span>
+                      </div>
+                    </div>
+                    <CheckCircle2 size={20} className="flex-shrink-0 text-primary" />
+                  </div>
+                ))
+              )}
             </section>
 
             <section className="relative overflow-hidden rounded-3xl bg-primary p-6 text-on-primary shadow-lg" data-testid="activity-trends-chart">

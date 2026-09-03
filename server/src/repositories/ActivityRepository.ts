@@ -40,6 +40,24 @@ export class ActivityRepository {
   async create(data: Partial<IActivityLog>): Promise<IActivityLog> {
     return ActivityLog.create(data);
   }
+
+  async addWorkoutEntry(
+    userId: string,
+    logDate: string,
+    entry: { title: string; caloriesBurned: number; activeMinutes: number; distanceKm: number },
+    increments: Partial<Pick<IActivityLog, 'steps' | 'caloriesBurned' | 'distanceKm' | 'activeMinutes'>>
+  ): Promise<IActivityLog> {
+    const doc = await ActivityLog.findOneAndUpdate(
+      { userId, logDate },
+      {
+        $inc: increments,
+        $push: { workouts: { ...entry, loggedAt: new Date() } },
+        $setOnInsert: { userId: new Types.ObjectId(userId), logDate },
+      },
+      { upsert: true, new: true }
+    ).exec();
+    return doc as IActivityLog;
+  }
 }
 
 export const activityRepository = new ActivityRepository();
