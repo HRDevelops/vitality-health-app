@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Sun, Droplet, Footprints, Scale } from 'lucide-react';
+import { Bell, Sun, Droplet, Footprints, Scale, Flame } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { useAuth } from '../../core/context/AuthContext';
@@ -89,6 +89,11 @@ export default function Dashboard() {
                 gradient="bg-gradient-to-br from-[#9b89f8] to-[#6d60e9]"
                 percent={Math.min(100, Math.round((data.caloriesConsumed / data.caloriesGoal) * 100))}
                 ringColor="#3ee5fe"
+                icon={
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-orange-500 shadow-md">
+                    <Flame size={20} className="text-white" />
+                  </div>
+                }
                 onClick={() => navigate('/nutrition')}
               />
               <MetricCard

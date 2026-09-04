@@ -52,6 +52,17 @@ export interface ActivityTrends {
   avgSteps: number;
 }
 
+export interface WaterTrendPoint {
+  date: string;
+  label: string;
+  waterMl: number;
+}
+
+export interface WaterTrend {
+  points: WaterTrendPoint[];
+  goalMl: number;
+}
+
 export interface NutritionLogItem {
   id: string;
   mealType: MealType;

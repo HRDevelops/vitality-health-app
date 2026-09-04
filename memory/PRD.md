@@ -241,3 +241,33 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   custom form). The Play/Pause "timer kept ticking" note was confirmed to be a
   Playwright force-click timing artifact, not a real bug (self-verified: pause
   correctly freezes the countdown).
+
+## What's been implemented (as of 2026-09-04, session 7 — 6 enhancements/polish)
+- Calorie MetricCard now has an amber/orange gradient Flame icon (was the only
+  metric card without one).
+- ActiveWorkoutModal timer wrapped in a circular SVG progress ring (teal→lavender
+  gradient stroke, `stroke-dashoffset` animated smoothly each second, no
+  rounding so it doesn't jump in whole-percent steps).
+- Custom Reminder Times: RemindersCard time is now a tap-to-edit `<input
+  type="time">` persisted to localStorage (`vitality_reminder_times`, id->time
+  map), overriding the seeded display time.
+- Podcast Resume Playback: `AudioPlayerContext` persists `currentTime` per track
+  to localStorage (`vitality_podcast_progress`) on every `timeupdate`, seeks
+  back to it when a track is re-selected, and both grid episode cards AND the
+  Daily Pick banner show a thin "% listened" progress bar (3% floor so tiny
+  amounts are still visible).
+- Hydration 7-Day Trend: new SVG `WaterTrendChart.tsx` in `LogWaterModal`
+  showing 7 daily bars vs. a dashed 2000ml goal line (met days darker). New
+  backend `GET /activity/water-trend` (`ActivityService.getWaterTrend`).
+- Workout History Detail: tapping a "Today's Workouts" item opens new
+  `WorkoutSummaryModal` (minutes/kcal/exertion-zone heuristic + 3-stage
+  Warm-up/Main/Cool-down breakdown proportional to activeMinutes).
+- **Bug found+fixed mid-session**: podcast play/pause toggle was broken on the
+  2nd click due to a React StrictMode double-invoke of an impure `setState`
+  functional updater (calling `setIsPlaying` as a side effect inside
+  `setCurrentTrack`'s updater — double-invoked in dev, netting no visible
+  toggle). Refactored `playTrack` to read `currentTrack` from closure instead.
+  Also fixed: workout list item was an invalid nested `<button>`-in-`<button>`
+  (now a `div role="button"`), and progress-bar rounding edge cases.
+- Tested via testing_agent (iteration_15 found 4 issues -> fixed -> iteration_16
+  retest 100% pass, 4/4 verified).

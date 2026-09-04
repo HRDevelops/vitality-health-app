@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Droplet } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { useDashboardMetrics } from '../../../services/api/dashboard';
-import { useLogWater } from '../../../services/api/activity';
+import { useLogWater, useWaterTrend } from '../../../services/api/activity';
 import { useUnits } from '../../../core/context/UnitsContext';
 import { useToast } from '../../../components/ui/ToastContext';
+import WaterTrendChart from './WaterTrendChart';
 
 interface LogWaterModalProps {
   onClose: () => void;
@@ -14,6 +15,7 @@ const QUICK_AMOUNTS_ML = [250, 500];
 
 export default function LogWaterModal({ onClose }: LogWaterModalProps) {
   const { data: metrics } = useDashboardMetrics();
+  const { data: waterTrend } = useWaterTrend();
   const logWater = useLogWater();
   const { formatVolume } = useUnits();
   const { showToast } = useToast();
@@ -73,6 +75,8 @@ export default function LogWaterModal({ onClose }: LogWaterModalProps) {
             );
           })}
         </div>
+
+        {waterTrend && <WaterTrendChart points={waterTrend.points} goalMl={waterTrend.goalMl} />}
       </div>
     </BottomSheet>
   );

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
-import { ActivityDaily, ActivityTrends } from '../../types/domain';
+import { ActivityDaily, ActivityTrends, WaterTrend } from '../../types/domain';
 import { triggerCelebration } from '../../lib/celebration';
 
 const SYNC_KEYS = ['dashboard', 'activity', 'nutrition', 'user'];
@@ -24,6 +24,16 @@ export function useActivityTrends(range: 'daily' | 'week' | 'month') {
     queryKey: ['activity', 'trends', range],
     queryFn: async () => {
       const { data } = await apiClient.get<ActivityTrends>('/activity/trends', { params: { range } });
+      return data;
+    },
+  });
+}
+
+export function useWaterTrend() {
+  return useQuery({
+    queryKey: ['activity', 'water-trend'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<WaterTrend>('/activity/water-trend');
       return data;
     },
   });

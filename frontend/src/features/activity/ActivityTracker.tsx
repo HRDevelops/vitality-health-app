@@ -9,6 +9,7 @@ import ProgressRing from '../../components/ui/ProgressRing';
 import ActivityInsightModal from './components/ActivityInsightModal';
 import AddWorkoutModal from './components/AddWorkoutModal';
 import ActivityTrendChart from './components/ActivityTrendChart';
+import WorkoutSummaryModal from './components/WorkoutSummaryModal';
 import { useToast } from '../../components/ui/ToastContext';
 import { WorkoutEntry } from '../../types/domain';
 
@@ -20,6 +21,7 @@ export default function ActivityTracker() {
   const [range, setRange] = useState<RangeOption>('daily');
   const [insightOpen, setInsightOpen] = useState(false);
   const [addWorkoutOpen, setAddWorkoutOpen] = useState(false);
+  const [summaryWorkout, setSummaryWorkout] = useState<WorkoutEntry | null>(null);
   const deleteWorkout = useDeleteWorkout();
   const logWorkout = useLogWorkout();
   const { showToast } = useToast();
@@ -162,8 +164,14 @@ export default function ActivityTracker() {
                 daily.workouts.map((w, i) => (
                   <div
                     key={w.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSummaryWorkout(w)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') setSummaryWorkout(w);
+                    }}
                     data-testid={`todays-workout-item-${i}`}
-                    className="flex items-center gap-3 rounded-2xl bg-surface-container-lowest p-4 shadow-sm"
+                    className="flex w-full cursor-pointer items-center gap-3 rounded-2xl bg-surface-container-lowest p-4 text-left shadow-sm transition-transform hover:scale-[0.99]"
                   >
                     <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-container/20">
                       <Dumbbell size={18} className="text-primary" />
@@ -181,7 +189,10 @@ export default function ActivityTracker() {
                     </div>
                     <CheckCircle2 size={20} className="flex-shrink-0 text-primary" />
                     <button
-                      onClick={() => handleDeleteWorkout(w)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteWorkout(w);
+                      }}
                       disabled={deleteWorkout.isPending}
                       className="flex-shrink-0 rounded-full p-1.5 text-outline-variant transition-colors hover:bg-error-container/40 hover:text-error disabled:opacity-50"
                       data-testid={`todays-workout-delete-${i}`}
@@ -219,6 +230,7 @@ export default function ActivityTracker() {
 
       {insightOpen && daily && <ActivityInsightModal daily={daily} trends={trends} onClose={() => setInsightOpen(false)} />}
       {addWorkoutOpen && <AddWorkoutModal onClose={() => setAddWorkoutOpen(false)} />}
+      {summaryWorkout && <WorkoutSummaryModal workout={summaryWorkout} onClose={() => setSummaryWorkout(null)} />}
     </div>
   );
 }

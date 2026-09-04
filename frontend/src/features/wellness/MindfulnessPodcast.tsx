@@ -23,7 +23,7 @@ export default function MindfulnessPodcast() {
   const [activeCategory, setActiveCategory] = useState('New');
   const [search, setSearch] = useState('');
   const [showAllWellness, setShowAllWellness] = useState(false);
-  const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
+  const { currentTrack, isPlaying, progressMap, playTrack } = useAudioPlayer();
   const [paywallOpen, setPaywallOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -104,6 +104,16 @@ export default function MindfulnessPodcast() {
                 Let&apos;s start
               </button>
             </div>
+            {dailyPick && (progressMap[dailyPick.id] ?? 0) > 0 && (
+              <div className="absolute inset-x-0 bottom-0 z-10 h-1.5 bg-black/20" data-testid={`podcast-progress-${dailyPick.id}`}>
+                <div
+                  className="h-full bg-white transition-all"
+                  style={{
+                    width: `${Math.max(3, Math.min(100, ((progressMap[dailyPick.id] ?? 0) / (dailyPick.durationMinutes * 60)) * 100))}%`,
+                  }}
+                />
+              </div>
+            )}
           </div>
         </section>
 
@@ -152,39 +162,48 @@ export default function MindfulnessPodcast() {
           )}
 
           <div className="mt-4 grid grid-cols-2 gap-gutter">
-            {trackList.map((track) => (
-              <button
-                key={track.id}
-                onClick={() => handleTrackClick(track)}
-                data-testid={`podcast-track-${track.id}`}
-                className="group flex h-full flex-col text-left"
-              >
-                <div className="relative mb-3 aspect-square overflow-hidden rounded bg-surface-container shadow-sm transition-shadow group-hover:shadow-md">
-                  <span className="absolute left-3 top-3 z-10 rounded-sm bg-white px-2 py-1 font-label-bold text-[10px] text-primary shadow-sm">
-                    {track.category}
-                  </span>
-                  {track.isPremium && (
-                    <span className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-inverse-surface text-inverse-on-surface shadow-sm">
-                      <Lock size={12} />
+            {trackList.map((track) => {
+              const listenedSeconds = progressMap[track.id] ?? 0;
+              const listenedPercent = Math.max(0, Math.min(100, (listenedSeconds / (track.durationMinutes * 60)) * 100));
+              return (
+                <button
+                  key={track.id}
+                  onClick={() => handleTrackClick(track)}
+                  data-testid={`podcast-track-${track.id}`}
+                  className="group flex h-full flex-col text-left"
+                >
+                  <div className="relative mb-3 aspect-square overflow-hidden rounded bg-surface-container shadow-sm transition-shadow group-hover:shadow-md">
+                    <span className="absolute left-3 top-3 z-10 rounded-sm bg-white px-2 py-1 font-label-bold text-[10px] text-primary shadow-sm">
+                      {track.category}
                     </span>
-                  )}
-                  <img
-                    src={track.imageUrl}
-                    alt={track.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {currentTrack?.id === track.id && isPlaying && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <Pause size={28} className="text-white" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-grow flex-col justify-between">
-                  <h4 className="mb-1 font-body-lg text-body-lg font-semibold leading-tight text-on-surface">{track.title}</h4>
-                  <p className="font-body-sm text-body-sm text-outline">{track.durationMinutes} minutes</p>
-                </div>
-              </button>
-            ))}
+                    {track.isPremium && (
+                      <span className="absolute right-3 top-3 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-inverse-surface text-inverse-on-surface shadow-sm">
+                        <Lock size={12} />
+                      </span>
+                    )}
+                    <img
+                      src={track.imageUrl}
+                      alt={track.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {currentTrack?.id === track.id && isPlaying && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <Pause size={28} className="text-white" />
+                      </div>
+                    )}
+                    {listenedPercent > 0 && (
+                      <div className="absolute inset-x-0 bottom-0 h-1.5 bg-black/20" data-testid={`podcast-progress-${track.id}`}>
+                        <div className="h-full bg-primary transition-all" style={{ width: `${Math.max(3, listenedPercent)}%` }} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-grow flex-col justify-between">
+                    <h4 className="mb-1 font-body-lg text-body-lg font-semibold leading-tight text-on-surface">{track.title}</h4>
+                    <p className="font-body-sm text-body-sm text-outline">{track.durationMinutes} minutes</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </section>
       </main>

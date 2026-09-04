@@ -5,29 +5,42 @@ import { useLogPodcastListen } from '../../services/api/podcasts';
 interface AudioPlayerContextValue {
   currentTrack: Podcast | null;
   isPlaying: boolean;
+  progressMap: Record<string, number>;
   playTrack: (track: Podcast) => void;
   togglePlayPause: () => void;
   closePlayer: () => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
+const PROGRESS_KEY = 'vitality_podcast_progress';
+
+function readProgress(): Record<string, number> {
+  try {
+    return JSON.parse(localStorage.getItem(PROGRESS_KEY) ?? '{}');
+  } catch {
+    return {};
+  }
+}
+
+function saveProgress(map: Record<string, number>) {
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify(map));
+}
 
 export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Podcast | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [progressMap, setProgressMap] = useState<Record<string, number>>(() => readProgress());
   const audioRef = useRef<HTMLAudioElement>(null);
   const logListen = useLogPodcastListen();
 
   const playTrack = (track: Podcast) => {
-    setCurrentTrack((current) => {
-      if (current?.id === track.id) {
-        setIsPlaying((p) => !p);
-        return current;
-      }
-      logListen.mutate(track.id);
-      setIsPlaying(true);
-      return track;
-    });
+    if (currentTrack?.id === track.id) {
+      setIsPlaying((p) => !p);
+      return;
+    }
+    logListen.mutate(track.id);
+    setCurrentTrack(track);
+    setIsPlaying(true);
   };
 
   const togglePlayPause = () => setIsPlaying((p) => !p);
@@ -42,6 +55,8 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     if (!audio || !currentTrack) return;
     if (!audio.src.includes(currentTrack.audioUrl)) {
       audio.src = currentTrack.audioUrl;
+      const saved = readProgress()[currentTrack.id];
+      if (saved) audio.currentTime = saved;
     }
     if (isPlaying) {
       audio.play().catch(() => setIsPlaying(false));
@@ -50,8 +65,23 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [currentTrack, isPlaying]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const handleTimeUpdate = () => {
+      if (!currentTrack) return;
+      setProgressMap((prev) => {
+        const updated = { ...prev, [currentTrack.id]: audio.currentTime };
+        saveProgress(updated);
+        return updated;
+      });
+    };
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    return () => audio.removeEventListener('timeupdate', handleTimeUpdate);
+  }, [currentTrack]);
+
   return (
-    <AudioPlayerContext.Provider value={{ currentTrack, isPlaying, playTrack, togglePlayPause, closePlayer }}>
+    <AudioPlayerContext.Provider value={{ currentTrack, isPlaying, progressMap, playTrack, togglePlayPause, closePlayer }}>
       {children}
       <audio ref={audioRef} onEnded={() => setIsPlaying(false)} data-testid="podcast-audio-element" />
     </AudioPlayerContext.Provider>

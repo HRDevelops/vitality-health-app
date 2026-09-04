@@ -88,6 +88,25 @@ export class ActivityService {
     return { range, points, totalSteps, avgSteps };
   }
 
+  async getWaterTrend() {
+    const user = await userRepository.findFirst();
+    if (!user) throw new Error('No user found. Please run the seed script.');
+    const end = todayString();
+    const dateList = lastNDates(7, end);
+    const logs = await activityRepository.findByDateRange(user.id, dateList[0], end);
+    const byDate = new Map(logs.map((l) => [l.logDate, l]));
+
+    const points = dateList.map((d) => ({
+      date: d,
+      label: weekdayLabel(d),
+      waterMl: byDate.get(d)?.waterMl ?? 0,
+    }));
+
+    const goalMl = byDate.get(end)?.waterGoalMl ?? 2000;
+
+    return { points, goalMl };
+  }
+
   async logWater(amountMl: number) {
     const user = await userRepository.findFirst();
     if (!user) throw new Error('No user found. Please run the seed script.');

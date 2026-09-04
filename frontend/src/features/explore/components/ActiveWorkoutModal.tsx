@@ -66,7 +66,10 @@ export default function ActiveWorkoutModal({ workout, onClose }: ActiveWorkoutMo
     if (elapsed < cumulative) break;
   }
 
-  const percentComplete = Math.min(100, Math.round((elapsed / totalSeconds) * 100));
+  const percentComplete = Math.min(100, (elapsed / totalSeconds) * 100);
+  const RADIUS = 90;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const strokeDashoffset = CIRCUMFERENCE * (1 - percentComplete / 100);
 
   const handleFinish = () => {
     setIsRunning(false);
@@ -88,12 +91,34 @@ export default function ActiveWorkoutModal({ workout, onClose }: ActiveWorkoutMo
     <BottomSheet title={workout.title} subtitle="Active Workout" onClose={onClose} testId="active-workout-modal-overlay">
       <div className="space-y-6" data-testid="active-workout-modal">
         <div className="flex flex-col items-center rounded-3xl bg-primary p-8 text-on-primary">
-          <p className="font-metric-display text-5xl font-bold" data-testid="active-workout-timer">
-            {formatTime(remaining)}
-          </p>
-          <p className="mt-1 font-body-sm text-body-sm opacity-80">remaining</p>
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/25">
-            <div className="h-full rounded-full bg-white transition-all" style={{ width: `${percentComplete}%` }} />
+          <div className="relative flex items-center justify-center" style={{ width: 220, height: 220 }} data-testid="active-workout-progress-ring">
+            <svg width={220} height={220} className="-rotate-90">
+              <defs>
+                <linearGradient id="workoutRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#28d9f3" />
+                  <stop offset="100%" stopColor="#c5b8ff" />
+                </linearGradient>
+              </defs>
+              <circle cx={110} cy={110} r={RADIUS} stroke="rgba(255,255,255,0.2)" strokeWidth={14} fill="none" />
+              <circle
+                cx={110}
+                cy={110}
+                r={RADIUS}
+                stroke="url(#workoutRingGradient)"
+                strokeWidth={14}
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray={CIRCUMFERENCE}
+                strokeDashoffset={strokeDashoffset}
+                style={{ transition: 'stroke-dashoffset 1s linear' }}
+              />
+            </svg>
+            <div className="absolute flex flex-col items-center">
+              <p className="font-metric-display text-5xl font-bold" data-testid="active-workout-timer">
+                {formatTime(remaining)}
+              </p>
+              <p className="mt-1 font-body-sm text-body-sm opacity-80">remaining</p>
+            </div>
           </div>
         </div>
 
