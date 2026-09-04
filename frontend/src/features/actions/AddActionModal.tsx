@@ -1,7 +1,5 @@
 import { Scale, Droplet, Utensils, Dumbbell, AlarmClock, ChevronRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useLogWater } from '../../services/api/activity';
-import { useToast } from '../../components/ui/ToastContext';
 
 interface AddActionModalProps {
   onClose: () => void;
@@ -9,8 +7,6 @@ interface AddActionModalProps {
 
 export default function AddActionModal({ onClose }: AddActionModalProps) {
   const navigate = useNavigate();
-  const { showToast } = useToast();
-  const logWater = useLogWater();
 
   const handleAddMeal = () => {
     onClose();
@@ -28,10 +24,8 @@ export default function AddActionModal({ onClose }: AddActionModalProps) {
   };
 
   const handleAddDrink = () => {
-    logWater.mutate(250, {
-      onSuccess: () => showToast('Hydration logged successfully!'),
-    });
     onClose();
+    navigate('/dashboard', { state: { openLogWater: true } });
   };
 
   const handleSetReminder = () => {

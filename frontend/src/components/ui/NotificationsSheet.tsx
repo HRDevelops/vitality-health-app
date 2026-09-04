@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, TrendingUp, Droplet, Headphones, CheckCheck } from 'lucide-react';
-import { useActionModal } from '../../core/context/ActionModalContext';
 
 interface NotificationsSheetProps {
   onClose: () => void;
@@ -16,7 +15,6 @@ const NOTIFICATIONS = [
 export default function NotificationsSheet({ onClose }: NotificationsSheetProps) {
   const [readIds, setReadIds] = useState<string[]>([]);
   const navigate = useNavigate();
-  const { open: openActionModal } = useActionModal();
 
   const handleNotificationClick = (id: string) => {
     setReadIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
@@ -24,8 +22,7 @@ export default function NotificationsSheet({ onClose }: NotificationsSheetProps)
     if (id === 'n1') {
       navigate('/profile', { state: { scrollToLeaderboard: true } });
     } else if (id === 'n2') {
-      navigate('/dashboard');
-      openActionModal();
+      navigate('/dashboard', { state: { openLogWater: true } });
     } else if (id === 'n3') {
       navigate('/wellness/podcast');
     }

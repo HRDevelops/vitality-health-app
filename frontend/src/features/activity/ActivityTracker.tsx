@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2, Trash2 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2, Trash2, ChevronLeft } from 'lucide-react';
 import { useActivityDaily, useActivityTrends, useDeleteWorkout, useLogWorkout } from '../../services/api/activity';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { useUnits } from '../../core/context/UnitsContext';
@@ -15,6 +15,7 @@ type RangeOption = 'daily' | 'week' | 'month';
 
 export default function ActivityTracker() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [range, setRange] = useState<RangeOption>('daily');
   const [insightOpen, setInsightOpen] = useState(false);
   const [addWorkoutOpen, setAddWorkoutOpen] = useState(false);
@@ -61,6 +62,14 @@ export default function ActivityTracker() {
     <div data-testid="activity-tracker-screen">
       <header className="sticky top-0 z-30 flex items-center justify-between bg-background px-container-margin py-4">
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate('/')}
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container"
+            data-testid="activity-back-button"
+            aria-label="Back to dashboard"
+          >
+            <ChevronLeft size={22} />
+          </button>
           {metrics?.avatarUrl && <img src={metrics.avatarUrl} alt="Profile" className="h-10 w-10 rounded-full object-cover" />}
           <h1 className="font-headline-md text-headline-md text-on-surface">Hi, {metrics?.greetingName ?? 'Grace'}</h1>
         </div>

@@ -11,6 +11,7 @@ import HealthScoreModal from './components/HealthScoreModal';
 import MetricCard from './components/MetricCard';
 import WeeklyRecapBanner from './components/WeeklyRecapBanner';
 import WeeklyDigestModal from './components/WeeklyDigestModal';
+import LogWaterModal from './components/LogWaterModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,10 +22,14 @@ export default function Dashboard() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
   const [weeklyDigestOpen, setWeeklyDigestOpen] = useState(false);
+  const [waterModalOpen, setWaterModalOpen] = useState(false);
 
   useEffect(() => {
     if ((location.state as any)?.openWeeklyDigest) {
       setWeeklyDigestOpen(true);
+    }
+    if ((location.state as any)?.openLogWater) {
+      setWaterModalOpen(true);
     }
   }, [location.state]);
 
@@ -108,7 +113,7 @@ export default function Dashboard() {
                 subtext="last update"
                 gradient="bg-gradient-to-br from-[#4db4ff] to-[#0089f2]"
                 icon={<Droplet size={40} className="opacity-90" />}
-                onClick={() => navigate('/nutrition')}
+                onClick={() => setWaterModalOpen(true)}
               />
               <MetricCard
                 testId="metric-card-steps"
@@ -129,6 +134,7 @@ export default function Dashboard() {
       {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
       {healthScoreModalOpen && data && <HealthScoreModal score={data.healthScore} onClose={() => setHealthScoreModalOpen(false)} />}
       {weeklyDigestOpen && <WeeklyDigestModal onClose={() => setWeeklyDigestOpen(false)} />}
+      {waterModalOpen && <LogWaterModal onClose={() => setWaterModalOpen(false)} />}
     </div>
   );
 }

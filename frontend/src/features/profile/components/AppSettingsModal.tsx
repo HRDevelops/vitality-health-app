@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import BottomSheet from '../../../components/ui/BottomSheet';
+import Toggle from '../../../components/ui/Toggle';
 import { useUnits, UnitSystem } from '../../../core/context/UnitsContext';
 
 interface AppSettingsModalProps {
@@ -11,20 +12,6 @@ const APP_VERSION = 'v1.2.0-emerge';
 function readSetting(key: string, fallback: boolean) {
   const stored = localStorage.getItem(key);
   return stored === null ? fallback : stored === 'true';
-}
-
-function Toggle({ checked, onChange, testId }: { checked: boolean; onChange: (v: boolean) => void; testId: string }) {
-  return (
-    <button
-      onClick={() => onChange(!checked)}
-      data-testid={testId}
-      role="switch"
-      aria-checked={checked}
-      className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-surface-variant'}`}
-    >
-      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0.5'}`} />
-    </button>
-  );
 }
 
 export default function AppSettingsModal({ onClose }: AppSettingsModalProps) {

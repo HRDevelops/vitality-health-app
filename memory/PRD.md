@@ -186,3 +186,19 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   test_health_score_history.py), frontend 100% (all 5 new features + full
   regression). Re-seeded DB after test (a nutrition log added during macro-badge
   testing was cleared via `npx ts-node src/seed.ts`).
+
+## What's been implemented (as of 2026-09-04, session 5 — UI/nav fixes)
+- Shared iOS-style `Toggle.tsx` component (`components/ui/Toggle.tsx`, role="switch"
+  + aria-checked, pill track/knob) now used by both AppSettingsModal and
+  RemindersCard (previously two slightly different inline toggle implementations).
+- Dedicated Hydration flow: new `LogWaterModal.tsx` (progress bar + +250ml/+500ml
+  quick-add buttons, unit-aware via `useUnits().formatVolume`). Dashboard's Water
+  MetricCard now opens this modal instead of navigating to `/nutrition`. Quick
+  Actions "Add Drink" and Notification n2 ("Hydration Alert") both now deep-link
+  to `/dashboard` + `location.state.openLogWater` to open the same modal (n2
+  previously opened the generic Quick Actions sheet — intentionally changed).
+- ActivityTracker header gained a `ChevronLeft` back button (`activity-back-
+  button`) navigating to `/`.
+- Tested via testing_agent (iteration_13): frontend 100% (7/7 flows, no backend
+  changes this round so backend not re-tested). No bugs found; Escape-to-close on
+  BottomSheet (already fixed in session 4) confirmed still present in code.

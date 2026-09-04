@@ -1,6 +1,7 @@
 import { BellRing } from 'lucide-react';
 import { Reminder } from '../../../types/domain';
 import { useToggleReminder } from '../../../services/api/reminders';
+import Toggle from '../../../components/ui/Toggle';
 
 interface RemindersCardProps {
   reminders: Reminder[];
@@ -27,17 +28,11 @@ export default function RemindersCard({ reminders }: RemindersCardProps) {
                 {reminder.subtitle} • {reminder.time}
               </p>
             </div>
-            <button
-              onClick={() => toggleReminder.mutate({ id: reminder.id, enabled: !reminder.enabled })}
-              data-testid={`reminder-toggle-${reminder.id}`}
-              className={`relative h-6 w-11 rounded-full transition-colors ${reminder.enabled ? 'bg-primary' : 'bg-surface-variant'}`}
-            >
-              <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                  reminder.enabled ? 'translate-x-5' : 'translate-x-0.5'
-                }`}
-              />
-            </button>
+            <Toggle
+              checked={reminder.enabled}
+              onChange={(enabled) => toggleReminder.mutate({ id: reminder.id, enabled })}
+              testId={`reminder-toggle-${reminder.id}`}
+            />
           </div>
         ))}
       </div>
