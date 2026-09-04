@@ -8,6 +8,7 @@ import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import ProgressRing from '../../components/ui/ProgressRing';
 import ActivityInsightModal from './components/ActivityInsightModal';
 import AddWorkoutModal from './components/AddWorkoutModal';
+import ActivityTrendChart from './components/ActivityTrendChart';
 import { useToast } from '../../components/ui/ToastContext';
 import { WorkoutEntry } from '../../types/domain';
 
@@ -31,10 +32,8 @@ export default function ActivityTracker() {
 
   const { data: daily, isLoading } = useActivityDaily();
   const { data: metrics } = useDashboardMetrics();
-  const { data: trends } = useActivityTrends(range === 'month' ? 'month' : 'week');
+  const { data: trends } = useActivityTrends(range);
   const { formatDistance } = useUnits();
-
-  const maxSteps = trends ? Math.max(...trends.points.map((p) => p.steps), 1) : 1;
 
   const handleDeleteWorkout = (workout: WorkoutEntry) => {
     deleteWorkout.mutate(workout.id, {
@@ -210,20 +209,8 @@ export default function ActivityTracker() {
                   </button>
                 ))}
               </div>
-              <div className="relative z-10 flex h-40 items-end justify-between gap-1 pb-2 pt-4">
-                {trends?.points.map((p) => (
-                  <div key={p.date} className="flex flex-1 flex-col items-center gap-2">
-                    <div
-                      className="w-full rounded-full bg-white/70 transition-all"
-                      style={{ height: `${Math.max(6, (p.steps / maxSteps) * 100)}%` }}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="relative z-10 mt-2 flex items-center justify-between px-2 font-label-bold text-label-bold text-primary-fixed-dim">
-                {trends?.points.map((p) => (
-                  <span key={p.date}>{p.label}</span>
-                ))}
+              <div className="relative z-10 pt-4">
+                <ActivityTrendChart points={trends?.points ?? []} />
               </div>
             </section>
           </>

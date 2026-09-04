@@ -1,6 +1,4 @@
 import BottomSheet from '../../../components/ui/BottomSheet';
-import { useLogWorkout } from '../../../services/api/activity';
-import { useToast } from '../../../components/ui/ToastContext';
 
 export interface WorkoutDetail {
   id: string;
@@ -15,21 +13,10 @@ export interface WorkoutDetail {
 interface WorkoutDetailModalProps {
   workout: WorkoutDetail;
   onClose: () => void;
+  onBegin: () => void;
 }
 
-export default function WorkoutDetailModal({ workout, onClose }: WorkoutDetailModalProps) {
-  const logWorkout = useLogWorkout();
-  const { showToast } = useToast();
-
-  const handleBegin = () => {
-    logWorkout.mutate(workout.logPayload, {
-      onSuccess: () => {
-        showToast(`${workout.title} logged!`);
-        onClose();
-      },
-    });
-  };
-
+export default function WorkoutDetailModal({ workout, onClose, onBegin }: WorkoutDetailModalProps) {
   return (
     <BottomSheet title={workout.title} subtitle={`${workout.difficulty} • ${workout.durationLabel}`} onClose={onClose} testId="workout-detail-modal-overlay">
       <div className="space-y-5" data-testid="workout-detail-modal">
@@ -57,12 +44,11 @@ export default function WorkoutDetailModal({ workout, onClose }: WorkoutDetailMo
           </div>
         </div>
         <button
-          onClick={handleBegin}
-          disabled={logWorkout.isPending}
-          className="w-full rounded-xl bg-primary py-4 font-headline-md text-sm text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50"
+          onClick={onBegin}
+          className="w-full rounded-xl bg-primary py-4 font-headline-md text-sm text-on-primary transition-opacity hover:opacity-90"
           data-testid="workout-detail-begin-button"
         >
-          {logWorkout.isPending ? 'Logging...' : 'Begin Workout'}
+          Begin Workout
         </button>
       </div>
     </BottomSheet>

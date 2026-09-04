@@ -19,7 +19,7 @@ export function useActivityDaily(date?: string) {
   });
 }
 
-export function useActivityTrends(range: 'week' | 'month') {
+export function useActivityTrends(range: 'daily' | 'week' | 'month') {
   return useQuery({
     queryKey: ['activity', 'trends', range],
     queryFn: async () => {

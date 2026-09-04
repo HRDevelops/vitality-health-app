@@ -46,7 +46,7 @@ export interface ActivityTrendPoint {
 }
 
 export interface ActivityTrends {
-  range: 'week' | 'month';
+  range: 'daily' | 'week' | 'month';
   points: ActivityTrendPoint[];
   totalSteps: number;
   avgSteps: number;
@@ -96,6 +96,8 @@ export interface Podcast {
   isPremium: boolean;
   isDailyPick: boolean;
   category: string;
+  tags: string[];
+  description: string;
 }
 
 export interface UserProfile {

@@ -11,6 +11,8 @@ export interface IPodcast extends Document {
   isPremium: boolean;
   isDailyPick: boolean;
   category: string;
+  tags: string[];
+  description: string;
 }
 
 const PodcastSchema = new Schema<IPodcast>(
@@ -23,6 +25,8 @@ const PodcastSchema = new Schema<IPodcast>(
     isPremium: { type: Boolean, default: false },
     isDailyPick: { type: Boolean, default: false },
     category: { type: String, default: 'Wellness' },
+    tags: { type: [String], default: [] },
+    description: { type: String, default: '' },
   },
   { timestamps: true }
 );

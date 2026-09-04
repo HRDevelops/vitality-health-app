@@ -14,7 +14,8 @@ export async function getDaily(req: Request, res: Response) {
 
 export async function getTrends(req: Request, res: Response) {
   try {
-    const range = (req.query.range as string) === 'month' ? 'month' : 'week';
+    const rangeParam = req.query.range as string;
+    const range = rangeParam === 'month' ? 'month' : rangeParam === 'daily' ? 'daily' : 'week';
     const data = await activityService.getTrends(range);
     res.json(data);
   } catch (err: any) {

@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Bell, Search, MoreHorizontal, Droplet, Apple, Leaf, Flower2, Utensils } from 'lucide-react';
+import { Bell, Search, MoreHorizontal, Droplet, Apple, Leaf, Flower2, Utensils, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import NotificationsSheet from '../../components/ui/NotificationsSheet';
 import WorkoutDetailModal, { WorkoutDetail } from './components/WorkoutDetailModal';
+import ActiveWorkoutModal from './components/ActiveWorkoutModal';
+import AllChallengesModal from './components/AllChallengesModal';
+import TopicIdeasModal from './components/TopicIdeasModal';
+import AllCategoriesModal, { CategoryItem } from './components/AllCategoriesModal';
 
 const trendingWorkouts: (WorkoutDetail & { meta: string; intensity: number; tags: string[]; image: string })[] = [
   {
@@ -60,13 +64,36 @@ const cardioChallenge: WorkoutDetail = {
   logPayload: { steps: 2500, caloriesBurned: 250, distanceKm: 2, activeMinutes: 20 },
 };
 
+const allChallenges: WorkoutDetail[] = [cardioChallenge, ...trendingWorkouts];
+
 const workoutCategories = ['All', 'Cardio', 'Office', 'Abs'];
 
-const topics = [
-  { id: 'nutrition', label: 'Nutrition', icon: Apple, bg: 'bg-error-container/50', fg: 'text-on-error-container', route: '/nutrition' },
-  { id: 'organic', label: 'Organic', icon: Leaf, bg: 'bg-tertiary-fixed/50', fg: 'text-on-tertiary-fixed', route: null },
-  { id: 'meditation', label: 'Meditation', icon: Flower2, bg: 'bg-secondary-fixed/50', fg: 'text-on-secondary-fixed', route: '/wellness/podcast' },
-  { id: 'snacks', label: 'Healthy Snacks Idea', icon: Utensils, bg: 'bg-primary-fixed/50', fg: 'text-on-primary-fixed', route: '/nutrition' },
+const ORGANIC_IDEAS = [
+  { name: 'Quinoa Power Bowl', detail: 'Quinoa, roasted veggies & tahini — 420 kcal' },
+  { name: 'Grilled Salmon & Greens', detail: 'Wild salmon, kale, lemon — 380 kcal' },
+  { name: 'Buddha Bowl', detail: 'Chickpeas, avocado, brown rice — 450 kcal' },
+  { name: 'Roasted Veggie Medley', detail: 'Seasonal organic vegetables — 210 kcal' },
+  { name: 'Avocado Toast', detail: 'Sourdough, avocado, seeds — 320 kcal' },
+];
+
+const SNACK_IDEAS = [
+  { name: 'Greek Yogurt Parfait', detail: 'Yogurt, berries & granola — 180 kcal' },
+  { name: 'Apple & Almond Butter', detail: 'Sliced apple with almond butter — 200 kcal' },
+  { name: 'Roasted Chickpeas', detail: 'Crunchy spiced chickpeas — 150 kcal' },
+  { name: 'Mixed Nuts', detail: 'Almonds, walnuts & cashews — 170 kcal' },
+  { name: 'Edamame', detail: 'Steamed, lightly salted — 120 kcal' },
+];
+
+const topics: CategoryItem[] = [
+  { id: 'nutrition', label: 'Nutrition', icon: Apple, bg: 'bg-error-container/50', fg: 'text-on-error-container' },
+  { id: 'organic', label: 'Organic', icon: Leaf, bg: 'bg-tertiary-fixed/50', fg: 'text-on-tertiary-fixed' },
+  { id: 'meditation', label: 'Meditation', icon: Flower2, bg: 'bg-secondary-fixed/50', fg: 'text-on-secondary-fixed' },
+  { id: 'snacks', label: 'Healthy Snacks Idea', icon: Utensils, bg: 'bg-primary-fixed/50', fg: 'text-on-primary-fixed' },
+];
+
+const extraCategories: CategoryItem[] = [
+  { id: 'hydration', label: 'Hydration', icon: Droplet, bg: 'bg-error-container/50', fg: 'text-on-error-container' },
+  { id: 'sleep', label: 'Sleep', icon: Moon, bg: 'bg-secondary-fixed/50', fg: 'text-on-secondary-fixed' },
 ];
 
 export default function ExploreFitness() {
@@ -75,6 +102,10 @@ export default function ExploreFitness() {
   const [search, setSearch] = useState('');
   const [activeWorkoutCategory, setActiveWorkoutCategory] = useState('All');
   const [selectedWorkout, setSelectedWorkout] = useState<WorkoutDetail | null>(null);
+  const [activeWorkout, setActiveWorkout] = useState<WorkoutDetail | null>(null);
+  const [allChallengesOpen, setAllChallengesOpen] = useState(false);
+  const [topicModal, setTopicModal] = useState<'organic' | 'snacks' | null>(null);
+  const [allCategoriesOpen, setAllCategoriesOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const filteredWorkouts = useMemo(() => {
@@ -85,6 +116,31 @@ export default function ExploreFitness() {
       return matchesCategory && matchesSearch;
     });
   }, [search, activeWorkoutCategory]);
+
+  const handleTopicAction = (id: string) => {
+    switch (id) {
+      case 'nutrition':
+        navigate('/nutrition');
+        break;
+      case 'organic':
+        setTopicModal('organic');
+        break;
+      case 'meditation':
+        navigate('/wellness/podcast');
+        break;
+      case 'snacks':
+        setTopicModal('snacks');
+        break;
+      case 'hydration':
+        navigate('/dashboard', { state: { openLogWater: true } });
+        break;
+      case 'sleep':
+        navigate('/wellness/podcast');
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div data-testid="explore-screen">
@@ -118,7 +174,11 @@ export default function ExploreFitness() {
         <section className="flex flex-col gap-4">
           <div className="flex items-end justify-between">
             <h2 className="font-headline-lg-mobile text-on-surface">Challenge</h2>
-            <button className="font-label-bold text-label-bold text-primary hover:opacity-80" data-testid="explore-challenge-see-all">
+            <button
+              onClick={() => setAllChallengesOpen(true)}
+              className="font-label-bold text-label-bold text-primary hover:opacity-80"
+              data-testid="explore-challenge-see-all"
+            >
               SEE ALL
             </button>
           </div>
@@ -212,7 +272,11 @@ export default function ExploreFitness() {
         <section className="flex flex-col gap-4">
           <div className="flex items-end justify-between">
             <h2 className="text-lg font-headline-md text-on-surface">Topics For You</h2>
-            <button className="text-outline-variant transition-colors hover:text-primary" data-testid="explore-topics-more">
+            <button
+              onClick={() => setAllCategoriesOpen(true)}
+              className="text-outline-variant transition-colors hover:text-primary"
+              data-testid="explore-topics-more"
+            >
               <MoreHorizontal size={20} />
             </button>
           </div>
@@ -220,12 +284,7 @@ export default function ExploreFitness() {
             {topics.map((t) => {
               const Icon = t.icon;
               return (
-                <button
-                  key={t.id}
-                  onClick={() => t.route && navigate(t.route)}
-                  data-testid={`explore-topic-${t.id}`}
-                  className="group flex flex-col items-center gap-2"
-                >
+                <button key={t.id} onClick={() => handleTopicAction(t.id)} data-testid={`explore-topic-${t.id}`} className="group flex flex-col items-center gap-2">
                   <div className={`flex h-14 w-14 items-center justify-center rounded-full shadow-sm transition-colors ${t.bg} ${t.fg}`}>
                     <Icon size={26} />
                   </div>
@@ -237,7 +296,43 @@ export default function ExploreFitness() {
         </section>
       </main>
 
-      {selectedWorkout && <WorkoutDetailModal workout={selectedWorkout} onClose={() => setSelectedWorkout(null)} />}
+      {selectedWorkout && (
+        <WorkoutDetailModal
+          workout={selectedWorkout}
+          onClose={() => setSelectedWorkout(null)}
+          onBegin={() => {
+            setActiveWorkout(selectedWorkout);
+            setSelectedWorkout(null);
+          }}
+        />
+      )}
+      {activeWorkout && <ActiveWorkoutModal workout={activeWorkout} onClose={() => setActiveWorkout(null)} />}
+      {allChallengesOpen && (
+        <AllChallengesModal
+          workouts={allChallenges}
+          onSelect={(w) => {
+            setSelectedWorkout(w);
+            setAllChallengesOpen(false);
+          }}
+          onClose={() => setAllChallengesOpen(false)}
+        />
+      )}
+      {topicModal === 'organic' && (
+        <TopicIdeasModal title="Organic Picks" subtitle="Clean, whole-food recipe ideas" items={ORGANIC_IDEAS} onClose={() => setTopicModal(null)} />
+      )}
+      {topicModal === 'snacks' && (
+        <TopicIdeasModal title="Healthy Snack Ideas" subtitle="Quick bites to keep you fueled" items={SNACK_IDEAS} onClose={() => setTopicModal(null)} />
+      )}
+      {allCategoriesOpen && (
+        <AllCategoriesModal
+          categories={[...topics, ...extraCategories]}
+          onSelect={(id) => {
+            setAllCategoriesOpen(false);
+            handleTopicAction(id);
+          }}
+          onClose={() => setAllCategoriesOpen(false)}
+        />
+      )}
       {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
     </div>
   );

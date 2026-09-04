@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
 import { Podcast } from '../../types/domain';
 import { useLogPodcastListen } from '../../services/api/podcasts';
 
@@ -15,6 +15,7 @@ const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
 export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Podcast | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const logListen = useLogPodcastListen();
 
   const playTrack = (track: Podcast) => {
@@ -36,9 +37,23 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     setIsPlaying(false);
   };
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentTrack) return;
+    if (!audio.src.includes(currentTrack.audioUrl)) {
+      audio.src = currentTrack.audioUrl;
+    }
+    if (isPlaying) {
+      audio.play().catch(() => setIsPlaying(false));
+    } else {
+      audio.pause();
+    }
+  }, [currentTrack, isPlaying]);
+
   return (
     <AudioPlayerContext.Provider value={{ currentTrack, isPlaying, playTrack, togglePlayPause, closePlayer }}>
       {children}
+      <audio ref={audioRef} onEnded={() => setIsPlaying(false)} data-testid="podcast-audio-element" />
     </AudioPlayerContext.Provider>
   );
 }

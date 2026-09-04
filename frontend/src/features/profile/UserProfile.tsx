@@ -42,6 +42,11 @@ export default function UserProfile() {
         document.getElementById('friends-leaderboard-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 300);
     }
+    if ((location.state as any)?.scrollToReminders) {
+      setTimeout(() => {
+        document.getElementById('reminders-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
   }, [location.state]);
 
   const { data: user, isLoading } = useUserProfile();
@@ -133,7 +138,11 @@ export default function UserProfile() {
                 <LeaderboardCard entries={leaderboard} />
               </div>
             )}
-            {reminders && <RemindersCard reminders={reminders} />}
+            {reminders && (
+              <div id="reminders-section">
+                <RemindersCard reminders={reminders} />
+              </div>
+            )}
 
             {!user.isPremium && (
               <section

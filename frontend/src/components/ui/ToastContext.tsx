@@ -41,7 +41,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       <div
-        className={`fixed bottom-28 left-1/2 z-[100] flex -translate-x-1/2 items-center gap-3 rounded-full bg-inverse-surface px-6 py-3 font-label-bold text-label-bold text-inverse-on-surface shadow-lg transition-all duration-300 ${
+        className={`fixed bottom-28 left-1/2 z-[55] flex -translate-x-1/2 items-center gap-3 rounded-full bg-inverse-surface px-6 py-3 font-label-bold text-label-bold text-inverse-on-surface shadow-lg transition-all duration-300 ${
           toast ? 'opacity-100 translate-y-0' : 'pointer-events-none opacity-0 translate-y-2'
         }`}
         data-testid="app-toast"

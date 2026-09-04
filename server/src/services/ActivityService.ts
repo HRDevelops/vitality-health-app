@@ -1,6 +1,14 @@
 import { userRepository } from '../repositories/UserRepository';
 import { activityRepository } from '../repositories/ActivityRepository';
-import { todayString, lastNDates, weekdayLabel } from '../utils/date';
+import { todayString, lastNDates, weekdayLabel, ordinalDayLabel } from '../utils/date';
+
+const HOURLY_WEIGHTS = [3, 5, 8, 10, 9, 6, 5, 7, 10, 13, 11, 8, 5];
+const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
+function hourLabel(hour: number): string {
+  if (hour === 12) return '12PM';
+  return hour > 12 ? `${hour - 12}PM` : `${hour}AM`;
+}
 
 export class ActivityService {
   async getDaily(date?: string) {
@@ -34,9 +42,30 @@ export class ActivityService {
     };
   }
 
-  async getTrends(range: 'week' | 'month') {
+  async getTrends(range: 'daily' | 'week' | 'month') {
     const user = await userRepository.findFirst();
     if (!user) throw new Error('No user found. Please run the seed script.');
+
+    if (range === 'daily') {
+      const today = todayString();
+      const log = await activityRepository.findByDate(user.id, today);
+      const totalSteps = log?.steps ?? 0;
+      const totalCalories = log?.caloriesBurned ?? 0;
+      const weightSum = HOURLY_WEIGHTS.reduce((a, b) => a + b, 0);
+
+      const points = HOURS.map((h, i) => ({
+        date: today,
+        label: hourLabel(h),
+        steps: Math.round((totalSteps * HOURLY_WEIGHTS[i]) / weightSum),
+        caloriesBurned: Math.round((totalCalories * HOURLY_WEIGHTS[i]) / weightSum),
+      }));
+
+      const totalStepsSum = points.reduce((s, p) => s + p.steps, 0);
+      const avgSteps = Math.round(totalStepsSum / points.length);
+
+      return { range, points, totalSteps: totalStepsSum, avgSteps };
+    }
+
     const days = range === 'month' ? 30 : 7;
     const end = todayString();
     const dateList = lastNDates(days, end);
@@ -47,7 +76,7 @@ export class ActivityService {
       const log = byDate.get(d);
       return {
         date: d,
-        label: weekdayLabel(d),
+        label: range === 'month' ? ordinalDayLabel(d) : weekdayLabel(d),
         steps: log?.steps ?? 0,
         caloriesBurned: log?.caloriesBurned ?? 0,
       };

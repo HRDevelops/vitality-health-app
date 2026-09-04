@@ -202,3 +202,42 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
 - Tested via testing_agent (iteration_13): frontend 100% (7/7 flows, no backend
   changes this round so backend not re-tested). No bugs found; Escape-to-close on
   BottomSheet (already fixed in session 4) confirmed still present in code.
+
+## What's been implemented (as of 2026-09-04, session 6 — 7 UI bugs/broken flows)
+- Toggle switches (Settings + Reminders): rewrote shared `Toggle.tsx` using the
+  robust `border-2 border-transparent` + `translate-x-0/5` pattern (no more
+  absolute-position edge-case clipping risk).
+- Explore screen: "SEE ALL" opens new `AllChallengesModal` (all 4 workouts) ->
+  `WorkoutDetailModal` -> "Begin Workout" now opens new `ActiveWorkoutModal`
+  (live MM:SS countdown, play/pause/stop, per-step highlight parsed from
+  workout.steps, "Finish Workout" logs + confetti + closes).
+- Topics For You: "Organic"/"Healthy Snacks Idea" open new `TopicIdeasModal`
+  (5 curated items each); "..." opens new `AllCategoriesModal` (6 tiles incl.
+  Hydration -> opens LogWaterModal, Sleep -> podcast screen).
+- Podcast screen: `AudioPlayerContext` now renders a real hidden `<audio>`
+  element and actually plays/pauses SoundHelix MP3 streams (previously UI-only
+  state, no real playback). Backend `Podcast` model gained `tags[]` +
+  `description`; category pills (New/Now/Popular/Trending) now filter by real
+  tags instead of matching everything; search now also matches description;
+  "See All" toggles bypassing the category filter; top-right search icon
+  scrolls to + focuses the search input.
+- Activity screen: **critical fix** — the step chart was completely invisible
+  (CSS percentage-height bug: bar height was a % of an auto-height flex
+  parent, which resolves to 0). Replaced with new SVG-based
+  `ActivityTrendChart.tsx` (visible bars + hover/tap tooltip) for all 3 ranges.
+  Backend `ActivityService.getTrends` now supports `range=daily` (13 synthetic
+  hourly points 8AM-8PM, deterministic weighted distribution of today's real
+  totals) and fixed the `month` label bug (was concatenated weekday abbrevs
+  like "ThuFriSat…" — now ordinal day-of-month labels like "6th","11th").
+- Quick Actions "Set Reminder" was dead code (passed unused `scrollToReminders`
+  state) — UserProfile.tsx now handles it and scrolls to `#reminders-section`.
+- `AddWorkoutModal` expanded from 3 to 7 presets (Walking, Outdoor Run, Gym
+  Strength Session, HIIT Cardio Blast, Vinyasa Yoga Flow, Cycling/Spin, Pilates
+  Core) + a "Custom Workout" accordion (title/duration/calories manual entry).
+- Tested via testing_agent (iteration_14): backend 100%, frontend 100% (7/7 bug
+  fixes verified + full regression). Fixed 1 minor cosmetic code-review note
+  post-test: lowered Toast z-index below BottomSheet's so reminder/hydration
+  toasts no longer visually overlap open modal content (e.g. AddWorkoutModal's
+  custom form). The Play/Pause "timer kept ticking" note was confirmed to be a
+  Playwright force-click timing artifact, not a real bug (self-verified: pause
+  correctly freezes the countdown).

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Play, Pause, Lock, Search } from 'lucide-react';
 import TopBar from '../../core/components/TopBar';
 import { usePodcasts } from '../../services/api/podcasts';
@@ -10,10 +10,10 @@ import SubscriptionPaywallModal from './components/SubscriptionPaywallModal';
 const categories = ['New', 'Now', 'Popular', 'Trending', 'Mindset', 'Sleep'];
 
 const CATEGORY_MATCHERS: Record<string, (p: Podcast) => boolean> = {
-  New: () => true,
-  Now: () => true,
-  Popular: () => true,
-  Trending: () => true,
+  New: (p) => p.tags?.includes('new'),
+  Now: (p) => p.tags?.includes('now'),
+  Popular: (p) => p.tags?.includes('popular'),
+  Trending: (p) => p.tags?.includes('trending'),
   Mindset: (p) => p.category.toLowerCase() === 'mindset',
   Sleep: (p) => p.category.toLowerCase() === 'sleep',
 };
@@ -22,8 +22,10 @@ export default function MindfulnessPodcast() {
   const { data: podcasts, isLoading } = usePodcasts();
   const [activeCategory, setActiveCategory] = useState('New');
   const [search, setSearch] = useState('');
+  const [showAllWellness, setShowAllWellness] = useState(false);
   const { currentTrack, isPlaying, playTrack } = useAudioPlayer();
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const dailyPick = podcasts?.find((p) => p.isDailyPick);
 
@@ -31,9 +33,15 @@ export default function MindfulnessPodcast() {
     const query = search.trim().toLowerCase();
     return (podcasts ?? [])
       .filter((p) => !p.isDailyPick)
-      .filter((p) => CATEGORY_MATCHERS[activeCategory](p))
-      .filter((p) => query === '' || p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
-  }, [podcasts, activeCategory, search]);
+      .filter((p) => showAllWellness || CATEGORY_MATCHERS[activeCategory](p))
+      .filter(
+        (p) =>
+          query === '' ||
+          p.title.toLowerCase().includes(query) ||
+          (p.description ?? '').toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query)
+      );
+  }, [podcasts, activeCategory, search, showAllWellness]);
 
   const handleTrackClick = (track: Podcast) => {
     if (track.isPremium) {
@@ -43,13 +51,27 @@ export default function MindfulnessPodcast() {
     playTrack(track);
   };
 
+  const handleSelectCategory = (c: string) => {
+    setActiveCategory(c);
+    setShowAllWellness(false);
+  };
+
+  const focusSearch = () => {
+    searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    searchInputRef.current?.focus();
+  };
+
   return (
     <div data-testid="mindfulness-podcast-screen">
       <TopBar
         title="Podcast"
         showBack
         rightSlot={
-          <button className="rounded-full p-2 text-primary transition-colors hover:bg-surface-variant" data-testid="podcast-search-button">
+          <button
+            onClick={focusSearch}
+            className="rounded-full p-2 text-primary transition-colors hover:bg-surface-variant"
+            data-testid="podcast-search-button"
+          >
             <Search size={20} />
           </button>
         }
@@ -88,14 +110,15 @@ export default function MindfulnessPodcast() {
         <section className="mb-section-gap">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-headline-md text-headline-md">Wellness</h3>
-            <button className="font-body-sm text-primary hover:underline" data-testid="podcast-see-all-button">
-              See All
+            <button onClick={() => setShowAllWellness((v) => !v)} className="font-body-sm text-primary hover:underline" data-testid="podcast-see-all-button">
+              {showAllWellness ? 'Show Less' : 'See All'}
             </button>
           </div>
 
           <div className="relative mb-4">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant" />
             <input
+              ref={searchInputRef}
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -109,10 +132,10 @@ export default function MindfulnessPodcast() {
             {categories.map((c) => (
               <button
                 key={c}
-                onClick={() => setActiveCategory(c)}
+                onClick={() => handleSelectCategory(c)}
                 data-testid={`podcast-category-${c.toLowerCase()}`}
                 className={`flex-shrink-0 whitespace-nowrap rounded-full px-5 py-2 font-body-sm transition-colors ${
-                  activeCategory === c ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-variant text-on-surface-variant hover:bg-surface-dim'
+                  !showAllWellness && activeCategory === c ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-variant text-on-surface-variant hover:bg-surface-dim'
                 }`}
               >
                 {c}
