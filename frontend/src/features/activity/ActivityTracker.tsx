@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2, Trash2 } from 'lucide-react';
 import { useActivityDaily, useActivityTrends, useDeleteWorkout, useLogWorkout } from '../../services/api/activity';
 import { useDashboardMetrics } from '../../services/api/dashboard';
+import { useUnits } from '../../core/context/UnitsContext';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import ProgressRing from '../../components/ui/ProgressRing';
 import ActivityInsightModal from './components/ActivityInsightModal';
@@ -30,6 +31,7 @@ export default function ActivityTracker() {
   const { data: daily, isLoading } = useActivityDaily();
   const { data: metrics } = useDashboardMetrics();
   const { data: trends } = useActivityTrends(range === 'month' ? 'month' : 'week');
+  const { formatDistance } = useUnits();
 
   const maxSteps = trends ? Math.max(...trends.points.map((p) => p.steps), 1) : 1;
 
@@ -123,7 +125,9 @@ export default function ActivityTracker() {
                 <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-container/20">
                   <MapPin size={20} className="text-primary" />
                 </div>
-                <span className="font-label-bold text-label-bold text-on-surface">{daily.distanceKm} km</span>
+                <span className="font-label-bold text-label-bold text-on-surface">
+                  {formatDistance(daily.distanceKm).value} {formatDistance(daily.distanceKm).unit}
+                </span>
               </button>
               <button
                 onClick={() => setInsightOpen(true)}

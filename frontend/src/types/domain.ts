@@ -143,3 +143,15 @@ export interface WeeklyDigest {
   podcastStreakCount: number;
   milestones: string[];
 }
+
+export interface HealthScoreHistoryPoint {
+  date: string;
+  label: string;
+  score: number;
+}
+
+export interface HealthScoreHistory {
+  range: 'week' | 'month';
+  points: HealthScoreHistoryPoint[];
+  average: number;
+}

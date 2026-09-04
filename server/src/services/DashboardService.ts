@@ -95,6 +95,34 @@ export class DashboardService {
       milestones,
     };
   }
+
+  async getHealthScoreHistory(range: 'week' | 'month') {
+    const user = await userRepository.findFirst();
+    if (!user) throw new Error('No user found. Please run the seed script.');
+
+    const days = range === 'month' ? 30 : 7;
+    const endDate = todayString();
+    const dateList = lastNDates(days, endDate);
+
+    const points = dateList.map((date, idx) => {
+      const isToday = idx === dateList.length - 1;
+      const score = isToday ? user.healthScore : this.seededScore(date, user.healthScore);
+      const d = new Date(`${date}T00:00:00.000Z`);
+      const label = range === 'month' ? `${d.getUTCMonth() + 1}/${d.getUTCDate()}` : weekdayLabel(date);
+      return { date, label, score };
+    });
+
+    const average = Math.round(points.reduce((sum, p) => sum + p.score, 0) / points.length);
+
+    return { range, points, average };
+  }
+
+  private seededScore(dateStr: string, baseScore: number) {
+    let hash = 0;
+    for (let i = 0; i < dateStr.length; i++) hash = (hash * 31 + dateStr.charCodeAt(i)) % 10000;
+    const offset = (hash % 9) - 4;
+    return Math.max(60, Math.min(98, baseScore + offset));
+  }
 }
 
 export const dashboardService = new DashboardService();

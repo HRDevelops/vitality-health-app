@@ -149,3 +149,40 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   podcast/auth. No critical or minor bugs; only a cosmetic toast-overlap note which
   was fixed post-test (see above, not re-tested but is a 1-line, low-risk timing
   change).
+
+## What's been implemented (as of 2026-09-04, session 4)
+- App Settings screen (AppSettingsModal): Units segmented control (Metric ↔
+  Imperial), backed by new `UnitsContext` (localStorage `vitality_unit_system`,
+  wrapped in main.tsx) exposing `formatWeight/formatDistance/formatVolume/
+  formatHeight` — wired into Dashboard weight/water MetricCards, ActivityTracker
+  distance tile, and UserProfile height/weight cards, all updating live. 3
+  notification toggles (Hydration Reminders, Workout Streaks, Weekly Digest
+  Nudges — localStorage `vitality_notif_hydration/streaks/weekly_digest`) +
+  "Vitality v1.2.0-emerge" version footer.
+- Health Score History: new backend `GET /dashboard/health-score-history?range=
+  week|month` (DashboardService.getHealthScoreHistory, deterministic seeded
+  pseudo-random walk ending at today's real healthScore — no new DB fields).
+  New `HealthScoreTrendChart.tsx` (hand-rolled SVG, Catmull-Rom smoothed line,
+  lavender→teal gradient fill, pointer-based hover/tap tooltip) rendered inside
+  HealthScoreModal with a Week/Month toggle above the existing breakdown bars.
+- Macro Balancer badge (AchievementsModal): now dynamically wired to today's
+  `useNutritionLogs().macroBreakdown` — ratio = min(carbs%,protein%,fat%)/100,
+  unlocked at ≥95% (same threshold pattern as other badges). Was previously
+  hardcoded `locked`; all 6 achievement badges are now fully dynamic.
+- Weekly Digest Sunday Nudge: new `WeeklyDigestNudge.tsx` (mounted in AppLayout)
+  fires an 8s-delayed toast on real Sundays (`getDay()===0`) or when
+  `localStorage.vitality_force_weekly_nudge==='true'` (demo/test override),
+  respecting the Settings toggle; "View" action deep-links to
+  `/dashboard` with `location.state.openWeeklyDigest` which Dashboard.tsx
+  consumes to auto-open WeeklyDigestModal. Dedup key per calendar day.
+  Also reused this deep-link pattern from a fresh `dashboard-weekly-recap-*`
+  reminder-nudge without extra plumbing.
+- Share on X: WeeklyDigestModal gained a second button (`weekly-digest-share-x-
+  button`) opening a prefilled `twitter.com/intent/tweet` Web Intent alongside
+  the existing clipboard/native-share "Share Digest" button.
+- Fixed 2 low-priority a11y/UX items testing_agent flagged: Settings toggles now
+  expose `role="switch"` + `aria-checked`; BottomSheet now closes on Escape key.
+- Tested via testing_agent (iteration_12): backend 46/46 pytest (added
+  test_health_score_history.py), frontend 100% (all 5 new features + full
+  regression). Re-seeded DB after test (a nutrition log added during macro-badge
+  testing was cleared via `npx ts-node src/seed.ts`).

@@ -4,6 +4,7 @@ import BottomSheet from '../../../components/ui/BottomSheet';
 import { useDashboardMetrics } from '../../../services/api/dashboard';
 import { useActivityTrends } from '../../../services/api/activity';
 import { useUserProfile } from '../../../services/api/user';
+import { useNutritionLogs } from '../../../services/api/nutrition';
 import { useToast } from '../../../components/ui/ToastContext';
 import { triggerCelebration } from '../../../lib/celebration';
 
@@ -20,11 +21,13 @@ const STATUS_STYLES: Record<BadgeStatus, { pill: string; iconWrap: string; label
 };
 
 const UNLOCKED_BADGES_STORAGE_KEY = 'vitality_unlocked_badges';
+const STREAK_BADGE_IDS = ['mindful-streak', '7-day-streak'];
 
 export default function AchievementsModal({ onClose }: AchievementsModalProps) {
   const { data: metrics } = useDashboardMetrics();
   const { data: trends } = useActivityTrends('week');
   const { data: user } = useUserProfile();
+  const { data: nutrition } = useNutritionLogs();
   const { showToast } = useToast();
 
   const steps = metrics?.steps ?? 0;
@@ -35,6 +38,8 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
   const totalDays = trends?.points.length ?? 7;
   const podcastSessions = user?.podcastSessionsCompleted ?? 0;
   const podcastStreak = user?.podcastStreakCount ?? 0;
+  const macro = nutrition?.macroBreakdown;
+  const macroRatio = macro ? Math.min(macro.carbs.percent, macro.protein.percent, macro.fat.percent) / 100 : 0;
   const PODCAST_GOAL = 3;
   const STREAK_GOAL = 3;
 
@@ -80,26 +85,30 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
       {
         id: 'macro-balancer',
         title: 'Macro Balancer',
-        subtitle: 'Log balanced macros for 3 days to unlock',
-        status: 'locked',
+        subtitle: macro
+          ? `Carbs ${Math.min(100, Math.round(macro.carbs.percent))}% · Protein ${Math.min(100, Math.round(macro.protein.percent))}% · Fat ${Math.min(100, Math.round(macro.fat.percent))}% of daily targets`
+          : 'Log balanced carbs, protein and fat today to unlock',
+        status: statusFor(macroRatio),
         icon: PieChart,
       },
     ],
-    [steps, stepsGoal, waterMl, waterGoalMl, podcastSessions, podcastStreak, daysLogged, totalDays]
+    [steps, stepsGoal, waterMl, waterGoalMl, podcastSessions, podcastStreak, daysLogged, totalDays, macro, macroRatio]
   );
 
   useEffect(() => {
-    if (!metrics || !trends || !user) return;
+    if (!metrics || !trends || !user || !nutrition) return;
     const unlockedNow = badges.filter((b) => b.status === 'unlocked').map((b) => b.id);
     const prevRaw = localStorage.getItem(UNLOCKED_BADGES_STORAGE_KEY);
     const prev: string[] = prevRaw ? JSON.parse(prevRaw) : [];
     const newlyUnlocked = unlockedNow.filter((id) => !prev.includes(id));
-    if (newlyUnlocked.length > 0) {
+    const streaksEnabled = localStorage.getItem('vitality_notif_streaks') !== 'false';
+    const notifiable = newlyUnlocked.filter((id) => streaksEnabled || !STREAK_BADGE_IDS.includes(id));
+    if (notifiable.length > 0) {
       triggerCelebration();
       showToast('🎉 Milestone Unlocked!');
     }
     localStorage.setItem(UNLOCKED_BADGES_STORAGE_KEY, JSON.stringify(unlockedNow));
-  }, [badges, metrics, trends, user]);
+  }, [badges, metrics, trends, user, nutrition]);
 
   return (
     <BottomSheet title="Achievements" subtitle="Your milestones so far" onClose={onClose} testId="achievements-modal-overlay">

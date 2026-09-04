@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 
 interface BottomSheetProps {
   title?: string;
@@ -10,6 +10,14 @@ interface BottomSheetProps {
 }
 
 export default function BottomSheet({ title, subtitle, onClose, children, testId }: BottomSheetProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-[60] flex items-end justify-center bg-[rgba(28,26,39,0.45)] backdrop-blur-sm animate-fade-in"

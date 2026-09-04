@@ -6,6 +6,7 @@ import { useUserProfile } from '../../services/api/user';
 import { useLeaderboard } from '../../services/api/community';
 import { useReminders } from '../../services/api/reminders';
 import { useAuth } from '../../core/context/AuthContext';
+import { useUnits } from '../../core/context/UnitsContext';
 import { ListSkeleton } from '../../components/ui/Skeleton';
 import LeaderboardCard from './components/LeaderboardCard';
 import RemindersCard from './components/RemindersCard';
@@ -22,6 +23,7 @@ export default function UserProfile() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { formatWeight, formatHeight } = useUnits();
   const [weightModalOpen, setWeightModalOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
@@ -99,9 +101,8 @@ export default function UserProfile() {
             <section className="grid grid-cols-3 gap-element-gap">
               <div className="flex flex-col items-center justify-center rounded-lg border border-outline-variant/20 bg-surface-container-lowest p-card-padding shadow-sm transition-transform hover:scale-[0.98]">
                 <Ruler size={26} className="mb-2 text-primary-container" />
-                <p className="font-metric-display text-metric-display text-on-surface">
-                  {user.heightCm}
-                  <span className="ml-1 font-body-sm text-body-sm text-outline">cm</span>
+                <p className="font-metric-display text-metric-display text-on-surface" data-testid="profile-height-value">
+                  {formatHeight(user.heightCm)}
                 </p>
                 <p className="mt-1 font-label-bold text-label-bold uppercase text-on-surface-variant">Height</p>
               </div>
@@ -112,8 +113,8 @@ export default function UserProfile() {
               >
                 <Weight size={26} className="mb-2 text-on-primary" />
                 <p className="font-metric-display text-metric-display text-on-primary">
-                  {user.currentWeightKg}
-                  <span className="ml-1 font-body-sm text-body-sm text-primary-fixed">kg</span>
+                  {formatWeight(user.currentWeightKg).value}
+                  <span className="ml-1 font-body-sm text-body-sm text-primary-fixed">{formatWeight(user.currentWeightKg).unit}</span>
                 </p>
                 <p className="mt-1 font-label-bold text-label-bold uppercase text-primary-fixed">Weight</p>
               </button>

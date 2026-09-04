@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bell, Sun, Droplet, Footprints, Scale } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { useAuth } from '../../core/context/AuthContext';
+import { useUnits } from '../../core/context/UnitsContext';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import NotificationsSheet from '../../components/ui/NotificationsSheet';
 import HealthScoreCard from './components/HealthScoreCard';
@@ -13,11 +14,19 @@ import WeeklyDigestModal from './components/WeeklyDigestModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { displayName } = useAuth();
+  const { formatWeight, formatVolume } = useUnits();
   const { data, isLoading, isError } = useDashboardMetrics();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
   const [weeklyDigestOpen, setWeeklyDigestOpen] = useState(false);
+
+  useEffect(() => {
+    if ((location.state as any)?.openWeeklyDigest) {
+      setWeeklyDigestOpen(true);
+    }
+  }, [location.state]);
 
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase();
 
@@ -80,8 +89,8 @@ export default function Dashboard() {
               <MetricCard
                 testId="metric-card-weight"
                 label="Weight"
-                value={String(data.weightKg)}
-                unit="kg"
+                value={formatWeight(data.weightKg).value}
+                unit={formatWeight(data.weightKg).unit}
                 subtext="last update"
                 gradient="bg-gradient-to-br from-[#b8a3ff] to-[#8d79fc]"
                 icon={
@@ -94,8 +103,8 @@ export default function Dashboard() {
               <MetricCard
                 testId="metric-card-water"
                 label="Water"
-                value={String(data.waterMl)}
-                unit="ml"
+                value={formatVolume(data.waterMl).value}
+                unit={formatVolume(data.waterMl).unit}
                 subtext="last update"
                 gradient="bg-gradient-to-br from-[#4db4ff] to-[#0089f2]"
                 icon={<Droplet size={40} className="opacity-90" />}

@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 12 verification of 5 new features + regression. BACKEND: 46/46 pytest passing (added test_health_score_history.py — week 7pts, month 30pts, deterministic, default=week). New endpoint GET /api/v1/dashboard/health-score-history returns 200 for both ranges. FRONTEND (all verified against public REACT_APP_BACKEND_URL): (1) App Settings modal opens from Profile, Units segmented control toggles metric<->imperial and immediately updates displays app-wide — Dashboard metric-card-weight switches to '127.9 lbs', metric-card-water to '25 oz', profile-height-value to 5'5\", profile-weight-card to 127.9 lbs, activity-tile-distance to '5.6 mi'; reverting to Metric restores kg/km/ml. localStorage keys vitality_unit_system/vitality_notif_hydration/vitality_notif_streaks/vitality_notif_weekly_digest all persist. Version footer reads 'Vitality v1.2.0-emerge'. (2) Health Score History chart renders inside HealthScoreModal from Profile 'Health Score History' — SVG chart present, Week (7-day avg 84/100) and Month (30-day avg 84/100) toggles switch data, hover tooltip shows date+score (e.g., '8/17 85'). (3) Macro Balancer badge: with no nutrition log today shows 'Locked' + subtitle 'Log balanced carbs, protein and fat today to unlock'; after POST /api/v1/nutrition/logs with mealType='BREAKFAST' foodName carbs=300 protein=200 fat=100 the badge live-updates to 'Unlocked' with subtitle 'Carbs 100% · Protein 100% · Fat 100% of daily targets' and Milestone Unlocked celebration fires. Other 5 badges (10k-club, hydration-hero, mindful-master, mindful-streak, 7-day-streak) still render with correct statuses. (4) Weekly Digest Sunday Nudge: with localStorage.vitality_force_weekly_nudge='true' and vitality_notif_weekly_digest='true', after ~9s an app-toast appears reading 'Your Weekly Digest is ready! Tap to view your wins.' with a 'View' action button; clicking action opens WeeklyDigestModal. With vitality_notif_weekly_digest='false' the nudge is correctly suppressed. Cleanup performed. (5) Share on X button present in Weekly Digest modal; clicking it calls window.open with 'https://twitter.com/intent/tweet?text=Crushed%2064%2C490%20steps%20and%204%20mindfulness%20sessions%20this%20week%20on%20%23VitalityApp!...' (contains steps count + #VitalityApp hashtag). Regression: Dashboard steps=11,690, Activity page loads OK.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "App Settings modal", "issues": ["The three notification toggle switches expose no aria-checked (or role=switch) attribute — DOM inspection returned aria-checked=None. Functional persistence works via localStorage but assistive-tech users can't determine on/off state. Consider adding role=switch + aria-checked."]},
+      {"screen": "Modals (HealthScoreModal, AchievementsModal, WeeklyDigestModal)", "issues": ["Pressing Escape does not close the BottomSheet modals — user must click the X button or backdrop. Minor UX consistency issue."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_health_score_history.py",
+    "/app/backend/tests/test_weekly_digest.py",
+    "/app/backend/tests/test_auth.py",
+    "/app/backend/tests/test_new_features.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_workout_delete.py",
+    "/app/test_reports/pytest/iteration_12.xml"
+  ],
+  "action_items": [
+    "Optional: add role=switch + aria-checked to Settings toggle components for a11y.",
+    "Optional: add Escape-to-close handler to BottomSheet (consistency with common modal patterns)."
+  ],
+  "critical_code_review_comments": [
+    "AchievementsModal.tsx: badges useMemo depends on `macro` (nutrition?.macroBreakdown). If the badges array is first computed before the useNutritionLogs query resolves, the subtitle falls back to the empty-state copy while status could later flip to Unlocked on next render — verified end-state renders correctly with 100/100/100 percentages after data lands, so no actual UI bug, but the initial 1-tick mismatch (subtitle=empty, status=Unlocked or vice-versa) is theoretically observable in a slow-network first paint. Consider gating the whole badge render on `nutrition` loaded.",
+    "New endpoint /api/v1/dashboard/health-score-history is unauthenticated (like all other /dashboard endpoints in this demo scope) — deterministic seeded pseudo-random walk confirmed (test_health_score_history_deterministic passes).",
+    "Share on X: buildTweetText correctly encodes steps count and #VitalityApp hashtag; window.open call verified via intercept."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_health_score_history.py (new)"
+  ],
+  "success_rate": { "backend": "100% (46/46)", "frontend": "100% (5/5 new features + regression)" },
+  "test_credentials": "Demo login via 'Continue as Grace' button on /login — no creds required.",
+  "seed_data_creation": "Posted 1 nutrition log for today (mealType=BREAKFAST, foodName='Test Meal', carbs=300g, protein=200g, fat=100g) to verify Macro Balancer 'Unlocked' path. Grace's today macroBreakdown now shows 100/100/100 (previous existing logs already contributed carbs=129g etc; after our POST totals became 429/234/130). To reset, re-seed via `cd /app/server && npx ts-node src/seed.ts`.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "For AchievementsModal macro-balancer badge test, wait ~2s after opening the modal so useNutritionLogs resolves before asserting subtitle contents (otherwise you'll see the empty-state copy on the first tick). Pressing Escape does NOT close the BottomSheet modals — click the X (svg.lucide-x) or overlay backdrop to close. Weekly Digest Sunday Nudge requires ~8-9s delay; use wait_for_timeout(11000) after setting vitality_force_weekly_nudge='true' + reloading. Grace's today nutrition includes an extra test log — re-seed if you need a clean 'Locked' state for the macro badge."
+}

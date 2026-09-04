@@ -1,4 +1,4 @@
-import { X, Footprints, Trophy, Flame, Moon, Sparkles, HeartPulse, Share2 } from 'lucide-react';
+import { X, Footprints, Trophy, Flame, Moon, Sparkles, HeartPulse, Share2, Twitter } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { useWeeklyDigest } from '../../../services/api/dashboard';
 import { useToast } from '../../../components/ui/ToastContext';
@@ -27,6 +27,10 @@ function buildShareText(data: WeeklyDigest) {
   ].join('\n');
 }
 
+function buildTweetText(data: WeeklyDigest) {
+  return `Crushed ${data.totalSteps.toLocaleString()} steps and ${data.podcastSessionsCompleted} mindfulness sessions this week on #VitalityApp! 🏃‍♀️✨`;
+}
+
 export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
   const { data, isLoading } = useWeeklyDigest();
   const { showToast } = useToast();
@@ -48,6 +52,12 @@ export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
     } catch {
       showToast('Unable to share right now.');
     }
+  };
+
+  const handleShareX = () => {
+    if (!data) return;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(buildTweetText(data))}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -128,6 +138,14 @@ export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
             >
               <Share2 size={16} />
               Share Digest
+            </button>
+            <button
+              onClick={handleShareX}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-black/25 py-3 font-label-bold text-label-bold text-on-primary transition-colors hover:bg-black/35"
+              data-testid="weekly-digest-share-x-button"
+            >
+              <Twitter size={16} />
+              Share on X
             </button>
           </div>
         )}
