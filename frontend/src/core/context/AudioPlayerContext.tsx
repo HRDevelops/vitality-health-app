@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useRef, useEffect, ReactNode } from 'react';
 import { Podcast } from '../../types/domain';
-import { useLogPodcastListen } from '../../services/api/podcasts';
+import { useLogPodcastListen, usePodcasts } from '../../services/api/podcasts';
 
 interface AudioPlayerContextValue {
   currentTrack: Podcast | null;
@@ -13,6 +13,7 @@ interface AudioPlayerContextValue {
 
 const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
 const PROGRESS_KEY = 'vitality_podcast_progress';
+const LAST_TRACK_KEY = 'vitality_last_podcast_track_id';
 
 function readProgress(): Record<string, number> {
   try {
@@ -32,6 +33,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const [progressMap, setProgressMap] = useState<Record<string, number>>(() => readProgress());
   const audioRef = useRef<HTMLAudioElement>(null);
   const logListen = useLogPodcastListen();
+  const { data: podcasts } = usePodcasts();
 
   const playTrack = (track: Podcast) => {
     if (currentTrack?.id === track.id) {
@@ -41,6 +43,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     logListen.mutate(track.id);
     setCurrentTrack(track);
     setIsPlaying(true);
+    localStorage.setItem(LAST_TRACK_KEY, track.id);
   };
 
   const togglePlayPause = () => setIsPlaying((p) => !p);
@@ -48,6 +51,20 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const closePlayer = () => {
     setCurrentTrack(null);
     setIsPlaying(false);
+  };
+
+  const handleEnded = () => {
+    if (!podcasts || !currentTrack) {
+      setIsPlaying(false);
+      return;
+    }
+    const currentIndex = podcasts.findIndex((p) => p.id === currentTrack.id);
+    const next = podcasts.slice(currentIndex + 1).find((p) => !p.isPremium);
+    if (next) {
+      playTrack(next);
+    } else {
+      setIsPlaying(false);
+    }
   };
 
   useEffect(() => {
@@ -83,7 +100,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   return (
     <AudioPlayerContext.Provider value={{ currentTrack, isPlaying, progressMap, playTrack, togglePlayPause, closePlayer }}>
       {children}
-      <audio ref={audioRef} onEnded={() => setIsPlaying(false)} data-testid="podcast-audio-element" />
+      <audio ref={audioRef} onEnded={handleEnded} data-testid="podcast-audio-element" />
     </AudioPlayerContext.Provider>
   );
 }
@@ -93,3 +110,4 @@ export function useAudioPlayer() {
   if (!ctx) throw new Error('useAudioPlayer must be used within AudioPlayerProvider');
   return ctx;
 }
+

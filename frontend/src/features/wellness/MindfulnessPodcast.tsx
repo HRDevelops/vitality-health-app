@@ -29,6 +29,14 @@ export default function MindfulnessPodcast() {
 
   const dailyPick = podcasts?.find((p) => p.isDailyPick);
 
+  const lastTrackId = localStorage.getItem('vitality_last_podcast_track_id');
+  const resumeTrack = podcasts?.find((p) => p.id === lastTrackId);
+  const resumeSeconds = resumeTrack ? progressMap[resumeTrack.id] ?? 0 : 0;
+  const resumeDurationSeconds = resumeTrack ? resumeTrack.durationMinutes * 60 : 0;
+  const resumeEligible = Boolean(
+    resumeTrack && currentTrack?.id !== resumeTrack.id && resumeSeconds > 5 && resumeSeconds < resumeDurationSeconds * 0.95
+  );
+
   const trackList = useMemo(() => {
     const query = search.trim().toLowerCase();
     return (podcasts ?? [])
@@ -118,6 +126,23 @@ export default function MindfulnessPodcast() {
         </section>
 
         <section className="mb-section-gap">
+          {resumeEligible && resumeTrack && (
+            <button
+              onClick={() => handleTrackClick(resumeTrack)}
+              data-testid="podcast-resume-chip"
+              className="mb-4 flex w-full items-center gap-3 rounded-full bg-primary-container px-4 py-3 text-left shadow-sm transition-transform hover:scale-[0.99]"
+            >
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
+                <Play size={16} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-body-sm text-body-sm font-semibold text-on-primary-container">Resume: {resumeTrack.title}</p>
+                <p className="font-label-bold text-[10px] uppercase text-on-primary-container/70">
+                  {Math.round((resumeSeconds / resumeDurationSeconds) * 100)}% listened
+                </p>
+              </div>
+            </button>
+          )}
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-headline-md text-headline-md">Wellness</h3>
             <button onClick={() => setShowAllWellness((v) => !v)} className="font-body-sm text-primary hover:underline" data-testid="podcast-see-all-button">

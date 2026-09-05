@@ -271,3 +271,17 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   (now a `div role="button"`), and progress-bar rounding edge cases.
 - Tested via testing_agent (iteration_15 found 4 issues -> fixed -> iteration_16
   retest 100% pass, 4/4 verified).
+
+## What's been implemented (as of 2026-09-05, session 8 — verify podcast resume/autoplay)
+- Verified the "Resume" Chip banner and "Autoplay Next" code left uncompiled/untested
+  at the end of session 7 (already present in `MindfulnessPodcast.tsx` /
+  `AudioPlayerContext.tsx`). Resume chip (data-testid `podcast-resume-chip`) shows
+  "Resume: <title>" + "% listened" above the Wellness section, only when a last-played
+  track exists, isn't the currently loaded track, and progress is >5s and <95% of
+  duration; tapping it seeks/resumes playback correctly. `handleEnded` in
+  AudioPlayerContext auto-advances to the next non-premium track in the podcasts list
+  when one finishes, and simply stops if the finished track was the last non-premium one.
+- `yarn typecheck` clean on both `/app/frontend` and `/app/server`, backend restarted.
+- Tested via testing_agent (iteration_17): frontend-only, 13/13 targeted assertions
+  passed (resume chip all eligibility branches, autoplay-next advance + stop-at-end,
+  regression on category filter/search/paywall/daily-pick/progress bars). No bugs found.
