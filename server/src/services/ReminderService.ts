@@ -8,8 +8,8 @@ export class ReminderService {
     return reminderRepository.findByUser(user.id);
   }
 
-  async toggle(id: string, enabled: boolean) {
-    const reminder = await reminderRepository.toggle(id, enabled);
+  async update(id: string, updates: { enabled?: boolean; time?: string }) {
+    const reminder = await reminderRepository.update(id, updates);
     if (!reminder) throw new Error('Reminder not found');
     return reminder;
   }

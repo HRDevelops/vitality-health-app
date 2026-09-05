@@ -17,12 +17,21 @@ export class UserRepository {
     return User.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
   }
 
-  async recordPodcastListen(id: string, streakCount: number, listenDate: string): Promise<IUser | null> {
+  async recordPodcastListen(id: string, streakCount: number, listenDate: string, consumeFreeze = false): Promise<IUser | null> {
+    const setFields: Record<string, unknown> = { podcastStreakCount: streakCount, lastListenDate: listenDate };
+    if (consumeFreeze) {
+      setFields.streakFreezeAvailable = false;
+      setFields.streakFreezeEquipped = false;
+    }
     return User.findByIdAndUpdate(
       id,
-      { $inc: { podcastSessionsCompleted: 1 }, $set: { podcastStreakCount: streakCount, lastListenDate: listenDate } },
+      { $inc: { podcastSessionsCompleted: 1 }, $set: setFields },
       { new: true }
     ).exec();
+  }
+
+  async setStreakFreezeEquipped(id: string, equipped: boolean): Promise<IUser | null> {
+    return User.findByIdAndUpdate(id, { streakFreezeEquipped: equipped }, { new: true }).exec();
   }
 }
 

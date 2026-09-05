@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Footprints, Flame, MapPin, Clock, Dumbbell, CheckCircle2, Trash2, ChevronLeft } from 'lucide-react';
-import { useActivityDaily, useActivityTrends, useDeleteWorkout, useLogWorkout } from '../../services/api/activity';
+import { useActivityDaily, useActivityTrends, useIntensityTrend, useDeleteWorkout, useLogWorkout } from '../../services/api/activity';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { useUnits } from '../../core/context/UnitsContext';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
@@ -9,6 +9,7 @@ import ProgressRing from '../../components/ui/ProgressRing';
 import ActivityInsightModal from './components/ActivityInsightModal';
 import AddWorkoutModal from './components/AddWorkoutModal';
 import ActivityTrendChart from './components/ActivityTrendChart';
+import WorkoutIntensityChart from './components/WorkoutIntensityChart';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal';
 import { useToast } from '../../components/ui/ToastContext';
 import { WorkoutEntry } from '../../types/domain';
@@ -35,6 +36,7 @@ export default function ActivityTracker() {
   const { data: daily, isLoading } = useActivityDaily();
   const { data: metrics } = useDashboardMetrics();
   const { data: trends } = useActivityTrends(range);
+  const { data: intensity } = useIntensityTrend();
   const { formatDistance } = useUnits();
 
   const handleDeleteWorkout = (workout: WorkoutEntry) => {
@@ -204,6 +206,8 @@ export default function ActivityTracker() {
                 ))
               )}
             </section>
+
+            {intensity && <WorkoutIntensityChart zones={intensity.zones} totalWorkouts={intensity.totalWorkouts} />}
 
             <section className="relative overflow-hidden rounded-3xl bg-primary p-6 text-on-primary shadow-lg" data-testid="activity-trends-chart">
               <div className="relative z-10 mb-6 flex items-center gap-4">

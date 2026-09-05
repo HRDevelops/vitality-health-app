@@ -16,6 +16,8 @@ export interface IUser extends Document {
   podcastSessionsCompleted: number;
   podcastStreakCount: number;
   lastListenDate: string | null;
+  streakFreezeAvailable: boolean;
+  streakFreezeEquipped: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +40,8 @@ const UserSchema = new Schema<IUser>(
     podcastSessionsCompleted: { type: Number, default: 0 },
     podcastStreakCount: { type: Number, default: 0 },
     lastListenDate: { type: String, default: null },
+    streakFreezeAvailable: { type: Boolean, default: true },
+    streakFreezeEquipped: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

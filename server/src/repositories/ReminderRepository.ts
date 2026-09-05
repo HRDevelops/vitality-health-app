@@ -5,8 +5,8 @@ export class ReminderRepository {
     return Reminder.find({ userId }).sort({ time: 1 }).exec();
   }
 
-  async toggle(id: string, enabled: boolean): Promise<IReminder | null> {
-    return Reminder.findByIdAndUpdate(id, { enabled }, { new: true }).exec();
+  async update(id: string, updates: Partial<Pick<IReminder, 'enabled' | 'time'>>): Promise<IReminder | null> {
+    return Reminder.findByIdAndUpdate(id, updates, { new: true, runValidators: true }).exec();
   }
 }
 

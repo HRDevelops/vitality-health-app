@@ -12,11 +12,11 @@ export function useReminders() {
   });
 }
 
-export function useToggleReminder() {
+export function useUpdateReminder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
-      const { data } = await apiClient.put(`/user/reminders/${id}`, { enabled });
+    mutationFn: async ({ id, enabled, time }: { id: string; enabled?: boolean; time?: string }) => {
+      const { data } = await apiClient.put(`/user/reminders/${id}`, { enabled, time });
       return data;
     },
     onSuccess: () => {

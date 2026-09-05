@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BellRing, Pencil } from 'lucide-react';
 import { Reminder } from '../../../types/domain';
-import { useToggleReminder } from '../../../services/api/reminders';
+import { useUpdateReminder } from '../../../services/api/reminders';
 import Toggle from '../../../components/ui/Toggle';
 
 interface RemindersCardProps {
@@ -19,7 +19,7 @@ function readCustomTimes(): Record<string, string> {
 }
 
 export default function RemindersCard({ reminders }: RemindersCardProps) {
-  const toggleReminder = useToggleReminder();
+  const updateReminder = useUpdateReminder();
   const [customTimes, setCustomTimes] = useState<Record<string, string>>(() => readCustomTimes());
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -28,6 +28,7 @@ export default function RemindersCard({ reminders }: RemindersCardProps) {
     const updated = { ...customTimes, [id]: value };
     setCustomTimes(updated);
     localStorage.setItem(TIME_STORAGE_KEY, JSON.stringify(updated));
+    updateReminder.mutate({ id, time: value });
   };
 
   return (
@@ -76,7 +77,7 @@ export default function RemindersCard({ reminders }: RemindersCardProps) {
               </div>
               <Toggle
                 checked={reminder.enabled}
-                onChange={(enabled) => toggleReminder.mutate({ id: reminder.id, enabled })}
+                onChange={(enabled) => updateReminder.mutate({ id: reminder.id, enabled })}
                 testId={`reminder-toggle-${reminder.id}`}
               />
             </div>

@@ -74,3 +74,23 @@ body {
 .animate-slide-in-right {
   animation: slide-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #weekly-digest-print-area,
+  #weekly-digest-print-area * {
+    visibility: visible;
+  }
+  #weekly-digest-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

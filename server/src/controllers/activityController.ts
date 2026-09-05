@@ -32,6 +32,15 @@ export async function getWaterTrend(req: Request, res: Response) {
   }
 }
 
+export async function getIntensityTrend(req: Request, res: Response) {
+  try {
+    const data = await activityService.getIntensityTrend();
+    res.json(data);
+  } catch (err: any) {
+    handleControllerError(err, res);
+  }
+}
+
 export async function logWater(req: Request, res: Response) {
   try {
     const amountMl = Number(req.body.amountMl ?? 250);

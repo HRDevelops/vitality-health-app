@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react';
-import { Trophy, Droplet, Headphones, Flame, PieChart, Moon } from 'lucide-react';
+import { Trophy, Droplet, Headphones, Flame, PieChart, Moon, Snowflake } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
+import Toggle from '../../../components/ui/Toggle';
 import { useDashboardMetrics } from '../../../services/api/dashboard';
 import { useActivityTrends } from '../../../services/api/activity';
-import { useUserProfile } from '../../../services/api/user';
+import { useUserProfile, useUpdateStreakFreeze } from '../../../services/api/user';
 import { useNutritionLogs } from '../../../services/api/nutrition';
 import { useToast } from '../../../components/ui/ToastContext';
 import { triggerCelebration } from '../../../lib/celebration';
@@ -29,6 +30,7 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
   const { data: user } = useUserProfile();
   const { data: nutrition } = useNutritionLogs();
   const { showToast } = useToast();
+  const updateStreakFreeze = useUpdateStreakFreeze();
 
   const steps = metrics?.steps ?? 0;
   const stepsGoal = metrics?.stepsGoal ?? 10000;
@@ -40,8 +42,17 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
   const podcastStreak = user?.podcastStreakCount ?? 0;
   const macro = nutrition?.macroBreakdown;
   const macroRatio = macro ? Math.min(macro.carbs.percent, macro.protein.percent, macro.fat.percent) / 100 : 0;
+  const streakFreezeAvailable = user?.streakFreezeAvailable ?? true;
+  const streakFreezeEquipped = user?.streakFreezeEquipped ?? false;
   const PODCAST_GOAL = 3;
   const STREAK_GOAL = 3;
+
+  const handleToggleFreeze = (equipped: boolean) => {
+    updateStreakFreeze.mutate(equipped, {
+      onSuccess: () =>
+        showToast(equipped ? '❄️ Streak Freeze equipped — one missed day is covered.' : 'Streak Freeze unequipped.'),
+    });
+  };
 
   const statusFor = (ratio: number): BadgeStatus => (ratio >= 0.95 ? 'unlocked' : ratio > 0 ? 'in-progress' : 'locked');
 
@@ -130,6 +141,20 @@ export default function AchievementsModal({ onClose }: AchievementsModalProps) {
               </div>
               <h4 className="mb-1 font-headline-md text-sm text-on-surface">{badge.title}</h4>
               <p className="font-body-sm text-[11px] text-on-surface-variant">{badge.subtitle}</p>
+              {badge.id === 'mindful-streak' && (
+                <div
+                  className="mt-3 flex w-full items-center justify-between gap-2 rounded-full bg-surface-container-lowest px-3 py-1.5"
+                  data-testid="streak-freeze-row"
+                >
+                  <div className="flex items-center gap-1.5 text-on-surface-variant">
+                    <Snowflake size={13} className={streakFreezeEquipped ? 'text-secondary' : ''} />
+                    <span className="font-label-bold text-[9px] uppercase" data-testid="streak-freeze-label">
+                      {streakFreezeAvailable ? 'Streak Freeze' : 'Freeze Used'}
+                    </span>
+                  </div>
+                  <Toggle checked={streakFreezeEquipped} onChange={handleToggleFreeze} disabled={!streakFreezeAvailable} testId="streak-freeze-toggle" />
+                </div>
+              )}
             </div>
           );
         })}

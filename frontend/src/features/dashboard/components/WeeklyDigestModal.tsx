@@ -1,4 +1,4 @@
-import { X, Footprints, Trophy, Flame, Moon, Sparkles, HeartPulse, Share2, Twitter } from 'lucide-react';
+import { X, Footprints, Trophy, Flame, Moon, Sparkles, HeartPulse, Share2, Twitter, Printer } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { useWeeklyDigest } from '../../../services/api/dashboard';
 import { useToast } from '../../../components/ui/ToastContext';
@@ -60,15 +60,20 @@ export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleDownloadPdf = () => {
+    window.print();
+  };
+
   return (
     <BottomSheet onClose={onClose} testId="weekly-digest-modal-overlay">
       <div
         className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-[#6d60e9] to-secondary-container p-6 text-on-primary shadow-glow"
         data-testid="weekly-digest-modal"
+        id="weekly-digest-print-area"
       >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/30"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/30 no-print"
           data-testid="weekly-digest-close-button"
           aria-label="Close"
         >
@@ -133,7 +138,7 @@ export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
 
             <button
               onClick={handleShare}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-white/20 py-3 font-label-bold text-label-bold text-on-primary transition-colors hover:bg-white/30"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-white/20 py-3 font-label-bold text-label-bold text-on-primary transition-colors hover:bg-white/30 no-print"
               data-testid="weekly-digest-share-button"
             >
               <Share2 size={16} />
@@ -141,11 +146,19 @@ export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
             </button>
             <button
               onClick={handleShareX}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-black/25 py-3 font-label-bold text-label-bold text-on-primary transition-colors hover:bg-black/35"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-black/25 py-3 font-label-bold text-label-bold text-on-primary transition-colors hover:bg-black/35 no-print"
               data-testid="weekly-digest-share-x-button"
             >
               <Twitter size={16} />
               Share on X
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-white/20 py-3 font-label-bold text-label-bold text-on-primary transition-colors hover:bg-white/30 no-print"
+              data-testid="weekly-digest-download-pdf-button"
+            >
+              <Printer size={16} />
+              Download PDF
             </button>
           </div>
         )}

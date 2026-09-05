@@ -125,6 +125,8 @@ export interface UserProfile {
   isPremium: boolean;
   podcastSessionsCompleted: number;
   podcastStreakCount: number;
+  streakFreezeAvailable: boolean;
+  streakFreezeEquipped: boolean;
 }
 
 export interface LeaderboardEntry {
@@ -167,4 +169,18 @@ export interface HealthScoreHistory {
   range: 'week' | 'month';
   points: HealthScoreHistoryPoint[];
   average: number;
+}
+
+export interface IntensityZone {
+  zone: 'light' | 'moderate' | 'hard' | 'peak';
+  label: string;
+  color: string;
+  minutes: number;
+  percent: number;
+}
+
+export interface IntensityTrend {
+  zones: IntensityZone[];
+  totalMinutes: number;
+  totalWorkouts: number;
 }

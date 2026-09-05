@@ -45,3 +45,14 @@ export function useUpdateProfile() {
     onSuccess: () => invalidateAll(queryClient),
   });
 }
+
+export function useUpdateStreakFreeze() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (equipped: boolean) => {
+      const { data } = await apiClient.put('/user/streak-freeze', { equipped });
+      return data;
+    },
+    onSuccess: () => invalidateAll(queryClient),
+  });
+}

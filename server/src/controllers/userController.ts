@@ -37,3 +37,16 @@ export async function updateProfile(req: Request, res: Response) {
     handleControllerError(err, res);
   }
 }
+
+export async function updateStreakFreeze(req: Request, res: Response) {
+  try {
+    const equipped = Boolean(req.body.equipped);
+    const user = await userService.setStreakFreezeEquipped(equipped);
+    res.json(user);
+  } catch (err: any) {
+    if (err.message === 'No Streak Freeze available to equip') {
+      return res.status(400).json({ message: err.message });
+    }
+    handleControllerError(err, res);
+  }
+}

@@ -21,18 +21,23 @@ export class PodcastService {
 
     const today = todayString();
     let streakCount: number;
+    let freezeConsumedNow = false;
     if (user.lastListenDate === today) {
       streakCount = user.podcastStreakCount;
     } else if (user.lastListenDate === addDaysString(today, -1)) {
       streakCount = user.podcastStreakCount + 1;
+    } else if (user.lastListenDate === addDaysString(today, -2) && user.streakFreezeEquipped && user.streakFreezeAvailable) {
+      streakCount = user.podcastStreakCount + 1;
+      freezeConsumedNow = true;
     } else {
       streakCount = 1;
     }
 
-    const updatedUser = await userRepository.recordPodcastListen(user.id, streakCount, today);
+    const updatedUser = await userRepository.recordPodcastListen(user.id, streakCount, today, freezeConsumedNow);
     return {
       podcastSessionsCompleted: updatedUser?.podcastSessionsCompleted ?? 0,
       podcastStreakCount: updatedUser?.podcastStreakCount ?? streakCount,
+      streakFreezeUsed: freezeConsumedNow,
     };
   }
 }

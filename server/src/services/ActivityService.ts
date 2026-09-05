@@ -5,6 +5,18 @@ import { todayString, lastNDates, weekdayLabel, ordinalDayLabel } from '../utils
 const HOURLY_WEIGHTS = [3, 5, 8, 10, 9, 6, 5, 7, 10, 13, 11, 8, 5];
 const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
+const INTENSITY_ZONES = [
+  { zone: 'light', label: 'Light', minRate: 0, maxRate: 3, color: '#c5c0ff' },
+  { zone: 'moderate', label: 'Moderate', minRate: 3, maxRate: 6, color: '#28d9f3' },
+  { zone: 'hard', label: 'Hard', minRate: 6, maxRate: 9, color: '#ffb77a' },
+  { zone: 'peak', label: 'Peak', minRate: 9, maxRate: Infinity, color: '#ba1a1a' },
+] as const;
+
+function classifyIntensityZone(caloriesBurned: number, activeMinutes: number) {
+  const rate = activeMinutes > 0 ? caloriesBurned / activeMinutes : 0;
+  return INTENSITY_ZONES.find((z) => rate >= z.minRate && rate < z.maxRate) ?? INTENSITY_ZONES[0];
+}
+
 function hourLabel(hour: number): string {
   if (hour === 12) return '12PM';
   return hour > 12 ? `${hour - 12}PM` : `${hour}AM`;
@@ -105,6 +117,35 @@ export class ActivityService {
     const goalMl = byDate.get(end)?.waterGoalMl ?? 2000;
 
     return { points, goalMl };
+  }
+
+  async getIntensityTrend() {
+    const user = await userRepository.findFirst();
+    if (!user) throw new Error('No user found. Please run the seed script.');
+    const end = todayString();
+    const dateList = lastNDates(7, end);
+    const logs = await activityRepository.findByDateRange(user.id, dateList[0], end);
+
+    const minutesByZone: Record<string, number> = { light: 0, moderate: 0, hard: 0, peak: 0 };
+    let totalWorkouts = 0;
+    for (const log of logs) {
+      for (const w of log.workouts) {
+        const zone = classifyIntensityZone(w.caloriesBurned, w.activeMinutes);
+        minutesByZone[zone.zone] += w.activeMinutes;
+        totalWorkouts += 1;
+      }
+    }
+
+    const totalMinutes = Object.values(minutesByZone).reduce((a, b) => a + b, 0);
+    const zones = INTENSITY_ZONES.map((z) => ({
+      zone: z.zone,
+      label: z.label,
+      color: z.color,
+      minutes: minutesByZone[z.zone],
+      percent: totalMinutes > 0 ? Math.round((minutesByZone[z.zone] / totalMinutes) * 100) : 0,
+    }));
+
+    return { zones, totalMinutes, totalWorkouts };
   }
 
   async logWater(amountMl: number) {

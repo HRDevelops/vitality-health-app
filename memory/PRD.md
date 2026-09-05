@@ -285,3 +285,33 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
 - Tested via testing_agent (iteration_17): frontend-only, 13/13 targeted assertions
   passed (resume chip all eligibility branches, autoplay-next advance + stop-at-end,
   regression on category filter/search/paywall/daily-pick/progress bars). No bugs found.
+
+## What's been implemented (as of 2026-09-05, session 9 — 4 feature enhancements)
+- Reminder Time Sync: `PUT /api/v1/user/reminders/:id` now accepts `{enabled?, time?}`
+  (was enabled-only). `RemindersCard.tsx` persists edited times to the backend on
+  blur/change (still caches to localStorage `vitality_reminder_times` as an offline
+  fallback), so custom times survive a fresh login/device instead of only living in
+  browser storage.
+- Weekly Digest PDF: `WeeklyDigestModal` gained a "Download PDF" button (Printer icon,
+  `weekly-digest-download-pdf-button`) calling `window.print()`. New `#weekly-digest-
+  print-area` + `.no-print` `@media print` rules in `index.css` hide the backdrop/close/
+  share buttons and print only the digest content.
+- Workout Intensity Chart: new backend `GET /api/v1/activity/intensity-trend`
+  (`ActivityService.getIntensityTrend`) aggregates all workouts logged in the last 7
+  days into 4 zones (Light <3, Moderate 3-6, Hard 6-9, Peak ≥9 kcal/min) by
+  activeMinutes. New `WorkoutIntensityChart.tsx` (segmented color bar + legend) renders
+  on the Activity screen below "Today's Workouts", with an empty state when no workouts
+  logged that week.
+- Streak Freeze: `User` model gained `streakFreezeAvailable` (default true, one token)
+  and `streakFreezeEquipped` (default false). New `PUT /api/v1/user/streak-freeze
+  {equipped}` (rejects equipping with 400 if no freeze available). `PodcastService.
+  logListen` now checks: if exactly 1 day was missed AND the freeze is equipped+
+  available, the streak continues (+1) and the freeze is consumed instead of resetting
+  to 1. `AchievementsModal`'s "Mindful Streak" badge card gained a Snowflake + toggle
+  row (`streak-freeze-toggle`) to equip/unequip, with a confirmation toast. `Toggle.tsx`
+  gained an optional `disabled` prop (used when freeze already consumed).
+- `yarn typecheck` clean on both `/app/frontend` and `/app/server` throughout.
+- Tested via testing_agent (iteration_18): backend 9/9 pytest (1 intentionally skipped,
+  requires DB manipulation to simulate missed-day), frontend 4/4 features verified E2E,
+  no critical/UI bugs. Fixed 1 minor issue post-test: `PUT /user/streak-freeze` now
+  returns 400 (was 500) when equipping while unavailable.

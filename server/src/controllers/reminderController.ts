@@ -10,9 +10,13 @@ export async function listReminders(req: Request, res: Response) {
   }
 }
 
-export async function toggleReminder(req: Request, res: Response) {
+export async function updateReminder(req: Request, res: Response) {
   try {
-    const reminder = await reminderService.toggle(req.params.id, Boolean(req.body.enabled));
+    const { enabled, time } = req.body;
+    const updates: { enabled?: boolean; time?: string } = {};
+    if (enabled !== undefined) updates.enabled = Boolean(enabled);
+    if (time !== undefined) updates.time = String(time);
+    const reminder = await reminderService.update(req.params.id, updates);
     res.json(reminder);
   } catch (err: any) {
     res.status(404).json({ message: err.message });

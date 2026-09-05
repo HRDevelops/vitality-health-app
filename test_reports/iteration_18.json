@@ -1,0 +1,36 @@
+{
+  "summary": "Full E2E verification of 4 new features. Backend: 9 pytest cases in test_iteration_18.py all pass (1 skipped for streak-freeze-unavailable case that requires DB manipulation). Frontend: all 4 features verified via Playwright with data-testid selectors. (1) Reminder time-sync: PUT /api/v1/user/reminders/:id fires with {time} on blur and {enabled} on toggle; time persists across hard reload. (2) Weekly Digest PDF button present with Printer icon next to Share Digest / Share on X; clicking invokes window.print() (verified via install-time spy); modal remains rendered after. (3) Workout Intensity Chart: empty state shows correct copy on 0 workouts; after logging Gym Strength Session (45min/250kcal -> 5.56 kcal/min -> moderate zone), chart shows Last 7 days · 1 workouts, segmented bar with segment-moderate=100%, and full legend (light 0m, moderate 45m, hard 0m, peak 0m). (4) Streak Freeze: toggle only present on mindful-streak badge (verified absent on 10k Club, Hydration Hero, Mindful Master, 7-Day Streak, Macro Balancer). Toggling calls PUT /api/v1/user/streak-freeze {equipped:true|false}; persists after close+reopen (verified aria-checked stays true); toast/text with 'freeze' shown. Backend intensity classification zones verified (light<3, moderate 3-6, hard 6-9, peak>=9 kcal/min).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "PUT /api/v1/user/streak-freeze", "issue": "When streakFreezeAvailable=false and client tries {equipped:true}, service throws error but controller returns HTTP 500 (via handleControllerError) instead of 400/409. Non-blocking as the negative case is only reachable after freeze consumption."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration_18.py",
+    "/app/test_reports/pytest/iteration_18.xml"
+  ],
+  "action_items": [
+    "(Optional) Return 400 (validation) rather than 500 from PUT /user/streak-freeze when equipping while unavailable."
+  ],
+  "critical_code_review_comments": [
+    "ActivityService.classifyIntensityZone uses caloriesBurned/activeMinutes correctly with 4 zones; falls back to light when activeMinutes=0 (rate=0) -- reasonable.",
+    "reminderController.updateReminder returns 404 on any thrown error which conflates 'not found' with other failures; acceptable for demo scope.",
+    "userService.setStreakFreezeEquipped correctly validates availability but error not mapped to proper HTTP status (see minor above)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration_18.py (new)"
+  ],
+  "success_rate": {"backend": "100% (9/9 passed, 1 skipped by design)", "frontend": "100% (4/4 features verified)"},
+  "test_credentials": "Any valid email + 6+ char password logs in as Grace; auto-auth on fresh load.",
+  "seed_data_creation": "Logged a Gym Strength Session workout during F3 test then deleted it. Reminder 'Log your meals' time restored to 08:00. Streak-freeze toggled ON then OFF (net unchanged).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 4 iteration-18 features working end-to-end. Test file test_iteration_18.py is idempotent (restores reminders, cleans workouts). REACT_APP_BACKEND_URL must be exported before running pytest. Workout modal FAB testid is 'fab-add-button'; achievements modal opened via 'profile-achievements-button'; weekly digest opened via 'dashboard-weekly-recap-view-digest'. Streak-freeze consumption on missed-day is server-only logic in PodcastService.logListen and not exercisable via UI without date manipulation.",
+  "rca of the issue": "N/A - no bugs found."
+}
