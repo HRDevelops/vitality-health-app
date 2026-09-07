@@ -33,6 +33,11 @@ export interface UpdateProfilePayload {
   name?: string;
   heightCm?: number;
   targetWeightKg?: number;
+  avatarUrl?: string;
+  stepGoal?: number;
+  waterGoal?: number;
+  calorieGoal?: number;
+  macros?: { protein?: number; carbs?: number; fat?: number };
 }
 
 export function useUpdateProfile() {

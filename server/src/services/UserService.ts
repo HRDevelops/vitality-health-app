@@ -13,7 +13,19 @@ export class UserService {
     return userRepository.updateWeight(user.id, weightKg);
   }
 
-  async updateProfile(userId: string, data: { name?: string; heightCm?: number; targetWeightKg?: number }) {
+  async updateProfile(
+    userId: string,
+    data: {
+      name?: string;
+      heightCm?: number;
+      targetWeightKg?: number;
+      avatarUrl?: string;
+      stepGoal?: number;
+      waterGoal?: number;
+      calorieGoal?: number;
+      macros?: { protein?: number; carbs?: number; fat?: number };
+    }
+  ) {
     const user = await userRepository.findById(userId);
     if (!user) throw new Error('User not found');
     return userRepository.updateProfile(user.id, data);

@@ -352,3 +352,39 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   flows (demo login, registration isolation, duplicate rejection, wrong password, Google/
   Apple social isolation + idempotency, Grace demo shortcut regression). No bugs found.
   Cleaned up all test-created accounts post-test; DB now contains only Grace.
+
+## What's been implemented (as of 2026-09-07, session 11 — leaderboard, profile goals, session expiry, forgot password)
+- **Dynamic leaderboard**: `CommunityService.getLeaderboard(userId)` merges the 4 static
+  friend records with the LIVE authenticated user's name/avatar/today's steps (no more
+  hardcoded Grace row in the seed), re-sorted by steps with fresh ranks. `(You)` badge/
+  highlight already existed in `LeaderboardCard.tsx` and now works for any account.
+  `/community` routes moved behind `requireAuth`.
+- **Per-user daily targets**: `User` model gained `stepGoal` (default 10000, Grace=15000),
+  `waterGoal` (ml, default 2000), `calorieGoal` (default 2000), `macros{protein,carbs,fat}`
+  grams (defaults 90/250/70), all editable via the existing `PUT /user/profile` (widened).
+  `ActivityService`, `DashboardService`, `NutritionService` now read these from the user
+  doc instead of hardcoded constants, so Dashboard rings/Activity progress/hydration goal
+  line/nutrition macro bars update immediately via react-query cache invalidation — no
+  reload needed. `EditProfileModal.tsx` gained an Avatar URL field + a "Daily Targets"
+  section (steps/water/calorie/macro goal inputs).
+- **Session expiry interceptor**: `apiClient` response interceptor clears `vitality_auth`
+  from localStorage and dispatches a `vitality:session-expired` custom event on any 401
+  from a protected endpoint (excludes login/register/social/demo/forgot-password/reset-
+  password so a wrong-password attempt shows the normal inline error, not this flow).
+  New `SessionExpiryHandler.tsx` (mounted in `App.tsx`) shows a toast ("Your session has
+  expired. Please sign in again.") and redirects to `/login`; `AuthContext` also listens
+  to clear its own state.
+- **Forgot/reset password**: real `POST /auth/forgot-password` (crypto random token, 1hr
+  expiry stored on the User doc, logged to console, returned directly in the response as
+  `resetToken` for self-service demo testing — no email enumeration leak for unknown
+  emails) and `POST /auth/reset-password` (validates token+expiry, bcrypt-hashes the new
+  password). `ForgotPasswordModal.tsx` rewritten as a 3-step flow: request email → token
+  pre-filled + copy button + new-password field → success. `resetPasswordToken`/
+  `resetPasswordExpires` stripped from all API responses (same toJSON transform as
+  `passwordHash`).
+- `yarn typecheck` clean on both frontend and server throughout. Tested via testing_agent
+  (iteration_20): backend 8/8 pytest, frontend all critical flows passing (leaderboard
+  merge + new-user isolation + 401-without-token, daily-targets live reflection across
+  Dashboard/Activity/Nutrition, session-expiry toast+redirect vs. wrong-password no-op,
+  full forgot/reset-password round trip incl. invalid-token error). No bugs found.
+  Test-created accounts purged via reseed; Grace restored to default seeded state.

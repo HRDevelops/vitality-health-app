@@ -17,8 +17,20 @@ export class UserRepository {
     return User.findByIdAndUpdate(id, { currentWeightKg: weightKg }, { new: true }).exec();
   }
 
-  async updateProfile(id: string, data: Partial<Pick<IUser, 'name' | 'heightCm' | 'targetWeightKg'>>): Promise<IUser | null> {
-    return User.findByIdAndUpdate(id, data, { new: true, runValidators: true }).exec();
+  async updateProfile(
+    id: string,
+    data: Partial<Pick<IUser, 'name' | 'heightCm' | 'targetWeightKg' | 'avatarUrl' | 'stepGoal' | 'waterGoal' | 'calorieGoal'>> & {
+      macros?: Partial<{ protein: number; carbs: number; fat: number }>;
+    }
+  ): Promise<IUser | null> {
+    const { macros, ...rest } = data;
+    const update: Record<string, unknown> = { ...rest };
+    if (macros) {
+      for (const [key, value] of Object.entries(macros)) {
+        if (value !== undefined) update[`macros.${key}`] = value;
+      }
+    }
+    return User.findByIdAndUpdate(id, update, { new: true, runValidators: true }).exec();
   }
 
   async recordPodcastListen(id: string, streakCount: number, listenDate: string, consumeFreeze = false): Promise<IUser | null> {
@@ -36,6 +48,18 @@ export class UserRepository {
 
   async setStreakFreezeEquipped(id: string, equipped: boolean): Promise<IUser | null> {
     return User.findByIdAndUpdate(id, { streakFreezeEquipped: equipped }, { new: true }).exec();
+  }
+
+  async setResetToken(id: string, token: string, expires: Date): Promise<void> {
+    await User.findByIdAndUpdate(id, { resetPasswordToken: token, resetPasswordExpires: expires }).exec();
+  }
+
+  async findByResetToken(token: string): Promise<IUser | null> {
+    return User.findOne({ resetPasswordToken: token }).exec();
+  }
+
+  async resetPassword(id: string, passwordHash: string): Promise<void> {
+    await User.findByIdAndUpdate(id, { passwordHash, resetPasswordToken: null, resetPasswordExpires: null }).exec();
   }
 }
 

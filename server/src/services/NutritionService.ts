@@ -3,7 +3,6 @@ import { nutritionRepository } from '../repositories/NutritionRepository';
 import { INutritionLog, MealType } from '../models/NutritionLog';
 import { todayString } from '../utils/date';
 
-const MACRO_GOALS = { carbsGrams: 250, proteinGrams: 90, fatGrams: 70 };
 const CALORIE_GOAL_PER_MEAL = 450;
 
 export class NutritionService {
@@ -40,9 +39,9 @@ export class NutritionService {
     );
 
     const macroBreakdown = {
-      carbs: { grams: totals.carbsGrams, goalGrams: MACRO_GOALS.carbsGrams, percent: Math.min(100, Math.round((totals.carbsGrams / MACRO_GOALS.carbsGrams) * 100)) },
-      protein: { grams: totals.proteinGrams, goalGrams: MACRO_GOALS.proteinGrams, percent: Math.min(100, Math.round((totals.proteinGrams / MACRO_GOALS.proteinGrams) * 100)) },
-      fat: { grams: totals.fatGrams, goalGrams: MACRO_GOALS.fatGrams, percent: Math.min(100, Math.round((totals.fatGrams / MACRO_GOALS.fatGrams) * 100)) },
+      carbs: { grams: totals.carbsGrams, goalGrams: user.macros.carbs, percent: Math.min(100, Math.round((totals.carbsGrams / user.macros.carbs) * 100)) },
+      protein: { grams: totals.proteinGrams, goalGrams: user.macros.protein, percent: Math.min(100, Math.round((totals.proteinGrams / user.macros.protein) * 100)) },
+      fat: { grams: totals.fatGrams, goalGrams: user.macros.fat, percent: Math.min(100, Math.round((totals.fatGrams / user.macros.fat) * 100)) },
     };
 
     return { logDate, meals: mealSummaries, totals, macroBreakdown };

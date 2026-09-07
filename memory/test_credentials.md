@@ -26,10 +26,25 @@ fully isolated (own steps, water, workouts, nutrition, streaks, reminders).
 
 ### General
 - `POST /api/v1/auth/login` checks bcrypt hash against ANY registered email.
-- All `/api/v1/{dashboard,activity,nutrition,user}/*` routes require
+- All `/api/v1/{dashboard,activity,nutrition,user,community}/*` routes require
   `Authorization: Bearer <token>` (401 without it). `/api/v1/podcasts` list/detail are
   public; `POST /podcasts/:id/listen` requires auth.
 - Seed script: `cd /app/server && npx ts-node src/seed.ts` (re-seeds ONLY Grace + her
   7-day activity logs/meals/podcasts/leaderboard/reminders — does not affect other
   registered users, but re-running will wipe ALL collections including other test users
   since it clears the full DB first).
+
+### Per-user daily targets (session 11)
+- Grace: stepGoal 15000, waterGoal 2000ml, calorieGoal 2000, macros protein/carbs/fat
+  90/250/70g (all editable via Profile > pencil icon > Edit Profile modal).
+- New/social accounts get the schema defaults (stepGoal 10000, same water/calorie/macros).
+
+### Forgot / reset password (session 11)
+- `POST /api/v1/auth/forgot-password {email}` returns `{message, resetToken}` if the
+  email exists (token also logged to server console), or just `{message}` if not (no
+  enumeration leak).
+- `POST /api/v1/auth/reset-password {token, newPassword}` sets the new bcrypt password
+  hash; 400 on invalid/expired token. Frontend modal auto-fills the token for one-flow
+  demo testing.
+- Session-expiry: any 401 on a protected route (not login/register/social/demo/forgot-
+  password/reset-password) clears localStorage and redirects to `/login` with a toast.

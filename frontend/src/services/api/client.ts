@@ -21,3 +21,21 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+const AUTH_ENDPOINT_PATHS = ['/auth/login', '/auth/register', '/auth/social', '/auth/demo', '/auth/forgot-password', '/auth/reset-password'];
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const url: string = error.config?.url ?? '';
+    const isAuthEndpoint = AUTH_ENDPOINT_PATHS.some((path) => url.includes(path));
+    if (error.response?.status === 401 && !isAuthEndpoint) {
+      const hadSession = !!localStorage.getItem(AUTH_STORAGE_KEY);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      if (hadSession) {
+        window.dispatchEvent(new CustomEvent('vitality:session-expired'));
+      }
+    }
+    return Promise.reject(error);
+  }
+);

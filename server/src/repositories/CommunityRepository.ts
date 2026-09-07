@@ -1,8 +1,8 @@
 import { CommunityMember, ICommunityMember } from '../models/CommunityMember';
 
 export class CommunityRepository {
-  async findAllRankedByStepsDesc(): Promise<ICommunityMember[]> {
-    return CommunityMember.find().sort({ steps: -1 }).exec();
+  async findAll(): Promise<ICommunityMember[]> {
+    return CommunityMember.find().exec();
   }
 }
 

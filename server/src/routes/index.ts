@@ -17,7 +17,7 @@ router.use('/activity', requireAuth, activityRoutes);
 router.use('/nutrition', requireAuth, nutritionRoutes);
 router.use('/podcasts', podcastRoutes);
 router.use('/user', requireAuth, userRoutes);
-router.use('/community', communityRoutes);
+router.use('/community', requireAuth, communityRoutes);
 router.use('/auth', authRoutes);
 
 export default router;

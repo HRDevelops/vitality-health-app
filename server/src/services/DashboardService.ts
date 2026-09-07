@@ -4,8 +4,6 @@ import { nutritionRepository } from '../repositories/NutritionRepository';
 import { podcastRepository } from '../repositories/PodcastRepository';
 import { todayString, lastNDates, weekdayLabel } from '../utils/date';
 
-const WEEKLY_MACRO_GOALS = { carbsGrams: 250 * 7, proteinGrams: 90 * 7, fatGrams: 70 * 7 };
-
 export class DashboardService {
   async getMetrics(userId: string) {
     const user = await userRepository.findById(userId);
@@ -23,11 +21,11 @@ export class DashboardService {
       healthScore: user.healthScore,
       healthScoreNote: user.healthScoreNote,
       steps: activity?.steps ?? 0,
-      stepsGoal: activity?.goalSteps ?? 10000,
+      stepsGoal: user.stepGoal,
       caloriesConsumed,
-      caloriesGoal: 2000,
+      caloriesGoal: user.calorieGoal,
       waterMl: activity?.waterMl ?? 0,
-      waterGoalMl: activity?.waterGoalMl ?? 2000,
+      waterGoalMl: user.waterGoal,
       weightKg: user.currentWeightKg,
       avatarUrl: user.avatarUrl,
     };
@@ -64,10 +62,16 @@ export class DashboardService {
       }
     }
 
+    const weeklyMacroGoals = {
+      carbsGrams: user.macros.carbs * 7,
+      proteinGrams: user.macros.protein * 7,
+      fatGrams: user.macros.fat * 7,
+    };
+
     const macroAdherencePercent = Math.round(
-      (Math.min(100, (macroTotals.carbsGrams / WEEKLY_MACRO_GOALS.carbsGrams) * 100) +
-        Math.min(100, (macroTotals.proteinGrams / WEEKLY_MACRO_GOALS.proteinGrams) * 100) +
-        Math.min(100, (macroTotals.fatGrams / WEEKLY_MACRO_GOALS.fatGrams) * 100)) /
+      (Math.min(100, (macroTotals.carbsGrams / weeklyMacroGoals.carbsGrams) * 100) +
+        Math.min(100, (macroTotals.proteinGrams / weeklyMacroGoals.proteinGrams) * 100) +
+        Math.min(100, (macroTotals.fatGrams / weeklyMacroGoals.fatGrams) * 100)) /
         3
     );
 

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from './core/components/AppLayout';
 import ProtectedRoute from './core/components/ProtectedRoute';
+import SessionExpiryHandler from './core/components/SessionExpiryHandler';
 import AuthScreen from './features/auth/AuthScreen';
 import Dashboard from './features/dashboard/Dashboard';
 import ExploreFitness from './features/explore/ExploreFitness';
@@ -11,7 +12,9 @@ import MindfulnessPodcast from './features/wellness/MindfulnessPodcast';
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <SessionExpiryHandler />
+      <Routes>
       <Route path="/login" element={<AuthScreen mode="login" />} />
       <Route path="/signup" element={<AuthScreen mode="signup" />} />
       <Route
@@ -30,6 +33,7 @@ export default function App() {
         <Route path="/wellness/podcast" element={<MindfulnessPodcast />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
-    </Routes>
+      </Routes>
+    </>
   );
 }

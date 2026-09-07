@@ -64,3 +64,28 @@ export async function me(req: Request, res: Response) {
     res.status(401).json({ message: 'Invalid or expired token' });
   }
 }
+
+export async function forgotPassword(req: Request, res: Response) {
+  try {
+    const result = await authService.forgotPassword(req.body.email);
+    res.status(200).json(result);
+  } catch (err: any) {
+    handleControllerError(err, res);
+  }
+}
+
+export async function resetPassword(req: Request, res: Response) {
+  try {
+    const result = await authService.resetPassword(req.body.token, req.body.newPassword);
+    res.status(200).json(result);
+  } catch (err: any) {
+    if (
+      err.message === 'Invalid or expired reset token' ||
+      err.message === 'Password must be at least 6 characters' ||
+      err.message === 'Token and new password are required'
+    ) {
+      return res.status(400).json({ message: err.message });
+    }
+    handleControllerError(err, res);
+  }
+}

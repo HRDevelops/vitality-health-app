@@ -27,11 +27,30 @@ export async function updateWeight(req: AuthedRequest, res: Response) {
 
 export async function updateProfile(req: AuthedRequest, res: Response) {
   try {
-    const { name, heightCm, targetWeightKg } = req.body;
-    const payload: { name?: string; heightCm?: number; targetWeightKg?: number } = {};
+    const { name, heightCm, targetWeightKg, avatarUrl, stepGoal, waterGoal, calorieGoal, macros } = req.body;
+    const payload: {
+      name?: string;
+      heightCm?: number;
+      targetWeightKg?: number;
+      avatarUrl?: string;
+      stepGoal?: number;
+      waterGoal?: number;
+      calorieGoal?: number;
+      macros?: { protein?: number; carbs?: number; fat?: number };
+    } = {};
     if (name !== undefined) payload.name = String(name);
     if (heightCm !== undefined) payload.heightCm = Number(heightCm);
     if (targetWeightKg !== undefined) payload.targetWeightKg = Number(targetWeightKg);
+    if (avatarUrl !== undefined) payload.avatarUrl = String(avatarUrl);
+    if (stepGoal !== undefined) payload.stepGoal = Number(stepGoal);
+    if (waterGoal !== undefined) payload.waterGoal = Number(waterGoal);
+    if (calorieGoal !== undefined) payload.calorieGoal = Number(calorieGoal);
+    if (macros !== undefined) {
+      payload.macros = {};
+      if (macros.protein !== undefined) payload.macros.protein = Number(macros.protein);
+      if (macros.carbs !== undefined) payload.macros.carbs = Number(macros.carbs);
+      if (macros.fat !== undefined) payload.macros.fat = Number(macros.fat);
+    }
     const user = await userService.updateProfile(req.userId!, payload);
     res.json(user);
   } catch (err: any) {

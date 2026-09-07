@@ -44,6 +44,7 @@ async function seed() {
     heightCm: 165,
     age: 24,
     isPremium: false,
+    stepGoal: 15000,
     podcastSessionsCompleted: 2,
     podcastStreakCount: 2,
     lastListenDate: addDaysString(todayString(), -1),
@@ -186,7 +187,6 @@ async function seed() {
 
   console.log('[seed] creating community leaderboard...');
   await CommunityMember.insertMany([
-    { name: 'Grace', avatarUrl: GRACE_AVATAR, steps: 9890, isCurrentUser: true },
     {
       name: 'Liam Carter',
       avatarUrl: 'https://images.unsplash.com/photo-1695927621677-ec96e048dce2?crop=entropy&cs=srgb&fm=jpg&q=85',

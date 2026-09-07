@@ -107,6 +107,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoggedOut(true);
   };
 
+  useEffect(() => {
+    const handler = () => logout();
+    window.addEventListener('vitality:session-expired', handler);
+    return () => window.removeEventListener('vitality:session-expired', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{

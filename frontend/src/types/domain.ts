@@ -123,6 +123,10 @@ export interface UserProfile {
   heightCm: number;
   age: number;
   isPremium: boolean;
+  stepGoal: number;
+  waterGoal: number;
+  calorieGoal: number;
+  macros: { protein: number; carbs: number; fat: number };
   podcastSessionsCompleted: number;
   podcastStreakCount: number;
   streakFreezeAvailable: boolean;

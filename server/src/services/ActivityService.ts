@@ -35,7 +35,7 @@ export class ActivityService {
     const log = await activityRepository.findByDate(user.id, logDate);
 
     const steps = log?.steps ?? 0;
-    const goalSteps = log?.goalSteps ?? 10000;
+    const goalSteps = user.stepGoal;
 
     return {
       logDate,
@@ -46,7 +46,7 @@ export class ActivityService {
       distanceKm: Math.round((log?.distanceKm ?? 0) * 10) / 10,
       activeMinutes: log?.activeMinutes ?? 0,
       waterMl: log?.waterMl ?? 0,
-      waterGoalMl: log?.waterGoalMl ?? 2000,
+      waterGoalMl: user.waterGoal,
       workouts: (log?.workouts ?? []).map((w) => ({
         id: w._id.toString(),
         title: w.title,
@@ -117,7 +117,7 @@ export class ActivityService {
       waterMl: byDate.get(d)?.waterMl ?? 0,
     }));
 
-    const goalMl = byDate.get(end)?.waterGoalMl ?? 2000;
+    const goalMl = user.waterGoal;
 
     return { points, goalMl };
   }
