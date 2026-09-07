@@ -1,29 +1,66 @@
+import bcrypt from 'bcryptjs';
 import { userRepository } from '../repositories/UserRepository';
+import { reminderRepository } from '../repositories/ReminderRepository';
 import { signAuthToken, verifyAuthToken } from '../utils/jwt';
 
+const GRACE_EMAIL = 'grace.user@email.com';
+const SALT_ROUNDS = 10;
+const DEFAULT_AVATAR =
+  'https://images.unsplash.com/photo-1586006552138-ea18985ab492?crop=entropy&cs=srgb&fm=jpg&q=85';
+
 export class AuthService {
-  private async getDemoUser() {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
-    return user;
+  async register(name: string, email: string, password: string) {
+    if (!email || !password) throw new Error('Email and password are required');
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await userRepository.findByEmail(normalizedEmail);
+    if (existing) throw new Error('An account with this email already exists');
+
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const user = await userRepository.createUser({
+      name: name?.trim() || normalizedEmail.split('@')[0],
+      email: normalizedEmail,
+      passwordHash,
+      avatarUrl: DEFAULT_AVATAR,
+    });
+
+    const grace = await userRepository.findByEmail(GRACE_EMAIL);
+    if (grace) await reminderRepository.copyTemplateForUser(user.id, grace.id);
+
+    const token = signAuthToken(user.id, user.email);
+    return { token, user };
   }
 
   async login(email: string, password: string) {
     if (!email || !password) throw new Error('Email and password are required');
-    const user = await this.getDemoUser();
-    const token = signAuthToken(user.id, email.toLowerCase());
+    const user = await userRepository.findByEmail(email.toLowerCase().trim());
+    if (!user) throw new Error('Invalid email or password');
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) throw new Error('Invalid email or password');
+    const token = signAuthToken(user.id, user.email);
     return { token, user };
   }
 
-  async signup(email: string, password: string) {
-    if (!email || !password) throw new Error('Email and password are required');
-    const user = await this.getDemoUser();
-    const token = signAuthToken(user.id, email.toLowerCase());
+  async socialLogin(provider: 'google' | 'apple') {
+    const email = provider === 'google' ? 'google.user@vitality.demo' : 'apple.user@vitality.demo';
+    let user = await userRepository.findByEmail(email);
+    if (!user) {
+      const passwordHash = await bcrypt.hash(`${provider}-social-${Date.now()}`, SALT_ROUNDS);
+      user = await userRepository.createUser({
+        name: provider === 'google' ? 'Google User' : 'Apple User',
+        email,
+        passwordHash,
+        avatarUrl: DEFAULT_AVATAR,
+      });
+      const grace = await userRepository.findByEmail(GRACE_EMAIL);
+      if (grace) await reminderRepository.copyTemplateForUser(user.id, grace.id);
+    }
+    const token = signAuthToken(user.id, user.email);
     return { token, user };
   }
 
   async demoLogin() {
-    const user = await this.getDemoUser();
+    const user = await userRepository.findByEmail(GRACE_EMAIL);
+    if (!user) throw new Error('Demo account not seeded. Please run the seed script.');
     const token = signAuthToken(user.id, user.email);
     return { token, user };
   }

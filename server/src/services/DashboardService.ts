@@ -7,9 +7,9 @@ import { todayString, lastNDates, weekdayLabel } from '../utils/date';
 const WEEKLY_MACRO_GOALS = { carbsGrams: 250 * 7, proteinGrams: 90 * 7, fatGrams: 70 * 7 };
 
 export class DashboardService {
-  async getMetrics() {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getMetrics(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
 
     const today = todayString();
     const activity = await activityRepository.findByDate(user.id, today);
@@ -33,9 +33,9 @@ export class DashboardService {
     };
   }
 
-  async getWeeklyDigest() {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getWeeklyDigest(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
 
     const endDate = todayString();
     const dateList = lastNDates(7, endDate);
@@ -96,9 +96,9 @@ export class DashboardService {
     };
   }
 
-  async getHealthScoreHistory(range: 'week' | 'month') {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getHealthScoreHistory(userId: string, range: 'week' | 'month') {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
 
     const days = range === 'month' ? 30 : 7;
     const endDate = todayString();

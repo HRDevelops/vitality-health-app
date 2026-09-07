@@ -7,9 +7,9 @@ const MACRO_GOALS = { carbsGrams: 250, proteinGrams: 90, fatGrams: 70 };
 const CALORIE_GOAL_PER_MEAL = 450;
 
 export class NutritionService {
-  async getLogsForDate(date?: string) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getLogsForDate(userId: string, date?: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
     const logDate = date ?? todayString();
     const logs = await nutritionRepository.findByDate(user.id, logDate);
 
@@ -48,20 +48,23 @@ export class NutritionService {
     return { logDate, meals: mealSummaries, totals, macroBreakdown };
   }
 
-  async createLog(payload: {
-    mealType: MealType;
-    foodName: string;
-    calories: number;
-    carbsGrams?: number;
-    proteinGrams?: number;
-    fatGrams?: number;
-    fiberGrams?: number;
-    sugarGrams?: number;
-    imageUrl?: string;
-    logDate?: string;
-  }) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async createLog(
+    userId: string,
+    payload: {
+      mealType: MealType;
+      foodName: string;
+      calories: number;
+      carbsGrams?: number;
+      proteinGrams?: number;
+      fatGrams?: number;
+      fiberGrams?: number;
+      sugarGrams?: number;
+      imageUrl?: string;
+      logDate?: string;
+    }
+  ) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
 
     let warningNote: string | null = null;
     if ((payload.carbsGrams ?? 0) > 40) warningNote = 'Very High Carb!';

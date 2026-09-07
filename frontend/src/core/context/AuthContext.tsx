@@ -15,13 +15,15 @@ interface AuthContextValue {
   user: UserProfile | null;
   token: string | null;
   isAuthenticated: boolean;
+  isBootstrapping: boolean;
   rememberMe: boolean;
   setRememberMe: (value: boolean) => void;
   displayName: string | null;
   setDisplayName: (name: string) => void;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
   loginAsDemo: () => Promise<void>;
+  socialLogin: (provider: 'google' | 'apple') => Promise<void>;
   logout: () => void;
 }
 
@@ -46,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [rememberMe, setRememberMeState] = useState<boolean>(() => readRememberMe());
   const [loggedOut, setLoggedOut] = useState<boolean>(() => !readStoredSession() && !readRememberMe());
   const [displayName, setDisplayNameState] = useState<string | null>(() => localStorage.getItem(DISPLAY_NAME_KEY));
+  const [isBootstrapping, setIsBootstrapping] = useState<boolean>(() => !readStoredSession() && readRememberMe());
 
   const setDisplayName = (name: string) => {
     setDisplayNameState(name);
@@ -53,14 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (session || loggedOut || !rememberMe) return;
+    if (session || loggedOut || !rememberMe) {
+      setIsBootstrapping(false);
+      return;
+    }
     apiClient
       .post<AuthSession>('/auth/demo')
       .then(({ data }) => {
         setSession(data);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       })
-      .catch(() => {});
+      .catch(() => setLoggedOut(true))
+      .finally(() => setIsBootstrapping(false));
   }, [session, loggedOut, rememberMe]);
 
   const persist = (data: AuthSession) => {
@@ -79,13 +86,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(data);
   };
 
-  const signup = async (email: string, password: string) => {
-    const { data } = await apiClient.post<AuthSession>('/auth/signup', { email, password });
+  const signup = async (name: string, email: string, password: string) => {
+    const { data } = await apiClient.post<AuthSession>('/auth/register', { name, email, password });
     persist(data);
   };
 
   const loginAsDemo = async () => {
     const { data } = await apiClient.post<AuthSession>('/auth/demo');
+    persist(data);
+  };
+
+  const socialLogin = async (provider: 'google' | 'apple') => {
+    const { data } = await apiClient.post<AuthSession>('/auth/social', { provider });
     persist(data);
   };
 
@@ -100,7 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user: session?.user ?? null,
         token: session?.token ?? null,
-        isAuthenticated: !loggedOut,
+        isAuthenticated: !loggedOut && !!session,
+        isBootstrapping,
         rememberMe,
         setRememberMe,
         displayName,
@@ -108,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         loginAsDemo,
+        socialLogin,
         logout,
       }}
     >

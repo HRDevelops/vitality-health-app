@@ -13,11 +13,11 @@ export class PodcastService {
     return podcast;
   }
 
-  async logListen(id: string) {
+  async logListen(userId: string, id: string) {
     const podcast = await podcastRepository.findById(id);
     if (!podcast) throw new Error('Podcast not found');
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
 
     const today = todayString();
     let streakCount: number;

@@ -5,6 +5,7 @@ export interface IUser extends Document {
   _id: Types.ObjectId;
   name: string;
   email: string;
+  passwordHash: string;
   avatarUrl: string;
   healthScore: number;
   healthScoreNote: string;
@@ -26,6 +27,7 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    passwordHash: { type: String, required: true },
     avatarUrl: { type: String, required: true },
     healthScore: { type: Number, default: 84 },
     healthScoreNote: {
@@ -47,5 +49,14 @@ const UserSchema = new Schema<IUser>(
 );
 
 applyToJSON(UserSchema);
+UserSchema.set('toJSON', {
+  ...UserSchema.get('toJSON'),
+  transform: (doc: any, ret: any) => {
+    ret.id = ret._id.toString();
+    delete ret._id;
+    delete ret.passwordHash;
+    return ret;
+  },
+});
 
 export const User = model<IUser>('User', UserSchema);

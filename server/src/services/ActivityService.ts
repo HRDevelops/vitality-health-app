@@ -22,10 +22,15 @@ function hourLabel(hour: number): string {
   return hour > 12 ? `${hour - 12}PM` : `${hour}AM`;
 }
 
+async function requireUser(userId: string) {
+  const user = await userRepository.findById(userId);
+  if (!user) throw new Error('User not found');
+  return user;
+}
+
 export class ActivityService {
-  async getDaily(date?: string) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getDaily(userId: string, date?: string) {
+    const user = await requireUser(userId);
     const logDate = date ?? todayString();
     const log = await activityRepository.findByDate(user.id, logDate);
 
@@ -54,9 +59,8 @@ export class ActivityService {
     };
   }
 
-  async getTrends(range: 'daily' | 'week' | 'month') {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getTrends(userId: string, range: 'daily' | 'week' | 'month') {
+    const user = await requireUser(userId);
 
     if (range === 'daily') {
       const today = todayString();
@@ -100,9 +104,8 @@ export class ActivityService {
     return { range, points, totalSteps, avgSteps };
   }
 
-  async getWaterTrend() {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getWaterTrend(userId: string) {
+    const user = await requireUser(userId);
     const end = todayString();
     const dateList = lastNDates(7, end);
     const logs = await activityRepository.findByDateRange(user.id, dateList[0], end);
@@ -119,9 +122,8 @@ export class ActivityService {
     return { points, goalMl };
   }
 
-  async getIntensityTrend() {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getIntensityTrend(userId: string) {
+    const user = await requireUser(userId);
     const end = todayString();
     const dateList = lastNDates(7, end);
     const logs = await activityRepository.findByDateRange(user.id, dateList[0], end);
@@ -148,17 +150,18 @@ export class ActivityService {
     return { zones, totalMinutes, totalWorkouts };
   }
 
-  async logWater(amountMl: number) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async logWater(userId: string, amountMl: number) {
+    const user = await requireUser(userId);
     const logDate = todayString();
     const log = await activityRepository.incrementFields(user.id, logDate, { waterMl: amountMl });
     return log;
   }
 
-  async logWorkout(payload: { title?: string; steps?: number; caloriesBurned?: number; distanceKm?: number; activeMinutes?: number }) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async logWorkout(
+    userId: string,
+    payload: { title?: string; steps?: number; caloriesBurned?: number; distanceKm?: number; activeMinutes?: number }
+  ) {
+    const user = await requireUser(userId);
     const logDate = todayString();
     const log = await activityRepository.addWorkoutEntry(
       user.id,
@@ -178,16 +181,15 @@ export class ActivityService {
       }
     );
     if (!log) throw new Error('Failed to log workout');
-    return this.getDaily(logDate);
+    return this.getDaily(userId, logDate);
   }
 
-  async deleteWorkout(workoutId: string) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async deleteWorkout(userId: string, workoutId: string) {
+    const user = await requireUser(userId);
     const logDate = todayString();
     const log = await activityRepository.removeWorkoutEntry(user.id, logDate, workoutId);
     if (!log) throw new Error('Workout not found');
-    return this.getDaily(logDate);
+    return this.getDaily(userId, logDate);
   }
 }
 

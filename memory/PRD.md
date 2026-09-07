@@ -315,3 +315,40 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   requires DB manipulation to simulate missed-day), frontend 4/4 features verified E2E,
   no critical/UI bugs. Fixed 1 minor issue post-test: `PUT /user/streak-freeze` now
   returns 400 (was 500) when equipping while unavailable.
+
+## What's been implemented (as of 2026-09-07, session 10 — real multi-tenant auth)
+- **Major architecture change** (explicit user approval): converted from single-hardcoded-
+  demo-user to real multi-tenant JWT auth with bcrypt-hashed passwords. `User` model
+  gained `passwordHash` (required, stripped from all API responses via custom `toJSON`
+  transform — verified no leak). New `src/middleware/auth.ts` (`requireAuth`) extracts
+  `req.userId` from the Bearer token; `/dashboard`, `/activity`, `/nutrition`, `/user`
+  routes now require it (401 without a token). `POST /podcasts/:id/listen` requires auth;
+  podcast catalog list/detail and `/community` remain public.
+- Every service (`ActivityService`, `NutritionService`, `ReminderService`, `UserService`,
+  `DashboardService`, `PodcastService.logListen`) now takes `userId` as its first param
+  instead of `userRepository.findFirst()` (removed entirely) — all user data is now
+  correctly scoped per authenticated account instead of always resolving to "the first
+  user in the DB".
+- Grace's seed re-keyed to `grace.user@email.com` / `12345678` (bcrypt hash), 100% of her
+  rich data (steps, streak, nutrition logs, workout history) preserved. Old email
+  `grace@vitality.app` no longer works.
+- `POST /api/v1/auth/register` creates a brand-new fully isolated user (0 steps/water,
+  empty history, default macro goals) and copies Grace's 3 default reminders as a
+  starting template (`ReminderRepository.copyTemplateForUser`). Duplicate email → 409.
+- `POST /api/v1/auth/login` checks bcrypt hash against any registered user (401 on wrong
+  password/unknown email). `POST /api/v1/auth/social {provider}` simulates Google/Apple
+  OAuth by creating/reusing one dedicated demo account per provider (idempotent), no real
+  OAuth — Auth screen shows a "Signed in with Google/Apple" toast before redirecting.
+- Auth screen gained a one-tap "Fill Demo Credentials" button (`auth-fill-demo-button`)
+  that auto-fills + auto-submits Grace's real credentials via the actual `/auth/login`
+  path (not the `/auth/demo` shortcut), proving the credentialed multi-user login works.
+- Frontend `apiClient` gained a request interceptor attaching `Authorization: Bearer
+  <token>` from localStorage on every call (previously never sent — auth was purely
+  cosmetic). `AuthContext` gained `isBootstrapping` so `ProtectedRoute` no longer renders
+  child queries before the Remember-Me auto-login resolves (avoids a 401 race on fresh
+  page loads).
+- `yarn typecheck` clean on both frontend and server. Tested via testing_agent
+  (iteration_19): backend 10/10 pytest (new `test_multi_tenant_auth.py`), frontend 6/6
+  flows (demo login, registration isolation, duplicate rejection, wrong password, Google/
+  Apple social isolation + idempotency, Grace demo shortcut regression). No bugs found.
+  Cleaned up all test-created accounts post-test; DB now contains only Grace.

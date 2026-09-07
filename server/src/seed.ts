@@ -4,6 +4,7 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../backend/.env') });
 dotenv.config();
 
+import bcrypt from 'bcryptjs';
 import { connectDB } from './config/db';
 import { User } from './models/User';
 import { ActivityLog } from './models/ActivityLog';
@@ -30,9 +31,11 @@ async function seed() {
   ]);
 
   console.log('[seed] creating Grace...');
+  const gracePasswordHash = await bcrypt.hash('12345678', 10);
   const grace = await User.create({
     name: 'Grace',
-    email: 'grace@vitality.app',
+    email: 'grace.user@email.com',
+    passwordHash: gracePasswordHash,
     avatarUrl: GRACE_AVATAR,
     healthScore: 84,
     healthScoreNote: 'Based on your overall health test, your score is 84 and considered good.',

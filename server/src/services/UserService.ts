@@ -1,27 +1,27 @@
 import { userRepository } from '../repositories/UserRepository';
 
 export class UserService {
-  async getProfile() {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async getProfile(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
     return user;
   }
 
-  async updateWeight(weightKg: number) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async updateWeight(userId: string, weightKg: number) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
     return userRepository.updateWeight(user.id, weightKg);
   }
 
-  async updateProfile(data: { name?: string; heightCm?: number; targetWeightKg?: number }) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async updateProfile(userId: string, data: { name?: string; heightCm?: number; targetWeightKg?: number }) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
     return userRepository.updateProfile(user.id, data);
   }
 
-  async setStreakFreezeEquipped(equipped: boolean) {
-    const user = await userRepository.findFirst();
-    if (!user) throw new Error('No user found. Please run the seed script.');
+  async setStreakFreezeEquipped(userId: string, equipped: boolean) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
     if (equipped && !user.streakFreezeAvailable) throw new Error('No Streak Freeze available to equip');
     return userRepository.setStreakFreezeEquipped(user.id, equipped);
   }

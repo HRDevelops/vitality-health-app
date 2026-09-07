@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthedRequest } from '../middleware/auth';
 import { podcastService } from '../services/PodcastService';
 
 export async function listPodcasts(req: Request, res: Response) {
@@ -19,9 +20,9 @@ export async function getPodcast(req: Request, res: Response) {
   }
 }
 
-export async function logListen(req: Request, res: Response) {
+export async function logListen(req: AuthedRequest, res: Response) {
   try {
-    const result = await podcastService.logListen(req.params.id);
+    const result = await podcastService.logListen(req.userId!, req.params.id);
     res.status(200).json(result);
   } catch (err: any) {
     res.status(404).json({ message: err.message });

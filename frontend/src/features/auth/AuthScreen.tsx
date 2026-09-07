@@ -30,9 +30,12 @@ function AppleIcon() {
 
 export default function AuthScreen({ mode }: AuthScreenProps) {
   const navigate = useNavigate();
-  const { login, signup, loginAsDemo, rememberMe, setRememberMe, displayName, setDisplayName } = useAuth();
+  const { login, signup, loginAsDemo, socialLogin, rememberMe, setRememberMe, displayName, setDisplayName } = useAuth();
   const { showToast } = useToast();
   const isSignup = mode === 'signup';
+
+  const DEMO_EMAIL = 'grace.user@email.com';
+  const DEMO_PASSWORD = '12345678';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -41,6 +44,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
   const [submitting, setSubmitting] = useState(false);
   const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
   const [demoLoading, setDemoLoading] = useState(false);
+  const [fillDemoLoading, setFillDemoLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
 
   const validate = (): string | null => {
@@ -61,7 +65,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
     setSubmitting(true);
     try {
       if (isSignup) {
-        await signup(email, password);
+        await signup(name.trim(), email, password);
         setDisplayName(name.trim());
         showToast(`Welcome to Vitality, ${name.trim()}!`, { duration: 3500 });
       } else {
@@ -86,13 +90,33 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
     }
   };
 
-  const handleSocial = (provider: 'google' | 'apple') => {
-    setSocialLoading(provider);
-    setTimeout(async () => {
-      await loginAsDemo();
-      setSocialLoading(null);
+  const handleFillDemo = async () => {
+    setEmail(DEMO_EMAIL);
+    setPassword(DEMO_PASSWORD);
+    setError(null);
+    setFillDemoLoading(true);
+    try {
+      await login(DEMO_EMAIL, DEMO_PASSWORD);
+      showToast('Welcome back, Grace!', { duration: 3000 });
       navigate('/', { replace: true });
-    }, 1000);
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? 'Something went wrong. Please try again.');
+    } finally {
+      setFillDemoLoading(false);
+    }
+  };
+
+  const handleSocial = async (provider: 'google' | 'apple') => {
+    setSocialLoading(provider);
+    try {
+      await socialLogin(provider);
+      showToast(`Signed in with ${provider === 'google' ? 'Google' : 'Apple'}`, { duration: 2500 });
+      navigate('/', { replace: true });
+    } catch {
+      setError('Social sign-in failed. Please try again.');
+    } finally {
+      setSocialLoading(null);
+    }
   };
 
   return (
@@ -255,6 +279,17 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
               {submitting ? 'Please wait...' : isSignup ? 'Create Account' : 'Sign In'}
             </button>
           </form>
+
+          <button
+            type="button"
+            onClick={handleFillDemo}
+            disabled={fillDemoLoading || submitting}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-dashed border-primary/40 py-2.5 font-body-sm text-body-sm text-primary transition-colors hover:bg-primary-container/10 disabled:opacity-60"
+            data-testid="auth-fill-demo-button"
+          >
+            {fillDemoLoading && <Loader2 size={14} className="animate-spin" />}
+            Fill Demo Credentials ({DEMO_EMAIL} / {DEMO_PASSWORD})
+          </button>
 
           <p className="mt-6 text-center font-body-sm text-body-sm text-on-surface-variant">
             {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}

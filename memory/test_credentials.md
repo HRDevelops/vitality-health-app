@@ -1,19 +1,35 @@
 # Test Credentials
 
-## Auth flow (added 2026-09-03)
-Simplified demo auth: ANY valid-format email + password (6+ chars) logs in successfully
-— all paths resolve to Grace's single seeded profile. No real per-user accounts/passwords
-are stored. Google/Apple buttons are simulated (1s delay, then logs in as Grace).
+## Auth flow (rewritten 2026-09-07 — real multi-tenant JWT auth)
+Real per-user accounts with bcrypt-hashed passwords. Each registered/social account is
+fully isolated (own steps, water, workouts, nutrition, streaks, reminders).
 
-- **Continue as Grace (Demo)** button on /login — no credentials needed, one tap in.
-- Email/password Sign In or Create Account: e.g. `anything@example.com` / `password123`
-  (any valid email format + password length >= 6 works).
-- Default behavior: fresh page load / new browser tab is ALWAYS auto-authenticated as
-  Grace (by design, so tests never get blocked by a login wall). Logout only clears
-  in-memory state for the current session — navigating within the same tab after logout
-  correctly redirects to /login, but a hard reload logs back in as Grace automatically.
+### Grace demo account (rich pre-seeded profile)
+- Email: `grace.user@email.com`
+- Password: `12345678`
+- One-tap options on /login: **Fill Demo Credentials** button (auto-fills + auto-submits
+  this login) or **Continue as Grace (Demo)** button (instant shortcut, same account).
+- OLD email `grace@vitality.app` no longer works (replaced).
 
-## Demo user
-- Demo user: **Grace** (email: grace@vitality.app).
-- Seed script: `cd /app/server && npx ts-node src/seed.ts` (re-seeds Grace, 7-day activity
-  logs, today's meals, 5 podcasts, 5-person leaderboard, 3 reminders).
+### New registrations
+- `POST /api/v1/auth/register` with any unique email + name + password (6+ chars)
+  creates a brand-new isolated user: 0 steps, 0ml water, empty workout/nutrition
+  history, default macro goals, and a COPY of Grace's 3 default reminders as a starting
+  template (editing them does not affect Grace's own reminders).
+- Duplicate email registration returns 409.
+
+### Social login simulation (no real OAuth)
+- Google button → creates/reuses one dedicated account `google.user@vitality.demo`
+  (no password; endpoint is `POST /api/v1/auth/social {"provider":"google"}`).
+- Apple button → creates/reuses `apple.user@vitality.demo` (`provider":"apple"`).
+- Idempotent: repeated Google/Apple sign-ins reuse the same account, not new ones.
+
+### General
+- `POST /api/v1/auth/login` checks bcrypt hash against ANY registered email.
+- All `/api/v1/{dashboard,activity,nutrition,user}/*` routes require
+  `Authorization: Bearer <token>` (401 without it). `/api/v1/podcasts` list/detail are
+  public; `POST /podcasts/:id/listen` requires auth.
+- Seed script: `cd /app/server && npx ts-node src/seed.ts` (re-seeds ONLY Grace + her
+  7-day activity logs/meals/podcasts/leaderboard/reminders — does not affect other
+  registered users, but re-running will wipe ALL collections including other test users
+  since it clears the full DB first).

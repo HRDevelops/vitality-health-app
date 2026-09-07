@@ -1,8 +1,12 @@
 import { User, IUser } from '../models/User';
 
 export class UserRepository {
-  async findFirst(): Promise<IUser | null> {
-    return User.findOne().exec();
+  async findByEmail(email: string): Promise<IUser | null> {
+    return User.findOne({ email }).exec();
+  }
+
+  async createUser(data: { name: string; email: string; passwordHash: string; avatarUrl: string }): Promise<IUser> {
+    return User.create(data);
   }
 
   async findById(id: string): Promise<IUser | null> {

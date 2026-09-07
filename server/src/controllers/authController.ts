@@ -11,19 +11,35 @@ export async function login(req: Request, res: Response) {
     if (err.message === 'Email and password are required') {
       return res.status(400).json({ message: err.message });
     }
+    if (err.message === 'Invalid email or password') {
+      return res.status(401).json({ message: err.message });
+    }
     handleControllerError(err, res);
   }
 }
 
-export async function signup(req: Request, res: Response) {
+export async function register(req: Request, res: Response) {
   try {
-    const { email, password } = req.body;
-    const result = await authService.signup(email, password);
+    const { name, email, password } = req.body;
+    const result = await authService.register(name, email, password);
     res.status(201).json(result);
   } catch (err: any) {
     if (err.message === 'Email and password are required') {
       return res.status(400).json({ message: err.message });
     }
+    if (err.message === 'An account with this email already exists') {
+      return res.status(409).json({ message: err.message });
+    }
+    handleControllerError(err, res);
+  }
+}
+
+export async function socialLogin(req: Request, res: Response) {
+  try {
+    const provider = req.body.provider === 'apple' ? 'apple' : 'google';
+    const result = await authService.socialLogin(provider);
+    res.status(200).json(result);
+  } catch (err: any) {
     handleControllerError(err, res);
   }
 }
