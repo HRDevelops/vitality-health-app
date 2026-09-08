@@ -52,7 +52,7 @@ async function seed() {
 
   console.log('[seed] creating 7 days of activity logs...');
   const dates = lastNDates(7, new Date().toISOString().slice(0, 10));
-  const stepsPattern = [8200, 10500, 7300, 11200, 6400, 9200, 9890];
+  const stepsPattern = [8200, 10500, 7300, 11200, 6400, 9200, 15290];
   const activityDocs = dates.map((logDate, i) => ({
     userId: grace._id,
     logDate,

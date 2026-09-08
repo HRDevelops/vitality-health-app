@@ -420,3 +420,25 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   Change Password flow, fixed and self-verified above; goal presets, avatar picker, and
   leaderboard toggle all passed with exact expected numbers). Grace's credentials/goals
   restored to defaults after testing.
+
+## Pre-launch QA audit (2026-09-08, session 13)
+- User requested a comprehensive 6-suite audit (Grace demo integrity, registration
+  isolation, dynamic leaderboard, profile settings, session-expiry/forgot-password,
+  codebase hygiene/security). Before running it, updated Grace's seeded "today" steps
+  from 9890 → **15290** in `seed.ts` to match the user's repeatedly stated expectation
+  (also re-verified: Grace now ranks #1 on the Today leaderboard, above Liam's 12430).
+- `yarn typecheck`: 0 errors on both frontend and server (re-verified independently by
+  testing_agent too).
+- testing_agent (iteration_22): **backend 23/23 pytest, frontend 100% of critical flows**
+  — Grace login/data integrity, new-account isolation (0 steps, copied reminder
+  templates, no cross-contamination), leaderboard Today (Grace #1 @ 15290) vs Week
+  (Sofia #1 @ 81200) re-ordering + new-user replacing Grace on their own view, goal
+  presets + avatar SVG persistence, password-change round-trip, session-expiry 401
+  redirect+toast+localStorage-clear, forgot/reset-password round-trip, and recursive
+  passwordHash/resetPasswordToken/resetPasswordExpires leak check across 5 endpoints.
+  **Zero bugs found.** Grace's password confirmed reverted to `12345678` at end of run.
+- One code-review note surfaced by testing_agent (not a bug, a production hardening
+  note): `POST /auth/forgot-password` returns the `resetToken` directly in the response
+  body — intentional per the user's explicit approval for a self-service demo flow, but
+  should be removed in favor of real email delivery before any real production launch.
+- Cleaned up 7 QA test accounts created during the audit; DB reseeded to Grace-only.
