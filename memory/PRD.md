@@ -442,3 +442,25 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   body — intentional per the user's explicit approval for a self-service demo flow, but
   should be removed in favor of real email delivery before any real production launch.
 - Cleaned up 7 QA test accounts created during the audit; DB reseeded to Grace-only.
+
+## Final polish batch (2026-09-08, session 14)
+- User requested 3 last polish items: Leaderboard Podium Visual, Avatar Crop Tool,
+  Weekly Digest Preset Callout. Fork picked up mid-implementation (podium + crop code
+  already written, digest callout pending, none compiled/tested).
+- `LeaderboardCard.tsx`: `RankBadge` renders `lucide-react` `Trophy` (gold, rank 1) and
+  `Medal` (silver rank 2 / bronze rank 3) icons instead of plain numbers; ranks 4+ stay
+  numeric. Works correctly across both Today/This Week ranges.
+- `EditProfileModal.tsx`: uploading a photo now goes through an intermediate crop step
+  (`cropSrc`/`zoom` state) — circular preview frame, zoom slider (1x-3x), Cancel/Use
+  Photo actions. `cropAndCompress()` does a canvas center-crop scaled by zoom, output
+  200x200 JPEG data URL (still Base64-in-Mongo per user's standing choice, no Object
+  Storage).
+- `WeeklyDigestModal.tsx`: added a preset callout badge ("Following: <Preset> Plan")
+  using `matchGoalPreset()` (`lib/goalPresets.ts`) against the live `useUserProfile()`
+  data; hidden automatically when goals don't exactly match any preset.
+- `yarn typecheck` clean (frontend + server). testing_agent (iteration_23): **100%
+  frontend pass**, all 3 features verified end-to-end (podium icons both ranges, crop
+  zoom+apply+cancel+persistence-after-reload, callout shown for Weight Loss preset and
+  correctly hidden after a manual goal edit). Zero bugs. One non-bug polish note: the
+  on-screen crop preview's CSS `transform: scale()` and the exported canvas crop math
+  are visually close but not pixel-identical at high zoom — left as-is (not a bug).

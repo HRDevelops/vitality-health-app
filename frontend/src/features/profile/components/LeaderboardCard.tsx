@@ -1,4 +1,4 @@
-import { Trophy } from 'lucide-react';
+import { Trophy, Medal } from 'lucide-react';
 import { LeaderboardEntry } from '../../../types/domain';
 import { LeaderboardRange } from '../../../services/api/community';
 
@@ -6,6 +6,17 @@ interface LeaderboardCardProps {
   entries: LeaderboardEntry[];
   range: LeaderboardRange;
   onRangeChange: (range: LeaderboardRange) => void;
+}
+
+function RankBadge({ rank }: { rank: number }) {
+  if (rank === 1) return <Trophy size={18} className="text-amber-500" data-testid="leaderboard-rank-badge-1" />;
+  if (rank === 2) return <Medal size={18} className="text-slate-400" data-testid="leaderboard-rank-badge-2" />;
+  if (rank === 3) return <Medal size={18} className="text-amber-700" data-testid="leaderboard-rank-badge-3" />;
+  return (
+    <span className="font-label-bold text-label-bold text-on-surface-variant" data-testid={`leaderboard-rank-badge-${rank}`}>
+      {rank}
+    </span>
+  );
 }
 
 export default function LeaderboardCard({ entries, range, onRangeChange }: LeaderboardCardProps) {
@@ -41,7 +52,9 @@ export default function LeaderboardCard({ entries, range, onRangeChange }: Leade
             data-testid={`leaderboard-entry-${entry.id}`}
             className={`flex items-center gap-3 rounded-xl p-2 ${entry.isCurrentUser ? 'bg-primary-fixed/20' : ''}`}
           >
-            <span className="w-6 text-center font-label-bold text-label-bold text-on-surface-variant">{entry.rank}</span>
+            <div className="flex w-6 flex-shrink-0 items-center justify-center">
+              <RankBadge rank={entry.rank} />
+            </div>
             <img src={entry.avatarUrl} alt={entry.name} className="h-10 w-10 rounded-full object-cover" />
             <span className="flex-1 font-body-lg text-body-lg font-semibold text-on-surface">
               {entry.isCurrentUser ? `${entry.name} (You)` : entry.name}

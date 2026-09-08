@@ -1,20 +1,15 @@
 import { useRef, useState } from 'react';
-import { Upload } from 'lucide-react';
+import { Upload, ZoomIn, ZoomOut } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { useUpdateProfile } from '../../../services/api/user';
 import { useToast } from '../../../components/ui/ToastContext';
 import { UserProfile } from '../../../types/domain';
+import { GOAL_PRESETS } from '../../../lib/goalPresets';
 
 interface EditProfileModalProps {
   user: UserProfile;
   onClose: () => void;
 }
-
-const GOAL_PRESETS = [
-  { id: 'weight-loss', label: 'Weight Loss', calorieGoal: 1800, protein: 160, carbs: 150, fat: 55, waterGoal: 2500, stepGoal: 12000 },
-  { id: 'maintenance', label: 'Maintenance', calorieGoal: 2200, protein: 140, carbs: 240, fat: 70, waterGoal: 2000, stepGoal: 10000 },
-  { id: 'muscle-gain', label: 'Muscle Gain', calorieGoal: 2700, protein: 180, carbs: 320, fat: 80, waterGoal: 3000, stepGoal: 8000 },
-];
 
 const AVATAR_ICONS = [
   { id: 'bolt', bg: '#7367f0', path: 'M13 2 3 14h7l-1 8 10-12h-7l1-8z' },
@@ -29,36 +24,24 @@ function buildIconAvatar(icon: (typeof AVATAR_ICONS)[number]): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-function compressImageFile(file: File): Promise<string> {
+function cropAndCompress(imageSrc: string, zoom: number): Promise<string> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const maxSize = 200;
-        let { width, height } = img;
-        if (width > height) {
-          if (width > maxSize) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
-          }
-        } else if (height > maxSize) {
-          width = Math.round((width * maxSize) / height);
-          height = maxSize;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('Canvas not supported'));
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
-      };
-      img.onerror = reject;
-      img.src = reader.result as string;
+    const img = new Image();
+    img.onload = () => {
+      const outputSize = 200;
+      const canvas = document.createElement('canvas');
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Canvas not supported'));
+      const sourceSize = Math.min(img.width, img.height) / zoom;
+      const sourceX = (img.width - sourceSize) / 2;
+      const sourceY = (img.height - sourceSize) / 2;
+      ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    img.onerror = () => reject(new Error('Could not load image'));
+    img.src = imageSrc;
   });
 }
 
@@ -74,6 +57,8 @@ export default function EditProfileModal({ user, onClose }: EditProfileModalProp
   const [carbsGoal, setCarbsGoal] = useState(String(user.macros.carbs));
   const [fatGoal, setFatGoal] = useState(String(user.macros.fat));
   const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const updateProfile = useUpdateProfile();
   const { showToast } = useToast();
@@ -88,15 +73,33 @@ export default function EditProfileModal({ user, onClose }: EditProfileModalProp
     setStepGoal(String(preset.stepGoal));
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropSrc(reader.result as string);
+      setZoom(1);
+    };
+    reader.onerror = () => showToast('Could not read that image. Please try another.');
+    reader.readAsDataURL(file);
+  };
+
+  const handleApplyCrop = async () => {
+    if (!cropSrc) return;
     try {
-      const dataUrl = await compressImageFile(file);
-      setAvatarUrl(dataUrl);
+      const compressed = await cropAndCompress(cropSrc, zoom);
+      setAvatarUrl(compressed);
+      setCropSrc(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch {
-      showToast('Could not read that image. Please try another.');
+      showToast('Could not process that image. Please try another.');
     }
+  };
+
+  const handleCancelCrop = () => {
+    setCropSrc(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSubmit = () => {
@@ -136,34 +139,83 @@ export default function EditProfileModal({ user, onClose }: EditProfileModalProp
 
         <div>
           <label className="mb-2 block font-label-bold text-[11px] uppercase text-on-surface-variant">Avatar</label>
-          <div className="flex items-center gap-3">
-            <img src={avatarUrl} alt="Avatar preview" className="h-16 w-16 rounded-full object-cover" data-testid="edit-profile-avatar-preview" />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 rounded-full border border-outline-variant px-4 py-2 font-label-bold text-[12px] text-on-surface transition-colors hover:bg-surface-container"
-              data-testid="edit-profile-upload-photo-button"
-            >
-              <Upload size={14} />
-              Upload Photo
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" data-testid="edit-profile-avatar-file-input" />
-          </div>
-          <div className="mt-3 flex gap-2">
-            {AVATAR_ICONS.map((icon) => (
-              <button
-                key={icon.id}
-                type="button"
-                onClick={() => setAvatarUrl(buildIconAvatar(icon))}
-                className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-transparent transition-all hover:ring-primary/50"
-                style={{ backgroundColor: icon.bg }}
-                data-testid={`edit-profile-avatar-icon-${icon.id}`}
-                aria-label={`Use ${icon.id} avatar`}
-              >
-                <img src={buildIconAvatar(icon)} alt={icon.id} className="h-full w-full" />
-              </button>
-            ))}
-          </div>
+          {!cropSrc ? (
+            <>
+              <div className="flex items-center gap-3">
+                <img src={avatarUrl} alt="Avatar preview" className="h-16 w-16 rounded-full object-cover" data-testid="edit-profile-avatar-preview" />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 rounded-full border border-outline-variant px-4 py-2 font-label-bold text-[12px] text-on-surface transition-colors hover:bg-surface-container"
+                  data-testid="edit-profile-upload-photo-button"
+                >
+                  <Upload size={14} />
+                  Upload Photo
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" data-testid="edit-profile-avatar-file-input" />
+              </div>
+              <div className="mt-3 flex gap-2">
+                {AVATAR_ICONS.map((icon) => (
+                  <button
+                    key={icon.id}
+                    type="button"
+                    onClick={() => setAvatarUrl(buildIconAvatar(icon))}
+                    className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-transparent transition-all hover:ring-primary/50"
+                    style={{ backgroundColor: icon.bg }}
+                    data-testid={`edit-profile-avatar-icon-${icon.id}`}
+                    aria-label={`Use ${icon.id} avatar`}
+                  >
+                    <img src={buildIconAvatar(icon)} alt={icon.id} className="h-full w-full" />
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="rounded-2xl border border-outline-variant/30 bg-surface p-4" data-testid="avatar-crop-step">
+              <p className="mb-3 text-center font-label-bold text-[11px] uppercase text-on-surface-variant">Adjust &amp; Crop</p>
+              <div className="mx-auto h-36 w-36 overflow-hidden rounded-full bg-surface-variant" data-testid="avatar-crop-frame">
+                <img
+                  src={cropSrc}
+                  alt="Crop preview"
+                  style={{ transform: `scale(${zoom})` }}
+                  className="h-full w-full object-cover transition-transform"
+                  data-testid="avatar-crop-preview"
+                />
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <ZoomOut size={14} className="flex-shrink-0 text-on-surface-variant" />
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full accent-primary"
+                  data-testid="avatar-crop-zoom-slider"
+                />
+                <ZoomIn size={14} className="flex-shrink-0 text-on-surface-variant" />
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelCrop}
+                  className="flex-1 rounded-full border border-outline-variant py-2 font-label-bold text-[12px] text-on-surface-variant transition-colors hover:bg-surface-container"
+                  data-testid="avatar-crop-cancel-button"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyCrop}
+                  className="flex-1 rounded-full bg-primary py-2 font-label-bold text-[12px] text-on-primary transition-opacity hover:opacity-90"
+                  data-testid="avatar-crop-apply-button"
+                >
+                  Use Photo
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

@@ -1,8 +1,10 @@
-import { X, Footprints, Trophy, Flame, Moon, Sparkles, HeartPulse, Share2, Twitter, Printer } from 'lucide-react';
+import { X, Footprints, Trophy, Flame, Moon, Sparkles, HeartPulse, Share2, Twitter, Printer, Target } from 'lucide-react';
 import BottomSheet from '../../../components/ui/BottomSheet';
 import { useWeeklyDigest } from '../../../services/api/dashboard';
+import { useUserProfile } from '../../../services/api/user';
 import { useToast } from '../../../components/ui/ToastContext';
 import { WeeklyDigest } from '../../../types/domain';
+import { matchGoalPreset } from '../../../lib/goalPresets';
 
 interface WeeklyDigestModalProps {
   onClose: () => void;
@@ -33,7 +35,9 @@ function buildTweetText(data: WeeklyDigest) {
 
 export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
   const { data, isLoading } = useWeeklyDigest();
+  const { data: user } = useUserProfile();
   const { showToast } = useToast();
+  const activePreset = user ? matchGoalPreset(user) : null;
 
   const handleShare = async () => {
     if (!data) return;
@@ -87,6 +91,15 @@ export default function WeeklyDigestModal({ onClose }: WeeklyDigestModalProps) {
             <p className="mt-1 font-body-sm text-body-sm text-primary-fixed" data-testid="weekly-digest-date-range">
               {formatRange(data.startDate, data.endDate)}
             </p>
+          )}
+          {activePreset && (
+            <div
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1"
+              data-testid="weekly-digest-preset-callout"
+            >
+              <Target size={12} />
+              <span className="font-label-bold text-[10px] uppercase tracking-wide">Following: {activePreset.label} Plan</span>
+            </div>
           )}
         </div>
 
