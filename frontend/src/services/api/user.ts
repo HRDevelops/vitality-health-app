@@ -61,3 +61,12 @@ export function useUpdateStreakFreeze() {
     onSuccess: () => invalidateAll(queryClient),
   });
 }
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: async ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => {
+      const { data } = await apiClient.put<{ message: string }>('/user/password', { currentPassword, newPassword });
+      return data;
+    },
+  });
+}

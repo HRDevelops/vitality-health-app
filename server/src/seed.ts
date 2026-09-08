@@ -191,24 +191,28 @@ async function seed() {
       name: 'Liam Carter',
       avatarUrl: 'https://images.unsplash.com/photo-1695927621677-ec96e048dce2?crop=entropy&cs=srgb&fm=jpg&q=85',
       steps: 12430,
+      weeklySteps: 74300,
       isCurrentUser: false,
     },
     {
       name: 'Sofia Reyes',
       avatarUrl: 'https://images.unsplash.com/photo-1662850886700-4ec19bd30d11?crop=entropy&cs=srgb&fm=jpg&q=85',
       steps: 11020,
+      weeklySteps: 81200,
       isCurrentUser: false,
     },
     {
       name: 'Maya Chen',
       avatarUrl: 'https://images.unsplash.com/photo-1589729132389-8f0e0b55b91e?crop=entropy&cs=srgb&fm=jpg&q=85',
       steps: 8760,
+      weeklySteps: 76500,
       isCurrentUser: false,
     },
     {
       name: 'Noah Park',
       avatarUrl: 'https://images.unsplash.com/photo-1571893714939-85a8e97c329d?crop=entropy&cs=srgb&fm=jpg&q=85',
       steps: 7210,
+      weeklySteps: 61800,
       isCurrentUser: false,
     },
   ]);

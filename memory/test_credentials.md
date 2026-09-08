@@ -47,4 +47,17 @@ fully isolated (own steps, water, workouts, nutrition, streaks, reminders).
   hash; 400 on invalid/expired token. Frontend modal auto-fills the token for one-flow
   demo testing.
 - Session-expiry: any 401 on a protected route (not login/register/social/demo/forgot-
-  password/reset-password) clears localStorage and redirects to `/login` with a toast.
+  password/reset-password/`user/password`) clears localStorage and redirects to `/login`
+  with a toast.
+
+### In-app password change (session 12)
+- `PUT /api/v1/user/password {currentPassword, newPassword}` — verifies bcrypt hash,
+  enforces 8+ char new password. Profile > Activity & Settings > "Change Password".
+- Note: `/user/password` is excluded from the global 401-session-expiry interceptor so a
+  wrong-current-password attempt shows an inline error instead of logging the user out.
+
+### Leaderboard Today/This Week (session 12)
+- `GET /api/v1/community/leaderboard?range=today|week` — today = live steps; week = sum
+  of the user's real last-7-days ActivityLog steps vs each friend's separate seeded
+  `weeklySteps` value (Liam 74300, Sofia 81200, Maya 76500, Noah 61800; Grace's real
+  weekly sum from seed ≈ 62690) — rankings genuinely differ between the two tabs.

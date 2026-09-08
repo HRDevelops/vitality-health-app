@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Pencil, Ruler, Cake, Weight, Award, TrendingUp, Settings, LogOut, ChevronRight, Sparkles, FileText } from 'lucide-react';
+import { Bell, Pencil, Ruler, Cake, Weight, Award, TrendingUp, Settings, LogOut, ChevronRight, Sparkles, FileText, KeyRound } from 'lucide-react';
 import TopBar from '../../core/components/TopBar';
 import { useUserProfile } from '../../services/api/user';
-import { useLeaderboard } from '../../services/api/community';
+import { useLeaderboard, LeaderboardRange } from '../../services/api/community';
 import { useReminders } from '../../services/api/reminders';
 import { useAuth } from '../../core/context/AuthContext';
 import { useUnits } from '../../core/context/UnitsContext';
@@ -18,6 +18,7 @@ import WeeklyDigestModal from '../dashboard/components/WeeklyDigestModal';
 import NotificationsSheet from '../../components/ui/NotificationsSheet';
 import EditProfileModal from './components/EditProfileModal';
 import AppSettingsModal from './components/AppSettingsModal';
+import ChangePasswordModal from './components/ChangePasswordModal';
 
 export default function UserProfile() {
   const location = useLocation();
@@ -32,6 +33,8 @@ export default function UserProfile() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [appSettingsOpen, setAppSettingsOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [leaderboardRange, setLeaderboardRange] = useState<LeaderboardRange>('today');
 
   useEffect(() => {
     if ((location.state as any)?.openWeightEdit) {
@@ -50,7 +53,7 @@ export default function UserProfile() {
   }, [location.state]);
 
   const { data: user, isLoading } = useUserProfile();
-  const { data: leaderboard } = useLeaderboard();
+  const { data: leaderboard } = useLeaderboard(leaderboardRange);
   const { data: reminders } = useReminders();
 
   return (
@@ -135,7 +138,7 @@ export default function UserProfile() {
 
             {leaderboard && (
               <div id="friends-leaderboard-section">
-                <LeaderboardCard entries={leaderboard} />
+                <LeaderboardCard entries={leaderboard} range={leaderboardRange} onRangeChange={setLeaderboardRange} />
               </div>
             )}
             {reminders && (
@@ -208,7 +211,7 @@ export default function UserProfile() {
                 </button>
                 <button
                   onClick={() => setAppSettingsOpen(true)}
-                  className="flex items-center justify-between p-card-padding transition-colors hover:bg-surface-container/50"
+                  className="flex items-center justify-between border-b border-outline-variant/10 p-card-padding transition-colors hover:bg-surface-container/50"
                   data-testid="profile-settings-button"
                 >
                   <div className="flex items-center gap-4">
@@ -216,6 +219,19 @@ export default function UserProfile() {
                       <Settings size={18} />
                     </div>
                     <span className="font-body-lg text-body-lg font-semibold text-on-surface">App Settings</span>
+                  </div>
+                  <ChevronRight size={18} className="text-outline" />
+                </button>
+                <button
+                  onClick={() => setChangePasswordOpen(true)}
+                  className="flex items-center justify-between p-card-padding transition-colors hover:bg-surface-container/50"
+                  data-testid="profile-change-password-button"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-error-container/40 text-error">
+                      <KeyRound size={18} />
+                    </div>
+                    <span className="font-body-lg text-body-lg font-semibold text-on-surface">Change Password</span>
                   </div>
                   <ChevronRight size={18} className="text-outline" />
                 </button>
@@ -244,6 +260,7 @@ export default function UserProfile() {
       {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
       {editProfileOpen && user && <EditProfileModal user={user} onClose={() => setEditProfileOpen(false)} />}
       {appSettingsOpen && <AppSettingsModal onClose={() => setAppSettingsOpen(false)} />}
+      {changePasswordOpen && <ChangePasswordModal onClose={() => setChangePasswordOpen(false)} />}
     </div>
   );
 }

@@ -22,7 +22,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-const AUTH_ENDPOINT_PATHS = ['/auth/login', '/auth/register', '/auth/social', '/auth/demo', '/auth/forgot-password', '/auth/reset-password'];
+const AUTH_ENDPOINT_PATHS = ['/auth/login', '/auth/register', '/auth/social', '/auth/demo', '/auth/forgot-password', '/auth/reset-password', '/user/password'];
 
 apiClient.interceptors.response.use(
   (response) => response,

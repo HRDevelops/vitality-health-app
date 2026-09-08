@@ -6,6 +6,7 @@ export interface ICommunityMember extends Document {
   name: string;
   avatarUrl: string;
   steps: number;
+  weeklySteps: number;
   isCurrentUser: boolean;
 }
 
@@ -14,6 +15,7 @@ const CommunityMemberSchema = new Schema<ICommunityMember>(
     name: { type: String, required: true },
     avatarUrl: { type: String, required: true },
     steps: { type: Number, required: true },
+    weeklySteps: { type: Number, required: true },
     isCurrentUser: { type: Boolean, default: false },
   },
   { timestamps: true }

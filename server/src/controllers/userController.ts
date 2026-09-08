@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthedRequest } from '../middleware/auth';
 import { userService } from '../services/UserService';
+import { authService } from '../services/AuthService';
 import { handleControllerError } from '../utils/httpError';
 
 export async function getProfile(req: AuthedRequest, res: Response) {
@@ -65,6 +66,22 @@ export async function updateStreakFreeze(req: AuthedRequest, res: Response) {
     res.json(user);
   } catch (err: any) {
     if (err.message === 'No Streak Freeze available to equip') {
+      return res.status(400).json({ message: err.message });
+    }
+    handleControllerError(err, res);
+  }
+}
+
+export async function changePassword(req: AuthedRequest, res: Response) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const result = await authService.changePassword(req.userId!, currentPassword, newPassword);
+    res.status(200).json(result);
+  } catch (err: any) {
+    if (err.message === 'Current password is incorrect') {
+      return res.status(401).json({ message: err.message });
+    }
+    if (err.message === 'New password must be at least 8 characters' || err.message === 'Current and new password are required') {
       return res.status(400).json({ message: err.message });
     }
     handleControllerError(err, res);

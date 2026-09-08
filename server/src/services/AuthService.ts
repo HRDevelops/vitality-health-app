@@ -101,6 +101,20 @@ export class AuthService {
     await userRepository.resetPassword(user.id, passwordHash);
     return { message: 'Password has been reset successfully.' };
   }
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    if (!currentPassword || !newPassword) throw new Error('Current and new password are required');
+    if (newPassword.length < 8) throw new Error('New password must be at least 8 characters');
+
+    const user = await userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) throw new Error('Current password is incorrect');
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await userRepository.resetPassword(user.id, passwordHash);
+    return { message: 'Password updated successfully.' };
+  }
 }
 
 export const authService = new AuthService();

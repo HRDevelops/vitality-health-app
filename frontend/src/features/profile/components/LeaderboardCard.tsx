@@ -1,19 +1,38 @@
 import { Trophy } from 'lucide-react';
 import { LeaderboardEntry } from '../../../types/domain';
+import { LeaderboardRange } from '../../../services/api/community';
 
 interface LeaderboardCardProps {
   entries: LeaderboardEntry[];
+  range: LeaderboardRange;
+  onRangeChange: (range: LeaderboardRange) => void;
 }
 
-export default function LeaderboardCard({ entries }: LeaderboardCardProps) {
+export default function LeaderboardCard({ entries, range, onRangeChange }: LeaderboardCardProps) {
   return (
     <section
       className="rounded-lg border border-outline-variant/10 bg-surface-container-lowest p-card-padding shadow-soft"
       data-testid="leaderboard-card"
     >
-      <div className="mb-4 flex items-center gap-2">
-        <Trophy size={18} className="text-tertiary" />
-        <h3 className="font-headline-md text-headline-md text-on-surface">Friends Leaderboard</h3>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Trophy size={18} className="text-tertiary" />
+          <h3 className="font-headline-md text-headline-md text-on-surface">Friends Leaderboard</h3>
+        </div>
+        <div className="flex rounded-full bg-surface-container p-1" data-testid="leaderboard-range-toggle">
+          {(['today', 'week'] as const).map((r) => (
+            <button
+              key={r}
+              onClick={() => onRangeChange(r)}
+              data-testid={`leaderboard-range-${r}`}
+              className={`rounded-full px-3 py-1 font-label-bold text-[11px] uppercase transition-colors ${
+                range === r ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              {r === 'today' ? 'Today' : 'This Week'}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="space-y-3">
         {entries.map((entry) => (

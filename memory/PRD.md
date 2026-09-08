@@ -388,3 +388,35 @@ Source repo: https://github.com/HRDevelops/vitality-health-app.git
   Dashboard/Activity/Nutrition, session-expiry toast+redirect vs. wrong-password no-op,
   full forgot/reset-password round trip incl. invalid-token error). No bugs found.
   Test-created accounts purged via reseed; Grace restored to default seeded state.
+
+## What's been implemented (as of 2026-09-08, session 12 — presets, password change, avatar picker, leaderboard toggle)
+- **Goal presets**: `EditProfileModal.tsx` gained 3 preset chips (Weight Loss/Maintenance/
+  Muscle Gain, exact macro/calorie/water/step values from spec) that auto-fill the Daily
+  Targets inputs (still editable/savable after); manually editing any field deselects the
+  active preset.
+- **In-app password change**: `PUT /api/v1/user/password` (`AuthService.changePassword`,
+  bcrypt-verifies current password, enforces 8+ char new password, reuses
+  `userRepository.resetPassword` to persist). New "Change Password" row in Profile >
+  Activity & Settings opens `ChangePasswordModal.tsx` (current/new/confirm, client-side
+  8-char + match validation, inline error on wrong current password).
+- **Avatar upload/picker** (explicit user choice: Base64-in-Mongo, NOT Object Storage):
+  replaced the raw Avatar URL text field with an "Upload Photo" button (FileReader +
+  canvas resize-to-200px + JPEG quality 0.7 → small base64 data URI) plus 5 tap-to-select
+  preset icon avatars (bolt/heart/star/drop/flame, inline SVG data URIs, no external
+  assets/dependencies).
+- **Leaderboard Today/This Week toggle**: `CommunityMember` model gained a separate
+  `weeklySteps` field per friend (deliberately NOT dailySteps×7, so rankings genuinely
+  reorder between tabs); `CommunityService.getLeaderboard(userId, range)` sums the user's
+  real last-7-days `ActivityLog` steps for the "week" view. `LeaderboardCard.tsx` gained
+  a segmented Today/This Week toggle.
+- **Bug found & fixed post-testing_agent**: the session-expiry 401 interceptor was
+  blanket-treating a wrong-current-password 401 from `PUT /user/password` as an expired
+  session, logging the user out mid-flow instead of showing the inline error. Fixed by
+  adding `/user/password` to the interceptor's excluded-endpoints whitelist in
+  `client.ts`; re-verified via Playwright script (wrong password → inline error, stays
+  on page; correct password → success + modal closes).
+- `yarn typecheck` clean on both frontend and server. Tested via testing_agent
+  (iteration_21): backend 11/11 pytest, frontend ~90% initially (1 HIGH-priority bug in
+  Change Password flow, fixed and self-verified above; goal presets, avatar picker, and
+  leaderboard toggle all passed with exact expected numbers). Grace's credentials/goals
+  restored to defaults after testing.
