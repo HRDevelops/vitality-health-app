@@ -1,0 +1,466 @@
+# Vitality Health & Fitness App — PRD / Memory
+
+## Original problem statement
+Implement "Vitality Health & Fitness App" as a mobile-first responsive web app
+(React + Vite + TypeScript + Tailwind CSS) backed by a decoupled REST API,
+converting 7 raw Stitch HTML templates (`client/raw_stitch_screens/`) per
+`ARCHITECTURE.md` and `client/raw_stitch_screens/vibrant_wellness/DESIGN.md`.
+Source repo: https://github.com/HRDevelops/vitality-health-app.git
+
+## User choices (gathered upfront)
+- Database: **MongoDB (Mongoose)** instead of Postgres/Prisma (platform fit).
+- Screens: converted exactly from the cloned repo's raw_stitch_screens + ARCHITECTURE.md.
+- Auth: **none** — single seeded demo user "Grace", no login/signup.
+- Data: all mocked/seeded, no real 3rd-party integrations.
+- Backend: **Node.js/Express + TypeScript**, Repository → Service → Controller pattern.
+
+## Architecture (adapted to Emergent's supervisor constraints)
+- Supervisor's `backend` program is hardcoded to run `uvicorn server:app` on port 8001
+  from `/app/backend`. Since the real backend is Node/Express (per user's explicit
+  choice), `/app/backend/server.py` is a thin FastAPI reverse-proxy shim: on startup it
+  spawns the real Express app (`/app/server`, `yarn dev` → `ts-node src/index.ts`) as a
+  child process on an internal port (`NODE_SERVER_PORT` in `/app/backend/.env`, currently
+  **8090** — NOTE: port 8010 collides with an unrelated platform system process, do not
+  reuse it) and transparently proxies every `/api/*` request to it. Zero business logic
+  lives in server.py.
+- `/app/frontend` is the Vite + React + TS + Tailwind client (maps to the platform's
+  `frontend` supervisor slot, port 3000). Internal structure mirrors the spec's
+  `client/src/{core,features,services/api}` layout.
+- `/app/server` is the real Express + TS backend: `src/models` (Mongoose schemas with
+  `toJSON` transform for `_id`→`id`), `src/repositories`, `src/services`,
+  `src/controllers`, `src/routes` (mounted at `/api/v1`), `src/seed.ts`.
+- MongoDB via `MONGO_URL`/`DB_NAME` in `/app/backend/.env` (`vitality_health_app` db).
+- Frontend env: `REACT_APP_BACKEND_URL` (protected/platform-managed) and
+  `VITE_BACKEND_URL` (actually consumed by the Vite client code, in
+  `src/services/api/client.ts`) — **must be kept in sync manually**, platform only
+  auto-syncs `REACT_APP_BACKEND_URL`.
+
+## What's been implemented (as of 2026-09-03)
+- 7 screens: Dashboard, Explore Fitness, Mindfulness/Podcast, Nutrition Journal,
+  Activity Tracker, Add Action Modal (global overlay), User Profile.
+- Persistent `AppLayout` (bottom nav + FAB) via `ActionModalContext`; back buttons use
+  `navigate(-1)`.
+- REST API: `/api/v1/dashboard/metrics`, `/activity/daily|trends|water|log`,
+  `/nutrition/logs` (GET/POST), `/podcasts`, `/podcasts/:id`, `/user/profile|weight`,
+  `/user/reminders` (GET/PUT), `/community/leaderboard`.
+- Seed data: Grace (health score 84), 7-day step trends, today's breakfast/lunch meals,
+  5 podcast tracks (2 free, 2 premium, 1 daily pick), 5-member leaderboard, 3 reminders.
+- Fixed critical infra bugs: port 8010 collision with platform system process (moved to
+  8090), Vite/PostCSS ESM-vs-CJS crash (removed `"type":"module"`), `ts-node-dev
+  --respawn` orphaned processes (switched to plain `ts-node`), stale `VITE_BACKEND_URL`.
+- Tested via testing_agent: 14/14 backend endpoints pass, all 7 frontend screens verified
+  end-to-end with real seeded data, no critical issues.
+
+## Known minor items (non-blocking, deferred)
+- `POST /api/v1/nutrition/logs` returns 500 instead of 400 on invalid `mealType` enum
+  (Mongoose ValidationError not mapped to 400).
+- React Router v6 future-flag console warnings (cosmetic).
+
+## What's been implemented (as of 2026-09-03, session 2)
+- Notification Deep Links: tapping n1/n2/n3 in NotificationsSheet marks read, closes sheet,
+  and navigates: n1 -> /profile (auto-scrolls to #friends-leaderboard-section), n2 ->
+  /dashboard + opens Quick Actions modal, n3 -> /wellness/podcast.
+- Workout History: ActivityLog model gained `workouts` subdocument array (title,
+  caloriesBurned, activeMinutes, distanceKm, loggedAt). POST /activity/log now accepts
+  `title` and pushes an entry while incrementing daily aggregates in one write. Activity
+  Tracker screen shows a "Today's Workouts" section (cards or empty state) that
+  auto-refreshes via React Query invalidation.
+- Real Podcast Progress: User model gained `podcastSessionsCompleted` (seeded at 2). New
+  POST /podcasts/:id/listen increments it; AudioPlayerContext calls this on every new
+  track play. AchievementsModal's "Mindful Master" badge is now fully dynamic
+  (`min(count,3)/3`, unlocks at 3) instead of hardcoded "unlocked".
+- Confetti Moments: added `canvas-confetti` package + `/frontend/src/lib/celebration.ts`
+  (`triggerCelebration()`, 2s dual burst, brand palette). Wired into: workout logged
+  (always), water logged when crossing the 2000ml goal threshold, podcast session hitting
+  3/3, and AchievementsModal detecting a newly-unlocked badge (tracked via localStorage
+  key `vitality_unlocked_badges`) with a "🎉 Milestone Unlocked!" toast.
+- Verified Mini-Player positioning (bottom-20 left-4 right-4 z-50, truncate on title) was
+  already correct from prior session — no change needed, confirmed via testing_agent.
+- Tested via testing_agent (iteration_6): backend 20/20 pytest, frontend all 5 features
+  verified end-to-end. Fixed 1 minor cosmetic bug (uncapped "4/3" numerator after unlock).
+
+- Workout Delete (2026-09-03): ActivityLog.workouts subdocs now retain `_id` and `steps`
+  (was `_id:false`, no steps). New `DELETE /activity/workout/:workoutId` finds the entry,
+  decrements steps/caloriesBurned/distanceKm/activeMinutes by its exact values, then $pull
+  removes it; returns 404 "Workout not found" if missing. Frontend: trash icon per workout
+  card in Today's Workouts (`todays-workout-delete-{i}`), `useDeleteWorkout()` hook
+  invalidates SYNC_KEYS + shows "Workout removed" toast. Tested 100% pass (backend 6/6,
+  frontend E2E) via testing_agent iteration_8, no regressions.
+- Known non-blocking code review note: removeWorkoutEntry is findOne+findOneAndUpdate
+  (not atomic) — fine for single-user demo, would need a transaction for multi-user.
+- Iteration 9 features (2026-09-03): Undo Delete for Workouts (5s toast with Undo action
+  re-logs via useLogWorkout, ToastContext extended to support {action,duration} while
+  staying backward compatible), Session Streaks Badge (User.podcastStreakCount +
+  lastListenDate track consecutive-day podcast listening; new "Mindful Streak" badge in
+  AchievementsModal), Weekly Confetti Recap (tapping WeeklyRecapBanner fires
+  triggerCelebration()+toast, X dismiss uses stopPropagation), In-App Reminder Push Nudge
+  (new ReminderNudge.tsx mounted in AppLayout, checks enabled reminders whose time has
+  passed + not yet nudged today via localStorage, shows toast with "Got it" action).
+  Tested 100% pass (backend 5/5 new + 22/22 regression, frontend E2E) via testing_agent
+  iteration_9. Fixed 2 low-priority issues it flagged: rounded distanceKm to 1 decimal in
+  ActivityService.getDaily, and normalized POST /activity/log to return the full
+  getDaily() shape ({id,...} workouts) instead of the raw Mongo doc for API consistency.
+- Known non-blocking note: ReminderNudge's localStorage nudge key uses UTC date
+  (toISOString slice) so it resets at UTC midnight, not local midnight — low priority.
+- Auth & Onboarding flow (2026-09-03): New /login and /signup routes (shared
+  AuthScreen.tsx component, mode prop), AuthContext (localStorage-persisted
+  token+user, isAuthenticated defaults true via in-memory-only loggedOut flag so
+  fresh loads/tests never hit a login wall), ProtectedRoute wraps the existing
+  AppLayout route group in App.tsx (all 7 screens unchanged, just nested one level
+  deeper). Backend: POST /api/v1/auth/{login,signup,demo} + GET /auth/me issue JWTs
+  via jsonwebtoken (JWT_SECRET in backend/.env) — SIMPLIFIED DEMO SCOPE per explicit
+  user choice: any valid-format email/password resolves to Grace's single profile,
+  no real multi-user accounts. Google/Apple buttons + Forgot Password modal are
+  UI-only simulations (no real OAuth/email). Logout clears in-memory auth state only
+  (redirects to /login, but a hard reload auto-re-logs-in as Grace by design).
+  Tested 100% pass (backend 9/9 pytest, frontend E2E incl. regression) via
+  testing_agent iteration_10. Fixed 1 minor UX issue: added `noValidate` to the auth
+  form so the styled inline error always shows instead of native browser tooltips.
+- Map Mongoose ValidationErrors to 400 responses across controllers.
+- Opt into React Router v7 future flags.
+- Real health-score-history detail view (currently static placeholder).
+- App Settings screen content.
+- Consider making POST /podcasts/:id/listen idempotent per-track-per-day (currently
+  increments on every play click, not just unique sessions) — deferred, non-blocking.
+
+## What's been implemented (as of 2026-09-03, session 3 — fork resume)
+- Root cause of prior session's "abrupt stop": the Express backend runs via plain
+  `ts-node` with no file watcher, so the previously-coded `/dashboard/weekly-digest`
+  route was 404ing until `sudo supervisorctl restart backend` was run this session.
+  Verified 200 OK via curl post-restart.
+- Signup Name Persistence: AuthContext gained `displayName`/`setDisplayName`
+  (localStorage key `vitality_display_name`). AuthScreen signup calls
+  `setDisplayName(name)` + toasts "Welcome to Vitality, {name}!"; login toasts
+  "Welcome back, {displayName}!" if a name was previously persisted. Dashboard
+  greeting header now reads `displayName ?? data?.greetingName` (falls back to
+  "Grace" from backend if no local name yet) — cosmetic personalization layer only,
+  backend/profile data still always Grace's, per explicit demo-scope user choice.
+- Shareable Weekly Digest: WeeklyDigestModal gained a "Share Digest" button
+  (`weekly-digest-share-button`) — uses `navigator.share()` when available, falls
+  back to `navigator.clipboard.writeText()` + toast "Weekly digest copied to
+  clipboard!", or a graceful "Unable to share right now." toast if neither works.
+- Fixed low-priority toast race: ReminderNudge's initial reminder check now fires
+  after a 4s delay (was immediate on mount) so it no longer overwrites the
+  welcome/login toast that fires right after auth navigation.
+- Tested via testing_agent (iteration_11): backend 41/41 pytest (added
+  test_weekly_digest.py), frontend 100% — signup name persistence, Remember Me
+  visibility/persistence, Weekly Digest Modal + Share button (success + fallback
+  paths), Mindful Streak Flame icon, full regression on dashboard/activity/profile/
+  podcast/auth. No critical or minor bugs; only a cosmetic toast-overlap note which
+  was fixed post-test (see above, not re-tested but is a 1-line, low-risk timing
+  change).
+
+## What's been implemented (as of 2026-09-04, session 4)
+- App Settings screen (AppSettingsModal): Units segmented control (Metric ↔
+  Imperial), backed by new `UnitsContext` (localStorage `vitality_unit_system`,
+  wrapped in main.tsx) exposing `formatWeight/formatDistance/formatVolume/
+  formatHeight` — wired into Dashboard weight/water MetricCards, ActivityTracker
+  distance tile, and UserProfile height/weight cards, all updating live. 3
+  notification toggles (Hydration Reminders, Workout Streaks, Weekly Digest
+  Nudges — localStorage `vitality_notif_hydration/streaks/weekly_digest`) +
+  "Vitality v1.2.0-emerge" version footer.
+- Health Score History: new backend `GET /dashboard/health-score-history?range=
+  week|month` (DashboardService.getHealthScoreHistory, deterministic seeded
+  pseudo-random walk ending at today's real healthScore — no new DB fields).
+  New `HealthScoreTrendChart.tsx` (hand-rolled SVG, Catmull-Rom smoothed line,
+  lavender→teal gradient fill, pointer-based hover/tap tooltip) rendered inside
+  HealthScoreModal with a Week/Month toggle above the existing breakdown bars.
+- Macro Balancer badge (AchievementsModal): now dynamically wired to today's
+  `useNutritionLogs().macroBreakdown` — ratio = min(carbs%,protein%,fat%)/100,
+  unlocked at ≥95% (same threshold pattern as other badges). Was previously
+  hardcoded `locked`; all 6 achievement badges are now fully dynamic.
+- Weekly Digest Sunday Nudge: new `WeeklyDigestNudge.tsx` (mounted in AppLayout)
+  fires an 8s-delayed toast on real Sundays (`getDay()===0`) or when
+  `localStorage.vitality_force_weekly_nudge==='true'` (demo/test override),
+  respecting the Settings toggle; "View" action deep-links to
+  `/dashboard` with `location.state.openWeeklyDigest` which Dashboard.tsx
+  consumes to auto-open WeeklyDigestModal. Dedup key per calendar day.
+  Also reused this deep-link pattern from a fresh `dashboard-weekly-recap-*`
+  reminder-nudge without extra plumbing.
+- Share on X: WeeklyDigestModal gained a second button (`weekly-digest-share-x-
+  button`) opening a prefilled `twitter.com/intent/tweet` Web Intent alongside
+  the existing clipboard/native-share "Share Digest" button.
+- Fixed 2 low-priority a11y/UX items testing_agent flagged: Settings toggles now
+  expose `role="switch"` + `aria-checked`; BottomSheet now closes on Escape key.
+- Tested via testing_agent (iteration_12): backend 46/46 pytest (added
+  test_health_score_history.py), frontend 100% (all 5 new features + full
+  regression). Re-seeded DB after test (a nutrition log added during macro-badge
+  testing was cleared via `npx ts-node src/seed.ts`).
+
+## What's been implemented (as of 2026-09-04, session 5 — UI/nav fixes)
+- Shared iOS-style `Toggle.tsx` component (`components/ui/Toggle.tsx`, role="switch"
+  + aria-checked, pill track/knob) now used by both AppSettingsModal and
+  RemindersCard (previously two slightly different inline toggle implementations).
+- Dedicated Hydration flow: new `LogWaterModal.tsx` (progress bar + +250ml/+500ml
+  quick-add buttons, unit-aware via `useUnits().formatVolume`). Dashboard's Water
+  MetricCard now opens this modal instead of navigating to `/nutrition`. Quick
+  Actions "Add Drink" and Notification n2 ("Hydration Alert") both now deep-link
+  to `/dashboard` + `location.state.openLogWater` to open the same modal (n2
+  previously opened the generic Quick Actions sheet — intentionally changed).
+- ActivityTracker header gained a `ChevronLeft` back button (`activity-back-
+  button`) navigating to `/`.
+- Tested via testing_agent (iteration_13): frontend 100% (7/7 flows, no backend
+  changes this round so backend not re-tested). No bugs found; Escape-to-close on
+  BottomSheet (already fixed in session 4) confirmed still present in code.
+
+## What's been implemented (as of 2026-09-04, session 6 — 7 UI bugs/broken flows)
+- Toggle switches (Settings + Reminders): rewrote shared `Toggle.tsx` using the
+  robust `border-2 border-transparent` + `translate-x-0/5` pattern (no more
+  absolute-position edge-case clipping risk).
+- Explore screen: "SEE ALL" opens new `AllChallengesModal` (all 4 workouts) ->
+  `WorkoutDetailModal` -> "Begin Workout" now opens new `ActiveWorkoutModal`
+  (live MM:SS countdown, play/pause/stop, per-step highlight parsed from
+  workout.steps, "Finish Workout" logs + confetti + closes).
+- Topics For You: "Organic"/"Healthy Snacks Idea" open new `TopicIdeasModal`
+  (5 curated items each); "..." opens new `AllCategoriesModal` (6 tiles incl.
+  Hydration -> opens LogWaterModal, Sleep -> podcast screen).
+- Podcast screen: `AudioPlayerContext` now renders a real hidden `<audio>`
+  element and actually plays/pauses SoundHelix MP3 streams (previously UI-only
+  state, no real playback). Backend `Podcast` model gained `tags[]` +
+  `description`; category pills (New/Now/Popular/Trending) now filter by real
+  tags instead of matching everything; search now also matches description;
+  "See All" toggles bypassing the category filter; top-right search icon
+  scrolls to + focuses the search input.
+- Activity screen: **critical fix** — the step chart was completely invisible
+  (CSS percentage-height bug: bar height was a % of an auto-height flex
+  parent, which resolves to 0). Replaced with new SVG-based
+  `ActivityTrendChart.tsx` (visible bars + hover/tap tooltip) for all 3 ranges.
+  Backend `ActivityService.getTrends` now supports `range=daily` (13 synthetic
+  hourly points 8AM-8PM, deterministic weighted distribution of today's real
+  totals) and fixed the `month` label bug (was concatenated weekday abbrevs
+  like "ThuFriSat…" — now ordinal day-of-month labels like "6th","11th").
+- Quick Actions "Set Reminder" was dead code (passed unused `scrollToReminders`
+  state) — UserProfile.tsx now handles it and scrolls to `#reminders-section`.
+- `AddWorkoutModal` expanded from 3 to 7 presets (Walking, Outdoor Run, Gym
+  Strength Session, HIIT Cardio Blast, Vinyasa Yoga Flow, Cycling/Spin, Pilates
+  Core) + a "Custom Workout" accordion (title/duration/calories manual entry).
+- Tested via testing_agent (iteration_14): backend 100%, frontend 100% (7/7 bug
+  fixes verified + full regression). Fixed 1 minor cosmetic code-review note
+  post-test: lowered Toast z-index below BottomSheet's so reminder/hydration
+  toasts no longer visually overlap open modal content (e.g. AddWorkoutModal's
+  custom form). The Play/Pause "timer kept ticking" note was confirmed to be a
+  Playwright force-click timing artifact, not a real bug (self-verified: pause
+  correctly freezes the countdown).
+
+## What's been implemented (as of 2026-09-04, session 7 — 6 enhancements/polish)
+- Calorie MetricCard now has an amber/orange gradient Flame icon (was the only
+  metric card without one).
+- ActiveWorkoutModal timer wrapped in a circular SVG progress ring (teal→lavender
+  gradient stroke, `stroke-dashoffset` animated smoothly each second, no
+  rounding so it doesn't jump in whole-percent steps).
+- Custom Reminder Times: RemindersCard time is now a tap-to-edit `<input
+  type="time">` persisted to localStorage (`vitality_reminder_times`, id->time
+  map), overriding the seeded display time.
+- Podcast Resume Playback: `AudioPlayerContext` persists `currentTime` per track
+  to localStorage (`vitality_podcast_progress`) on every `timeupdate`, seeks
+  back to it when a track is re-selected, and both grid episode cards AND the
+  Daily Pick banner show a thin "% listened" progress bar (3% floor so tiny
+  amounts are still visible).
+- Hydration 7-Day Trend: new SVG `WaterTrendChart.tsx` in `LogWaterModal`
+  showing 7 daily bars vs. a dashed 2000ml goal line (met days darker). New
+  backend `GET /activity/water-trend` (`ActivityService.getWaterTrend`).
+- Workout History Detail: tapping a "Today's Workouts" item opens new
+  `WorkoutSummaryModal` (minutes/kcal/exertion-zone heuristic + 3-stage
+  Warm-up/Main/Cool-down breakdown proportional to activeMinutes).
+- **Bug found+fixed mid-session**: podcast play/pause toggle was broken on the
+  2nd click due to a React StrictMode double-invoke of an impure `setState`
+  functional updater (calling `setIsPlaying` as a side effect inside
+  `setCurrentTrack`'s updater — double-invoked in dev, netting no visible
+  toggle). Refactored `playTrack` to read `currentTrack` from closure instead.
+  Also fixed: workout list item was an invalid nested `<button>`-in-`<button>`
+  (now a `div role="button"`), and progress-bar rounding edge cases.
+- Tested via testing_agent (iteration_15 found 4 issues -> fixed -> iteration_16
+  retest 100% pass, 4/4 verified).
+
+## What's been implemented (as of 2026-09-05, session 8 — verify podcast resume/autoplay)
+- Verified the "Resume" Chip banner and "Autoplay Next" code left uncompiled/untested
+  at the end of session 7 (already present in `MindfulnessPodcast.tsx` /
+  `AudioPlayerContext.tsx`). Resume chip (data-testid `podcast-resume-chip`) shows
+  "Resume: <title>" + "% listened" above the Wellness section, only when a last-played
+  track exists, isn't the currently loaded track, and progress is >5s and <95% of
+  duration; tapping it seeks/resumes playback correctly. `handleEnded` in
+  AudioPlayerContext auto-advances to the next non-premium track in the podcasts list
+  when one finishes, and simply stops if the finished track was the last non-premium one.
+- `yarn typecheck` clean on both `/app/frontend` and `/app/server`, backend restarted.
+- Tested via testing_agent (iteration_17): frontend-only, 13/13 targeted assertions
+  passed (resume chip all eligibility branches, autoplay-next advance + stop-at-end,
+  regression on category filter/search/paywall/daily-pick/progress bars). No bugs found.
+
+## What's been implemented (as of 2026-09-05, session 9 — 4 feature enhancements)
+- Reminder Time Sync: `PUT /api/v1/user/reminders/:id` now accepts `{enabled?, time?}`
+  (was enabled-only). `RemindersCard.tsx` persists edited times to the backend on
+  blur/change (still caches to localStorage `vitality_reminder_times` as an offline
+  fallback), so custom times survive a fresh login/device instead of only living in
+  browser storage.
+- Weekly Digest PDF: `WeeklyDigestModal` gained a "Download PDF" button (Printer icon,
+  `weekly-digest-download-pdf-button`) calling `window.print()`. New `#weekly-digest-
+  print-area` + `.no-print` `@media print` rules in `index.css` hide the backdrop/close/
+  share buttons and print only the digest content.
+- Workout Intensity Chart: new backend `GET /api/v1/activity/intensity-trend`
+  (`ActivityService.getIntensityTrend`) aggregates all workouts logged in the last 7
+  days into 4 zones (Light <3, Moderate 3-6, Hard 6-9, Peak ≥9 kcal/min) by
+  activeMinutes. New `WorkoutIntensityChart.tsx` (segmented color bar + legend) renders
+  on the Activity screen below "Today's Workouts", with an empty state when no workouts
+  logged that week.
+- Streak Freeze: `User` model gained `streakFreezeAvailable` (default true, one token)
+  and `streakFreezeEquipped` (default false). New `PUT /api/v1/user/streak-freeze
+  {equipped}` (rejects equipping with 400 if no freeze available). `PodcastService.
+  logListen` now checks: if exactly 1 day was missed AND the freeze is equipped+
+  available, the streak continues (+1) and the freeze is consumed instead of resetting
+  to 1. `AchievementsModal`'s "Mindful Streak" badge card gained a Snowflake + toggle
+  row (`streak-freeze-toggle`) to equip/unequip, with a confirmation toast. `Toggle.tsx`
+  gained an optional `disabled` prop (used when freeze already consumed).
+- `yarn typecheck` clean on both `/app/frontend` and `/app/server` throughout.
+- Tested via testing_agent (iteration_18): backend 9/9 pytest (1 intentionally skipped,
+  requires DB manipulation to simulate missed-day), frontend 4/4 features verified E2E,
+  no critical/UI bugs. Fixed 1 minor issue post-test: `PUT /user/streak-freeze` now
+  returns 400 (was 500) when equipping while unavailable.
+
+## What's been implemented (as of 2026-09-07, session 10 — real multi-tenant auth)
+- **Major architecture change** (explicit user approval): converted from single-hardcoded-
+  demo-user to real multi-tenant JWT auth with bcrypt-hashed passwords. `User` model
+  gained `passwordHash` (required, stripped from all API responses via custom `toJSON`
+  transform — verified no leak). New `src/middleware/auth.ts` (`requireAuth`) extracts
+  `req.userId` from the Bearer token; `/dashboard`, `/activity`, `/nutrition`, `/user`
+  routes now require it (401 without a token). `POST /podcasts/:id/listen` requires auth;
+  podcast catalog list/detail and `/community` remain public.
+- Every service (`ActivityService`, `NutritionService`, `ReminderService`, `UserService`,
+  `DashboardService`, `PodcastService.logListen`) now takes `userId` as its first param
+  instead of `userRepository.findFirst()` (removed entirely) — all user data is now
+  correctly scoped per authenticated account instead of always resolving to "the first
+  user in the DB".
+- Grace's seed re-keyed to `grace.user@email.com` / `12345678` (bcrypt hash), 100% of her
+  rich data (steps, streak, nutrition logs, workout history) preserved. Old email
+  `grace@vitality.app` no longer works.
+- `POST /api/v1/auth/register` creates a brand-new fully isolated user (0 steps/water,
+  empty history, default macro goals) and copies Grace's 3 default reminders as a
+  starting template (`ReminderRepository.copyTemplateForUser`). Duplicate email → 409.
+- `POST /api/v1/auth/login` checks bcrypt hash against any registered user (401 on wrong
+  password/unknown email). `POST /api/v1/auth/social {provider}` simulates Google/Apple
+  OAuth by creating/reusing one dedicated demo account per provider (idempotent), no real
+  OAuth — Auth screen shows a "Signed in with Google/Apple" toast before redirecting.
+- Auth screen gained a one-tap "Fill Demo Credentials" button (`auth-fill-demo-button`)
+  that auto-fills + auto-submits Grace's real credentials via the actual `/auth/login`
+  path (not the `/auth/demo` shortcut), proving the credentialed multi-user login works.
+- Frontend `apiClient` gained a request interceptor attaching `Authorization: Bearer
+  <token>` from localStorage on every call (previously never sent — auth was purely
+  cosmetic). `AuthContext` gained `isBootstrapping` so `ProtectedRoute` no longer renders
+  child queries before the Remember-Me auto-login resolves (avoids a 401 race on fresh
+  page loads).
+- `yarn typecheck` clean on both frontend and server. Tested via testing_agent
+  (iteration_19): backend 10/10 pytest (new `test_multi_tenant_auth.py`), frontend 6/6
+  flows (demo login, registration isolation, duplicate rejection, wrong password, Google/
+  Apple social isolation + idempotency, Grace demo shortcut regression). No bugs found.
+  Cleaned up all test-created accounts post-test; DB now contains only Grace.
+
+## What's been implemented (as of 2026-09-07, session 11 — leaderboard, profile goals, session expiry, forgot password)
+- **Dynamic leaderboard**: `CommunityService.getLeaderboard(userId)` merges the 4 static
+  friend records with the LIVE authenticated user's name/avatar/today's steps (no more
+  hardcoded Grace row in the seed), re-sorted by steps with fresh ranks. `(You)` badge/
+  highlight already existed in `LeaderboardCard.tsx` and now works for any account.
+  `/community` routes moved behind `requireAuth`.
+- **Per-user daily targets**: `User` model gained `stepGoal` (default 10000, Grace=15000),
+  `waterGoal` (ml, default 2000), `calorieGoal` (default 2000), `macros{protein,carbs,fat}`
+  grams (defaults 90/250/70), all editable via the existing `PUT /user/profile` (widened).
+  `ActivityService`, `DashboardService`, `NutritionService` now read these from the user
+  doc instead of hardcoded constants, so Dashboard rings/Activity progress/hydration goal
+  line/nutrition macro bars update immediately via react-query cache invalidation — no
+  reload needed. `EditProfileModal.tsx` gained an Avatar URL field + a "Daily Targets"
+  section (steps/water/calorie/macro goal inputs).
+- **Session expiry interceptor**: `apiClient` response interceptor clears `vitality_auth`
+  from localStorage and dispatches a `vitality:session-expired` custom event on any 401
+  from a protected endpoint (excludes login/register/social/demo/forgot-password/reset-
+  password so a wrong-password attempt shows the normal inline error, not this flow).
+  New `SessionExpiryHandler.tsx` (mounted in `App.tsx`) shows a toast ("Your session has
+  expired. Please sign in again.") and redirects to `/login`; `AuthContext` also listens
+  to clear its own state.
+- **Forgot/reset password**: real `POST /auth/forgot-password` (crypto random token, 1hr
+  expiry stored on the User doc, logged to console, returned directly in the response as
+  `resetToken` for self-service demo testing — no email enumeration leak for unknown
+  emails) and `POST /auth/reset-password` (validates token+expiry, bcrypt-hashes the new
+  password). `ForgotPasswordModal.tsx` rewritten as a 3-step flow: request email → token
+  pre-filled + copy button + new-password field → success. `resetPasswordToken`/
+  `resetPasswordExpires` stripped from all API responses (same toJSON transform as
+  `passwordHash`).
+- `yarn typecheck` clean on both frontend and server throughout. Tested via testing_agent
+  (iteration_20): backend 8/8 pytest, frontend all critical flows passing (leaderboard
+  merge + new-user isolation + 401-without-token, daily-targets live reflection across
+  Dashboard/Activity/Nutrition, session-expiry toast+redirect vs. wrong-password no-op,
+  full forgot/reset-password round trip incl. invalid-token error). No bugs found.
+  Test-created accounts purged via reseed; Grace restored to default seeded state.
+
+## What's been implemented (as of 2026-09-08, session 12 — presets, password change, avatar picker, leaderboard toggle)
+- **Goal presets**: `EditProfileModal.tsx` gained 3 preset chips (Weight Loss/Maintenance/
+  Muscle Gain, exact macro/calorie/water/step values from spec) that auto-fill the Daily
+  Targets inputs (still editable/savable after); manually editing any field deselects the
+  active preset.
+- **In-app password change**: `PUT /api/v1/user/password` (`AuthService.changePassword`,
+  bcrypt-verifies current password, enforces 8+ char new password, reuses
+  `userRepository.resetPassword` to persist). New "Change Password" row in Profile >
+  Activity & Settings opens `ChangePasswordModal.tsx` (current/new/confirm, client-side
+  8-char + match validation, inline error on wrong current password).
+- **Avatar upload/picker** (explicit user choice: Base64-in-Mongo, NOT Object Storage):
+  replaced the raw Avatar URL text field with an "Upload Photo" button (FileReader +
+  canvas resize-to-200px + JPEG quality 0.7 → small base64 data URI) plus 5 tap-to-select
+  preset icon avatars (bolt/heart/star/drop/flame, inline SVG data URIs, no external
+  assets/dependencies).
+- **Leaderboard Today/This Week toggle**: `CommunityMember` model gained a separate
+  `weeklySteps` field per friend (deliberately NOT dailySteps×7, so rankings genuinely
+  reorder between tabs); `CommunityService.getLeaderboard(userId, range)` sums the user's
+  real last-7-days `ActivityLog` steps for the "week" view. `LeaderboardCard.tsx` gained
+  a segmented Today/This Week toggle.
+- **Bug found & fixed post-testing_agent**: the session-expiry 401 interceptor was
+  blanket-treating a wrong-current-password 401 from `PUT /user/password` as an expired
+  session, logging the user out mid-flow instead of showing the inline error. Fixed by
+  adding `/user/password` to the interceptor's excluded-endpoints whitelist in
+  `client.ts`; re-verified via Playwright script (wrong password → inline error, stays
+  on page; correct password → success + modal closes).
+- `yarn typecheck` clean on both frontend and server. Tested via testing_agent
+  (iteration_21): backend 11/11 pytest, frontend ~90% initially (1 HIGH-priority bug in
+  Change Password flow, fixed and self-verified above; goal presets, avatar picker, and
+  leaderboard toggle all passed with exact expected numbers). Grace's credentials/goals
+  restored to defaults after testing.
+
+## Pre-launch QA audit (2026-09-08, session 13)
+- User requested a comprehensive 6-suite audit (Grace demo integrity, registration
+  isolation, dynamic leaderboard, profile settings, session-expiry/forgot-password,
+  codebase hygiene/security). Before running it, updated Grace's seeded "today" steps
+  from 9890 → **15290** in `seed.ts` to match the user's repeatedly stated expectation
+  (also re-verified: Grace now ranks #1 on the Today leaderboard, above Liam's 12430).
+- `yarn typecheck`: 0 errors on both frontend and server (re-verified independently by
+  testing_agent too).
+- testing_agent (iteration_22): **backend 23/23 pytest, frontend 100% of critical flows**
+  — Grace login/data integrity, new-account isolation (0 steps, copied reminder
+  templates, no cross-contamination), leaderboard Today (Grace #1 @ 15290) vs Week
+  (Sofia #1 @ 81200) re-ordering + new-user replacing Grace on their own view, goal
+  presets + avatar SVG persistence, password-change round-trip, session-expiry 401
+  redirect+toast+localStorage-clear, forgot/reset-password round-trip, and recursive
+  passwordHash/resetPasswordToken/resetPasswordExpires leak check across 5 endpoints.
+  **Zero bugs found.** Grace's password confirmed reverted to `12345678` at end of run.
+- One code-review note surfaced by testing_agent (not a bug, a production hardening
+  note): `POST /auth/forgot-password` returns the `resetToken` directly in the response
+  body — intentional per the user's explicit approval for a self-service demo flow, but
+  should be removed in favor of real email delivery before any real production launch.
+- Cleaned up 7 QA test accounts created during the audit; DB reseeded to Grace-only.
+
+## Final polish batch (2026-09-08, session 14)
+- User requested 3 last polish items: Leaderboard Podium Visual, Avatar Crop Tool,
+  Weekly Digest Preset Callout. Fork picked up mid-implementation (podium + crop code
+  already written, digest callout pending, none compiled/tested).
+- `LeaderboardCard.tsx`: `RankBadge` renders `lucide-react` `Trophy` (gold, rank 1) and
+  `Medal` (silver rank 2 / bronze rank 3) icons instead of plain numbers; ranks 4+ stay
+  numeric. Works correctly across both Today/This Week ranges.
+- `EditProfileModal.tsx`: uploading a photo now goes through an intermediate crop step
+  (`cropSrc`/`zoom` state) — circular preview frame, zoom slider (1x-3x), Cancel/Use
+  Photo actions. `cropAndCompress()` does a canvas center-crop scaled by zoom, output
+  200x200 JPEG data URL (still Base64-in-Mongo per user's standing choice, no Object
+  Storage).
+- `WeeklyDigestModal.tsx`: added a preset callout badge ("Following: <Preset> Plan")
+  using `matchGoalPreset()` (`lib/goalPresets.ts`) against the live `useUserProfile()`
+  data; hidden automatically when goals don't exactly match any preset.
+- `yarn typecheck` clean (frontend + server). testing_agent (iteration_23): **100%
+  frontend pass**, all 3 features verified end-to-end (podium icons both ranges, crop
+  zoom+apply+cancel+persistence-after-reload, callout shown for Weight Loss preset and
+  correctly hidden after a manual goal edit). Zero bugs. One non-bug polish note: the
+  on-screen crop preview's CSS `transform: scale()` and the exported canvas crop math
+  are visually close but not pixel-identical at high zoom — left as-is (not a bug).

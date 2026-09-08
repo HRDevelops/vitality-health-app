@@ -1,0 +1,41 @@
+{
+  "summary": "Full E2E test of 4 new features: (1) Undo Delete for Workouts, (2) Session Streaks Badge (Mindful Streak), (3) Weekly Confetti Recap, (4) In-App Reminder Push Nudge. Backend: 5/5 new tests + 22/22 regression tests pass. Frontend: all 4 features verified working on live preview (mobile 390x844). Undo flow fully restores aggregates (steps, calories, distance, activeMinutes) and workouts count; expiring toast keeps deletion. Podcast listen bumps streak 2->3 on first listen (lastListenDate=yesterday seeded) and stays at 3 for same-day repeat while sessionsCompleted keeps incrementing. Mindful Streak badge shows 'Unlocked' with '3-Day Zen Streak — 3/3 days in a row'. Weekly banner click fires confetti+toast '🎉 New personal best!'; X dismiss stops propagation (no toast). Reminder Nudge fires '⏰ Log your meals — Track breakfast before 9am' with 'Got it' action button (current UTC ~20:00, both 08:00 and 18:00 reminders past; disabled 14:00 'Drink water' never fired).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/v1/activity/log", "issue": "Response returns raw Mongo doc with _id (ObjectId serialized as hex) instead of normalized {id, ...} for workouts subdocuments. GET /activity/daily correctly returns id. Frontend works via cache invalidation + refetch, but the direct POST response is inconsistent with the rest of the API contract."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ActivityTracker Today's Workouts", "issue": "Distance shown as raw float '10.799999999999999 km' due to unrounded aggregate. Should be rounded to 1 decimal for display (backend also returns this exact value).", "selector": "activity distance stat", "priority": "LOW"},
+      {"component": "ActivityTracker workout list vs fixed bottom nav", "issue": "When the Today's Workouts row sits behind the fixed bottom nav bar, the trash button (data-testid='todays-workout-delete-0') is visually rendered but click coordinates pass through the fixed nav bar and hit the Profile tab instead. Discovered while automating; only triggers if the row happens to land in the bottom nav area (y > ~780 on 844 viewport). Users would normally scroll before tapping. Not tied to new feature but was surfaced by this iteration.", "selector": "todays-workout-delete-0", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_new_features.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/iter9_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Round distanceKm to 1 decimal at API boundary or display layer to avoid '10.799999999999999 km'.",
+    "(Optional) Normalize POST /activity/log workouts subdocs to expose {id, ...} instead of {_id, ...} for API contract consistency."
+  ],
+  "critical_code_review_comments": [
+    "PodcastService.logListen correctly handles same-day (streak stays), consecutive-day (+1), and gap (reset to 1). Uses todayString()/addDaysString() from utils/date.ts — timezone consistent server-side.",
+    "ReminderNudge.tsx uses ISO date slice for localStorage key so it resets at UTC midnight; if user's local day rolls over before UTC midnight, they may see yesterday's already-nudged reminders again. Consider using local date string. Low priority.",
+    "WeeklyRecapBanner properly uses e.stopPropagation() on the dismiss button; verified end-to-end.",
+    "ActivityTracker.handleDeleteWorkout captures the workout object BEFORE the mutation call and reuses it in the Undo action — good pattern to survive optimistic re-renders."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_new_features.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "None - single seeded user Grace, no auth",
+  "seed_data_creation": "DB was re-seeded via `npx ts-node src/seed.ts` after the test run so it is pristine (podcastStreakCount=2, lastListenDate=yesterday, no workouts today) for the next session. localStorage keys 'vitality_reminder_nudged_*' and 'vitality_unlocked_badges' may be set in the browser session from this test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 4 iteration-9 features are working end-to-end. New backend regression tests live at /app/backend/tests/test_new_features.py (5 tests, all pass). Note that Playwright must scroll delete-button into view-center (not near-bottom) before clicking, otherwise the fixed bottom nav intercepts the click. Reminder Nudge is time-sensitive — for reliable Playwright coverage of the 08:00 reminder, run tests after 08:00 UTC (or seed additional past-time reminders). No known regressions."
+}

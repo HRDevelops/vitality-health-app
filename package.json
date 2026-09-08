@@ -1,0 +1,14 @@
+{
+  "name": "vitality-health-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n CLIENT,SERVER -c blue,green \"yarn --cwd frontend dev\" \"yarn --cwd server dev\"",
+    "dev:client": "yarn --cwd frontend dev",
+    "dev:server": "yarn --cwd server dev",
+    "seed": "yarn --cwd server seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

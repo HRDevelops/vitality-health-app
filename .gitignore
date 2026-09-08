@@ -4,3 +4,13 @@ build/
 .env
 .DS_Store
 *.log
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

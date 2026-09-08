@@ -1,0 +1,23 @@
+{
+  "summary": "Iteration 20: Full backend+frontend testing of 4 new features (dynamic leaderboard, per-user daily targets, 401 session-expiry interceptor, forgot/reset-password flow). Backend: 8/8 pytest tests passing. Frontend: all critical Playwright flows passing (Grace login, leaderboard with 5 entries + (You) badge, EditProfile modal with all 8 new data-testid fields, session-expiry interceptor redirects+toast+localStorage clear, wrong-password does NOT trigger expiry toast, forgot-password 3-step flow with pre-filled token, copy button, invalid-token error, successful reset + old-pw 401 + new-pw 200). Grace's password and profile goals were restored to defaults after testing.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Backend response envelope is FLAT (e.g. login returns {token, user} at top level, not wrapped in {data: ...}). Prior test fixtures in system prompt template assumed a 'data' key; adjusted accordingly. Consistent, but worth documenting in API docs.",
+    "POST /api/v1/auth/reset-password expects body field 'newPassword' (camelCase) while some ecosystems expect 'password'. Not a bug, but worth surfacing in API contract.",
+    "GET /api/v1/user/profile confirmed to omit passwordHash, resetPasswordToken, resetPasswordExpires — good security."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "100% critical flows"},
+  "test_credentials": "Grace: grace.user@email.com / 12345678 (restored after test)",
+  "seed_data_creation": "Created 2 TEST_ prefixed users (TEST_leader_* and TEST_reset_*) during backend tests; each test also creates independent TEST_ users. These persist in DB. Main agent may run `cd /app/server && npx ts-node src/seed.ts` to purge if desired.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 4 features verified. Backend uses flat JSON responses (no 'data' envelope). reset-password body key is 'newPassword'. Grace's profile+password were restored via API after testing. Some TEST_ users remain from registration-based tests (leaderboard-new-user and forgot/reset flow); safe to reseed.",
+  "rca of the issue": "N/A - no issues found."
+}
