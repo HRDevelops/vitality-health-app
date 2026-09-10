@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .post<AuthSession>('/auth/demo')
       .then(({ data }) => {
         setSession(data);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: data.user }));
       })
       .catch(() => setLoggedOut(true))
       .finally(() => setIsBootstrapping(false));
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const persist = (data: AuthSession) => {
     setSession(data);
     setLoggedOut(false);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: data.user }));
   };
 
   const setRememberMe = (value: boolean) => {
@@ -101,7 +101,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(data);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await apiClient.post('/auth/logout');
+    } catch (e) {
+      console.error('Logout failed', e);
+    }
     localStorage.removeItem(STORAGE_KEY);
     setSession(null);
     setLoggedOut(true);

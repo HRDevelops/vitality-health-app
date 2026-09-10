@@ -13,6 +13,7 @@ const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 export class AuthService {
   async register(name: string, email: string, password: string) {
     if (!email || !password) throw new Error('Email and password are required');
+    if (password.length < 8) throw new Error('Password must be at least 8 characters');
     const normalizedEmail = email.toLowerCase().trim();
     const existing = await userRepository.findByEmail(normalizedEmail);
     if (existing) throw new Error('An account with this email already exists');
@@ -90,7 +91,7 @@ export class AuthService {
 
   async resetPassword(token: string, newPassword: string) {
     if (!token || !newPassword) throw new Error('Token and new password are required');
-    if (newPassword.length < 6) throw new Error('Password must be at least 6 characters');
+    if (newPassword.length < 8) throw new Error('Password must be at least 8 characters');
 
     const user = await userRepository.findByResetToken(token);
     if (!user || !user.resetPasswordExpires || user.resetPasswordExpires.getTime() < Date.now()) {

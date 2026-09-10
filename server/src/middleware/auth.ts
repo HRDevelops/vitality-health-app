@@ -6,9 +6,14 @@ export interface AuthedRequest extends Request {
 }
 
 export function requireAuth(req: AuthedRequest, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization ?? '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  let token = req.cookies?.token;
+  if (!token) {
+    const authHeader = req.headers.authorization ?? '';
+    token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  }
+
   if (!token) return res.status(401).json({ message: 'Not authenticated' });
+
   try {
     const payload = verifyAuthToken(token);
     req.userId = payload.sub;
