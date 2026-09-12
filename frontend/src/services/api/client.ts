@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+// const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8010';
 const AUTH_STORAGE_KEY = 'vitality_auth';
 
 export const apiClient = axios.create({
@@ -9,7 +10,30 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-const AUTH_ENDPOINT_PATHS = ['/auth/login', '/auth/register', '/auth/social', '/auth/demo', '/auth/forgot-password', '/auth/reset-password', '/user/password'];
+// Attach Bearer token from localStorage as a fallback if cookies are dropped across origins/proxies
+apiClient.interceptors.request.use((config) => {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    const token = raw ? JSON.parse(raw).token : null;
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // ignore malformed storage
+  }
+  return config;
+});
+
+const AUTH_ENDPOINT_PATHS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/social',
+  '/auth/demo',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/user/password',
+];
 
 apiClient.interceptors.response.use(
   (response) => response,

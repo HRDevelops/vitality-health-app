@@ -7,10 +7,18 @@ export function createApp() {
   const app = express();
   app.use(cookieParser());
 
+  // const allowedOrigins = [
+  //   'http://localhost:3000',
+  //   process.env.FRONTEND_URL
+  // ].filter(Boolean);
   const allowedOrigins = [
-    'http://localhost:3000',
-    process.env.FRONTEND_URL
-  ].filter(Boolean);
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:8000',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+  process.env.FRONTEND_URL
+].filter(Boolean);
 
   app.use(cors({
     origin: function (origin, callback) {

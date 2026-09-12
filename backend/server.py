@@ -22,11 +22,20 @@ NODE_PORT = os.environ.get("NODE_SERVER_PORT", "8010")
 
 app = FastAPI(title="Vitality API Gateway")
 
+# allowed_origins = [
+#     "http://localhost:3000",
+# ]
+# if os.environ.get("FRONTEND_URL"):
+#     allowed_origins.append(os.environ.get("FRONTEND_URL"))
 allowed_origins = [
     "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
 ]
 if os.environ.get("FRONTEND_URL"):
-    allowed_origins.append(os.environ.get("FRONTEND_URL"))
+    allowed_origins.append(os.environ.get("FRONTEND_URL")) 
 
 app.add_middleware(
     CORSMiddleware,
