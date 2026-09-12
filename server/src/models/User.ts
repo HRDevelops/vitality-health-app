@@ -24,6 +24,8 @@ export interface IUser extends Document {
   streakFreezeAvailable: boolean;
   streakFreezeEquipped: boolean;
   strikeCount: number;
+  universityId?: Types.ObjectId | null;
+  teamId?: Types.ObjectId | null;
   resetPasswordToken: string | null;
   resetPasswordExpires: Date | null;
   createdAt: Date;
@@ -60,6 +62,8 @@ const UserSchema = new Schema<IUser>(
     streakFreezeAvailable: { type: Boolean, default: true },
     streakFreezeEquipped: { type: Boolean, default: false },
     strikeCount: { type: Number, default: 0 },
+    universityId: { type: Schema.Types.ObjectId, ref: 'University', default: null, index: true },
+    teamId: { type: Schema.Types.ObjectId, ref: 'Team', default: null, index: true },
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
   },

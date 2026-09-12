@@ -8,6 +8,7 @@ import communityRoutes from './communityRoutes';
 import authRoutes from './authRoutes';
 import healthMetricRoutes from './healthMetricRoutes';
 import moveActivityRoutes from './moveActivityRoutes';
+import leaderboardRoutes from './leaderboardRoutes';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
@@ -17,6 +18,7 @@ router.get('/health', (_req, res) => res.json({ status: 'ok' }));
 router.use('/dashboard', requireAuth, dashboardRoutes);
 router.use('/activity', requireAuth, activityRoutes);
 router.use('/move', requireAuth, moveActivityRoutes);
+router.use('/leaderboards', requireAuth, leaderboardRoutes);
 router.use('/nutrition', requireAuth, nutritionRoutes);
 router.use('/podcasts', podcastRoutes);
 router.use('/user', requireAuth, userRoutes);

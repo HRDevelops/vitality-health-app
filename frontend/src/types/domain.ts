@@ -276,4 +276,52 @@ export interface LogMoveActivityInput {
   loggedAt?: string;
 }
 
+export type LeaderboardTier = 'INDIVIDUAL' | 'TEAMS' | 'UNIVERSITIES';
+export type LeaderboardTimeframe = 'weekly' | 'all_time';
+
+export interface University {
+  id: string;
+  name: string;
+  shortCode: string;
+  logoUrl?: string;
+  totalKm: number;
+  totalCo2Kg: number;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  universityId: string | University;
+  captainId?: string;
+  memberCount: number;
+  totalKm: number;
+  totalCo2Kg: number;
+}
+
+export interface CampusLeaderboardEntry {
+  rank: number;
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  logoUrl?: string;
+  subtitle?: string;
+  universityName?: string;
+  universityShortCode?: string;
+  teamName?: string;
+  memberCount?: number;
+  totalKm: number;
+  totalCo2Kg: number;
+  activityCount: number;
+  isCurrent?: boolean;
+}
+
+export interface LeaderboardResponse {
+  entries: CampusLeaderboardEntry[];
+  currentUserEntry?: CampusLeaderboardEntry | null;
+  currentTeamEntry?: CampusLeaderboardEntry | null;
+  currentUniversityEntry?: CampusLeaderboardEntry | null;
+  timeframe: LeaderboardTimeframe;
+  tier: LeaderboardTier;
+}
+
 
