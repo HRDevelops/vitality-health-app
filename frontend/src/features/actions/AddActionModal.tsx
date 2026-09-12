@@ -1,4 +1,4 @@
-import { Scale, Droplet, Utensils, Dumbbell, AlarmClock, ChevronRight, X } from 'lucide-react';
+import { Scale, Droplet, Utensils, Dumbbell, AlarmClock, ChevronRight, X, Activity, Droplets } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface AddActionModalProps {
@@ -7,6 +7,16 @@ interface AddActionModalProps {
 
 export default function AddActionModal({ onClose }: AddActionModalProps) {
   const navigate = useNavigate();
+
+  const handleLogBP = () => {
+    onClose();
+    navigate('/health', { state: { openLogBP: true } });
+  };
+
+  const handleLogGlucose = () => {
+    onClose();
+    navigate('/health', { state: { openLogGlucose: true } });
+  };
 
   const handleAddMeal = () => {
     onClose();
@@ -57,6 +67,28 @@ export default function AddActionModal({ onClose }: AddActionModalProps) {
           <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">What would you like to log today?</p>
         </div>
         <div className="grid grid-cols-2 gap-gutter">
+          <button
+            onClick={handleLogBP}
+            className="group flex flex-col items-center justify-center rounded-2xl border border-transparent bg-surface-container-low p-card-padding shadow-sm transition-all duration-200 hover:border-primary-fixed-dim hover:bg-surface-container hover:shadow-md"
+            data-testid="action-log-bp"
+          >
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-container shadow-lg transition-transform duration-200 group-hover:scale-110 text-white">
+              <Activity size={28} />
+            </div>
+            <span className="font-headline-md text-headline-md text-on-surface transition-colors group-hover:text-primary">Log BP</span>
+            <span className="mt-0.5 text-[11px] text-on-surface-variant">Blood Pressure</span>
+          </button>
+          <button
+            onClick={handleLogGlucose}
+            className="group flex flex-col items-center justify-center rounded-2xl border border-transparent bg-surface-container-low p-card-padding shadow-sm transition-all duration-200 hover:border-secondary-fixed-dim hover:bg-surface-container hover:shadow-md"
+            data-testid="action-log-glucose"
+          >
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-secondary-fixed shadow-lg transition-transform duration-200 group-hover:scale-110 text-white">
+              <Droplets size={28} />
+            </div>
+            <span className="font-headline-md text-headline-md text-on-surface transition-colors group-hover:text-secondary">Log Glucose</span>
+            <span className="mt-0.5 text-[11px] text-on-surface-variant">Blood Sugar</span>
+          </button>
           <button
             onClick={handleUpdateWeight}
             className="group flex flex-col items-center justify-center rounded-2xl border border-transparent bg-surface-container-low p-card-padding shadow-sm transition-all duration-200 hover:border-primary-fixed-dim hover:bg-surface-container hover:shadow-md"

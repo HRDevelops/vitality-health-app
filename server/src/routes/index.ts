@@ -6,6 +6,7 @@ import podcastRoutes from './podcastRoutes';
 import userRoutes from './userRoutes';
 import communityRoutes from './communityRoutes';
 import authRoutes from './authRoutes';
+import healthMetricRoutes from './healthMetricRoutes';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
@@ -18,6 +19,7 @@ router.use('/nutrition', requireAuth, nutritionRoutes);
 router.use('/podcasts', podcastRoutes);
 router.use('/user', requireAuth, userRoutes);
 router.use('/community', requireAuth, communityRoutes);
+router.use('/health-metrics', requireAuth, healthMetricRoutes);
 router.use('/auth', authRoutes);
 
 export default router;

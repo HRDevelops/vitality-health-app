@@ -188,3 +188,56 @@ export interface IntensityTrend {
   totalMinutes: number;
   totalWorkouts: number;
 }
+
+export type HealthMetricType = 'blood_pressure' | 'blood_glucose';
+export type HealthMetricUiToken = 'Fern' | 'Saffron' | 'Clay';
+export type GlucoseUnit = 'MG_DL' | 'MMOL_L';
+
+export interface HealthMetric {
+  id: string;
+  userId: string;
+  type: HealthMetricType;
+  systolic?: number;
+  diastolic?: number;
+  pulse?: number;
+  glucoseValue?: number; // stored in mg/dL
+  glucoseUnit: GlucoseUnit;
+  isFasting: boolean;
+  category: string;
+  uiToken: HealthMetricUiToken;
+  isCriticalAlert: boolean;
+  notes?: string;
+  loggedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface HealthMetricSummary {
+  latestBp: HealthMetric | null;
+  latestGlucose: HealthMetric | null;
+  averages: {
+    avgSystolic: number | null;
+    avgDiastolic: number | null;
+    avgPulse: number | null;
+    avgGlucose: number | null;
+  };
+  categoryDistributions: {
+    bloodPressure: Record<string, number>;
+    bloodGlucose: Record<string, number>;
+  };
+  highestRiskFlag: HealthMetricUiToken;
+  totalReadings: number;
+}
+
+export interface CreateHealthMetricInput {
+  type: HealthMetricType;
+  systolic?: number;
+  diastolic?: number;
+  pulse?: number;
+  glucoseValue?: number;
+  glucoseUnit?: GlucoseUnit;
+  isFasting?: boolean;
+  notes?: string;
+  loggedAt?: string;
+}
+

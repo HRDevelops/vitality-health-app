@@ -1,10 +1,10 @@
-import { Home, Compass, Activity, User, Plus } from 'lucide-react';
+import { Home, HeartPulse, Activity, User, Plus } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useActionModal } from '../context/ActionModalContext';
 
 const tabs = [
   { to: '/dashboard', label: 'Home', icon: Home, testId: 'nav-home' },
-  { to: '/explore', label: 'Explore', icon: Compass, testId: 'nav-explore' },
+  { to: '/health', label: 'Health', icon: HeartPulse, testId: 'nav-health' },
 ];
 
 const tabsRight = [

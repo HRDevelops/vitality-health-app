@@ -1,67 +1,100 @@
-# Y-CHAP Technical Architecture & System Invariants
+# Y-CHAP Technical Architecture & Complete Product Specification
 
-## 1. Core Stack & Infrastructure
+## 1. System Invariants & Infrastructure
 
-- **Backend**: Node.js + Express (TypeScript) in `/server`. Pattern: Controller -> Service -> Repository/Model.
-- **Frontend**: React 18 + Vite (TypeScript) + Tailwind CSS in `/frontend`. Viewport strictly locked to mobile (max-w-md / 390px–430px canvas).
-- **Database**: MongoDB via Mongoose (Local: `mongodb://127.0.0.1:27017/vitality`).
-- **Auth Guard**: Dual-layer system (httpOnly cookie + Bearer token fallback in `client.ts`). Never delete the Bearer fallback.
-- **Ports**: Backend `8010`, Frontend `3000`.
+- **Stack**: Node.js + Express (TypeScript) in `/server`, React 18 + Vite (TypeScript) + Tailwind CSS in `/frontend`.
+- **Architecture**: Strict Controller -> Service -> Model/Repository pattern in `/server`.
+- **Database**: MongoDB via Mongoose (Local dev: `mongodb://127.0.0.1:27017/vitality`).
+- **Auth Guard**: Dual-layer (httpOnly cookies with strict fallback to `Authorization: Bearer <token>` in `frontend/src/services/api/client.ts`). Never modify or remove this fallback.
+- **Runtime Ports**: Backend `8010`, Frontend `3000`.
+- **Viewport**: Mobile-first layout strictly bounded to 390px–430px canvas (`max-w-md mx-auto min-h-screen`).
+- **Legal Boundary**: Educational and monitoring support only (Non-Diagnostic). Every clinical screen, reading modal, and export MUST display:
+  > _"Educational & tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care."_
 
-## 2. Design System & Clinical Standards
+## 2. Design System & Tokens
 
-- **Font**: Manrope with tabular numerals (`tabular-nums`) for numeric data alignment.
-- **Icons**: Lucide React line icons only (strictly zero emojis in clinical and data flows).
-- **6-Token Palette**:
-  - Pine (`#0B2B26`): Deep brand headers and primary navigation active states.
+- **Typography**: Manrope font with `tabular-nums` enabled across all metric values, charts, timers, and tables for strict vertical numeric alignment.
+- **Icons**: Lucide React line icons only. **Strictly ZERO emojis** in clinical cards, forms, logs, and system alerts.
+- **6-Token Clinical Palette**:
+  - Pine (`#0B2B26`): Deep brand surfaces, primary navigation active states, high-contrast headings.
   - Fern (`#1E5E4D`): Success states, optimal BP/Glucose target zones.
   - Mist (`#E3EFE9`): Background tints, light borders, subtle card fills.
-  - Bone (`#F8F9F5`): Canvas surface, high-contrast readable backgrounds.
-  - Saffron (`#E29528`): Warnings, Elevated BP, Prediabetes glycemic zones.
-  - Clay (`#C2452D`): Strictly reserved for clinical risk (Stage 2, Crisis, Hypoglycemia).
-- **Clinical Boundary**: Strictly educational and monitoring support. Non-diagnostic disclaimer must render on all clinical cards and exports.
+  - Bone (`#F8F9F5`): Canvas background surface, neutral high-readability containers.
+  - Saffron (`#E29528`): Warnings, Elevated BP, Stage 1 Hypertension, Prediabetes glycemic zones.
+  - Clay (`#C2452D`): **Strictly reserved for genuine clinical alerts** (Stage 2, Hypertensive Crisis, Hypoglycemia).
 
-## 3. Clinical Rules & Computation Engines
+## 3. Clinical Engines & Logic Rules
 
-### 3.1 Blood Pressure (AHA/ACC 2017)
+### 3.1 Blood Pressure Engine (AHA/ACC 2017 Guidelines)
 
 Evaluates Systolic (S) and Diastolic (D) in mmHg. Assigned to the higher risk zone:
 
-- **Normal**: S < 120 AND D < 80 (Fern)
-- **Elevated**: S 120–129 AND D < 80 (Saffron)
-- **Stage 1 Hypertension**: S 130–139 OR D 80–89 (Saffron)
-- **Stage 2 Hypertension**: S >= 140 OR D >= 90 (Clay)
-- **Hypertensive Crisis**: S > 180 AND/OR D > 120 (Clay + Trigger Emergency Modal + Immediate Physician Disclaimer)
+- **Normal**: S < 120 AND D < 80 | Token: `Fern` | Action: Standard log confirmation.
+- **Elevated**: S 120–129 AND D < 80 | Token: `Saffron` | Action: Activity nudge & lifestyle tips.
+- **High — Stage 1**: S 130–139 OR D 80–89 | Token: `Saffron` | Action: DASH diet recommendation & tracking prompt.
+- **High — Stage 2**: S >= 140 OR D >= 90 | Token: `Clay` | Action: High reading alert, prompt to schedule clinical checkup.
+- **Hypertensive Crisis**: S > 180 AND/OR D > 120 | Token: `Clay` | Action: **Intercept UI with full-screen emergency care prompt & clinical disclaimer modal**. Flag `isCriticalAlert: true`.
 
-### 3.2 Blood Glucose (ADA Guidelines)
+### 3.2 Blood Glucose Engine (ADA Guidelines)
 
-Supports mg/dL (primary) and mmol/L (conversion: mg/dL = mmol/L \* 18.0182):
+Supports dual units: `mg/dL` (internal storage) and `mmol/L` (UI toggle: `mg/dL = mmol/L * 18.0182`).
 
-- **Hypoglycemia**: < 70 mg/dL (Clay)
-- **Fasting Normal**: 70–99 mg/dL (Fern) | **Random Normal**: 70–139 mg/dL (Fern)
-- **Fasting Prediabetes**: 100–125 mg/dL (Saffron) | **Random Prediabetes**: 140–199 mg/dL (Saffron)
-- **Diabetes Range**: Fasting >= 126 mg/dL OR Random >= 200 mg/dL (Clay)
+- **Low (Hypoglycemia)**: < 70 mg/dL (< 3.9 mmol/L) | Token: `Clay` | Action: Hypoglycemia warning, prompt immediate fast-acting carb intake and re-test.
+- **Normal**:
+  - Fasting: 70–99 mg/dL (3.9–5.5 mmol/L) | Token: `Fern`
+  - Random / Post-Prandial: 70–139 mg/dL (3.9–7.7 mmol/L) | Token: `Fern`
+- **Prediabetes**:
+  - Fasting: 100–125 mg/dL (5.6–6.9 mmol/L) | Token: `Saffron`
+  - Random / Post-Prandial: 140–199 mg/dL (7.8–11.0 mmol/L) | Token: `Saffron`
+- **Diabetes Range**:
+  - Fasting: >= 126 mg/dL (>= 7.0 mmol/L) | Token: `Clay`
+  - Random / Post-Prandial: >= 200 mg/dL (>= 11.1 mmol/L) | Token: `Clay` | Action: Physician consultation advisory.
 
 ### 3.3 Move & Anti-Cheat Engine
 
-- Metric: Distance (km) and CO2 savings (`distance_km * 0.192 kg CO2`). Raw step count is excluded.
-- Modes: `WALKATHON` and `CYCLING`.
-- Anti-Cheat Pace Validation:
-  - Walkathon speed > 12.0 km/h: Flagged as motorized vehicle fraud.
-  - Cycling speed > 45.0 km/h: Flagged as motorized vehicle fraud.
-  - Flagged activities void CO2/distance credit and increment user `strikeCount`.
+- **Primary Metrics**: Distance (`km`) and CO2 offset (`co2_kg = distance_km * 0.192`). **Raw step counting is completely excluded.**
+- **Modes**: `WALKATHON` and `CYCLING`.
+- **Anti-Cheat Validation**:
+  - Walkathon pace threshold: Average speed > 12.0 km/h is flagged as motorized vehicle fraud.
+  - Cycling pace threshold: Average speed > 45.0 km/h is flagged as motorized vehicle fraud.
+  - System Action on Fraud: Void distance and CO2 credit, increment user `strikeCount`, and set `isFlagged: true`.
 
-## 4. Mongoose Data Schemas
+### 3.4 Evidence & Population Data Anchors
+
+Clinical stat cards rendered on Home/Health tabs:
+
+- Hypertension Burden: ~1.4 billion adults live with hypertension worldwide.
+- Mortality Impact: High systolic BP contributes to ~10.8 million deaths annually.
+- Activity Efficacy: Physical activity reduces hypertension risk by ~19% (high vs. low) and ~11% (moderate vs. low).
+
+### 3.5 Heart Plate & Product Scanner Engine
+
+- **Heart Plate**: Photo meal scan evaluating sodium density against DASH diet rules (<1,500 mg/day optimal, <2,300 mg/day limit). Includes Cooking Mode and Calorie Ring Card.
+- **Product Scanner**: Packaged food & cosmetics scanning via camera with OCR label fallback and lab-verified scoring.
+
+## 4. Complete Mongoose Schemas
 
 ```typescript
-// HealthMetric: models/HealthMetric.ts
+// 1. User: models/User.ts (extensions to existing schema)
+{
+  fullName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  passwordHash: { type: String },
+  universityId: { type: Schema.Types.ObjectId, ref: 'University' },
+  teamId: { type: Schema.Types.ObjectId, ref: 'Team' },
+  accountStatus: { type: String, enum: ['UNREGISTERED_GUEST', 'ACTIVE_USER'], default: 'ACTIVE_USER' },
+  strikeCount: { type: Number, default: 0 },
+  isDemo: { type: Boolean, default: false }
+}
+
+// 2. HealthMetric: models/HealthMetric.ts
 {
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   type: { type: String, enum: ['blood_pressure', 'blood_glucose'], required: true, index: true },
   systolic: { type: Number },
   diastolic: { type: Number },
   pulse: { type: Number },
-  glucoseValue: { type: Number },
+  glucoseValue: { type: Number }, // stored in mg/dL
   glucoseUnit: { type: String, enum: ['MG_DL', 'MMOL_L'], default: 'MG_DL' },
   isFasting: { type: Boolean, default: false },
   category: { type: String, required: true },
@@ -71,7 +104,7 @@ Supports mg/dL (primary) and mmol/L (conversion: mg/dL = mmol/L \* 18.0182):
   loggedAt: { type: Date, default: Date.now, index: true }
 }
 
-// MoveActivity: models/MoveActivity.ts
+// 3. MoveActivity: models/MoveActivity.ts
 {
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   activityType: { type: String, enum: ['WALKATHON', 'CYCLING'], required: true },
@@ -84,12 +117,31 @@ Supports mg/dL (primary) and mmol/L (conversion: mg/dL = mmol/L \* 18.0182):
   loggedAt: { type: Date, default: Date.now, index: true }
 }
 
-// CareCircle: models/CareCircle.ts
+// 4. CareCircleLink: models/CareCircleLink.ts
 {
-  observerId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Diaspora relative
-  subjectId: { type: Schema.Types.ObjectId, ref: 'User', required: true },  // Family member
-  relationship: { type: String, required: true },
+  observerId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true }, // Diaspora relative
+  subjectId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },   // Family member back home
+  relationshipType: { type: String, required: true },
   accessLevel: { type: String, enum: ['VIEW_VITALS', 'EMERGENCY_ONLY'], default: 'VIEW_VITALS' },
   createdAt: { type: Date, default: Date.now }
+}
+
+// 5. ProductScan: models/ProductScan.ts
+{
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  scanType: { type: String, enum: ['HEART_PLATE', 'PRODUCT'], required: true },
+  imageUrl: { type: String },
+  ocrText: { type: String },
+  labVerifiedScore: { type: Number },
+  sodiumMg: { type: Number },
+  scannedAt: { type: Date, default: Date.now }
+}
+
+// 6. UserAchievement: models/UserAchievement.ts
+{
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  achievementId: { type: Number, required: true },
+  rarity: { type: String, enum: ['COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHIC'], required: true },
+  unlockedAt: { type: Date, default: Date.now }
 }
 ```

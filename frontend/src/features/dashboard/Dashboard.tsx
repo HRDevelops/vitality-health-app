@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Bell, Sun, Droplet, Footprints, Scale, Flame } from 'lucide-react';
+import { Bell, Sun, Droplet, Footprints, Scale, Flame, ChevronRight, HeartPulse } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
+import { useHealthMetricSummary } from '../../services/api/healthMetrics';
+import { HealthMetricType } from '../../types/domain';
 import { useAuth } from '../../core/context/AuthContext';
 import { useUnits } from '../../core/context/UnitsContext';
 import { DashboardSkeleton } from '../../components/ui/Skeleton';
@@ -12,6 +14,8 @@ import MetricCard from './components/MetricCard';
 import WeeklyRecapBanner from './components/WeeklyRecapBanner';
 import WeeklyDigestModal from './components/WeeklyDigestModal';
 import LogWaterModal from './components/LogWaterModal';
+import HealthMetricCard from '../health/components/HealthMetricCard';
+import LogHealthMetricModal from '../health/components/LogHealthMetricModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,10 +23,14 @@ export default function Dashboard() {
   const { displayName } = useAuth();
   const { formatWeight, formatVolume } = useUnits();
   const { data, isLoading, isError } = useDashboardMetrics();
+  const { data: healthSummary } = useHealthMetricSummary();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
   const [weeklyDigestOpen, setWeeklyDigestOpen] = useState(false);
   const [waterModalOpen, setWaterModalOpen] = useState(false);
+  const [healthModalOpen, setHealthModalOpen] = useState(false);
+  const [healthModalType, setHealthModalType] = useState<HealthMetricType>('blood_pressure');
+  const [healthModalLock, setHealthModalLock] = useState(false);
 
   useEffect(() => {
     if ((location.state as any)?.openWeeklyDigest) {
@@ -132,6 +140,54 @@ export default function Dashboard() {
                 onClick={() => navigate('/activity')}
               />
             </div>
+
+            {/* Clinical Health Vitals Section */}
+            <div className="mt-8 space-y-3" data-testid="dashboard-clinical-vitals-section">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <HeartPulse size={18} className="text-primary" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Clinical Vitals
+                  </h2>
+                </div>
+                <button
+                  onClick={() => navigate('/health')}
+                  className="flex items-center gap-0.5 text-xs font-bold text-primary transition-colors hover:text-primary-container"
+                  data-testid="view-health-tab-link"
+                >
+                  <span>View All</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                <HealthMetricCard
+                  type="blood_pressure"
+                  metric={healthSummary?.latestBp ?? null}
+                  onLogClick={() => {
+                    setHealthModalType('blood_pressure');
+                    setHealthModalLock(true);
+                    setHealthModalOpen(true);
+                  }}
+                />
+                <HealthMetricCard
+                  type="blood_glucose"
+                  metric={healthSummary?.latestGlucose ?? null}
+                  onLogClick={() => {
+                    setHealthModalType('blood_glucose');
+                    setHealthModalLock(true);
+                    setHealthModalOpen(true);
+                  }}
+                />
+              </div>
+
+              {/* Non-Diagnostic Educational Disclaimer */}
+              <div className="rounded-xl border border-slate-200/50 bg-slate-100/70 p-3 text-center">
+                <p className="text-[11px] leading-relaxed text-slate-500 italic" data-testid="clinical-disclaimer">
+                  Educational &amp; tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care.
+                </p>
+              </div>
+            </div>
           </>
         )}
       </main>
@@ -140,6 +196,12 @@ export default function Dashboard() {
       {healthScoreModalOpen && data && <HealthScoreModal score={data.healthScore} onClose={() => setHealthScoreModalOpen(false)} />}
       {weeklyDigestOpen && <WeeklyDigestModal onClose={() => setWeeklyDigestOpen(false)} />}
       {waterModalOpen && <LogWaterModal onClose={() => setWaterModalOpen(false)} />}
+      <LogHealthMetricModal
+        isOpen={healthModalOpen}
+        onClose={() => setHealthModalOpen(false)}
+        initialType={healthModalType}
+        lockType={healthModalLock}
+      />
     </div>
   );
 }
