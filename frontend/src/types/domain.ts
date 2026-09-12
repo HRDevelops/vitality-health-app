@@ -241,3 +241,39 @@ export interface CreateHealthMetricInput {
   loggedAt?: string;
 }
 
+export type MoveActivityType = 'WALKATHON' | 'CYCLING';
+
+export interface MoveActivity {
+  id: string;
+  userId: string;
+  activityType: MoveActivityType;
+  distanceKm: number;
+  durationMinutes: number;
+  co2SavingsKg: number;
+  averagePaceKmh: number;
+  isFlagged: boolean;
+  flagReason?: string;
+  loggedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MoveSummary {
+  totalVerifiedDistanceKm: number;
+  totalCo2SavingsKg: number;
+  walkathonKm: number;
+  cyclingKm: number;
+  totalActivities: number;
+  verifiedActivitiesCount: number;
+  flaggedActivitiesCount: number;
+  activeStrikes: number;
+}
+
+export interface LogMoveActivityInput {
+  activityType: MoveActivityType;
+  distanceKm: number;
+  durationMinutes: number;
+  loggedAt?: string;
+}
+
+

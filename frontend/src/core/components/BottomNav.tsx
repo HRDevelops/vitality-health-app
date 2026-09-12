@@ -1,4 +1,4 @@
-import { Home, HeartPulse, Activity, User, Plus } from 'lucide-react';
+import { Home, HeartPulse, Footprints, User, Plus } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useActionModal } from '../context/ActionModalContext';
 
@@ -8,7 +8,7 @@ const tabs = [
 ];
 
 const tabsRight = [
-  { to: '/activity', label: 'Activity', icon: Activity, testId: 'nav-activity' },
+  { to: '/move', label: 'Move', icon: Footprints, testId: 'nav-move' },
   { to: '/profile', label: 'Profile', icon: User, testId: 'nav-profile' },
 ];
 

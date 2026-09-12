@@ -10,6 +10,7 @@ import UserProfile from './features/profile/UserProfile';
 import NutritionJournal from './features/nutrition/NutritionJournal';
 import MindfulnessPodcast from './features/wellness/MindfulnessPodcast';
 import HealthView from './features/health/HealthView';
+import MoveView from './features/move/MoveView';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/health" element={<HealthView />} />
+        <Route path="/move" element={<MoveView />} />
         <Route path="/explore" element={<ExploreFitness />} />
         <Route path="/activity" element={<ActivityTracker />} />
         <Route path="/profile" element={<UserProfile />} />

@@ -25,7 +25,7 @@ export default function AddActionModal({ onClose }: AddActionModalProps) {
 
   const handleAddWorkout = () => {
     onClose();
-    navigate('/activity', { state: { openAddWorkout: true } });
+    navigate('/move', { state: { openLogMove: true } });
   };
 
   const handleUpdateWeight = () => {

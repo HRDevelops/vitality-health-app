@@ -23,6 +23,7 @@ export interface IUser extends Document {
   lastListenDate: string | null;
   streakFreezeAvailable: boolean;
   streakFreezeEquipped: boolean;
+  strikeCount: number;
   resetPasswordToken: string | null;
   resetPasswordExpires: Date | null;
   createdAt: Date;
@@ -58,6 +59,7 @@ const UserSchema = new Schema<IUser>(
     lastListenDate: { type: String, default: null },
     streakFreezeAvailable: { type: Boolean, default: true },
     streakFreezeEquipped: { type: Boolean, default: false },
+    strikeCount: { type: Number, default: 0 },
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
   },
