@@ -1,62 +1,40 @@
-import { Home, HeartPulse, Footprints, Trophy, Plus } from 'lucide-react';
+import { Home, HeartPulse, Footprints, Trophy, HeartHandshake } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import { useActionModal } from '../context/ActionModalContext';
 
-const tabs = [
+const navItems = [
   { to: '/dashboard', label: 'Home', icon: Home, testId: 'nav-home' },
   { to: '/health', label: 'Health', icon: HeartPulse, testId: 'nav-health' },
-];
-
-const tabsRight = [
   { to: '/move', label: 'Move', icon: Footprints, testId: 'nav-move' },
   { to: '/teams', label: 'Teams', icon: Trophy, testId: 'nav-teams' },
+  { to: '/care-circle', label: 'Circle', icon: HeartHandshake, testId: 'nav-care-circle' },
 ];
 
-function NavItem({ to, label, icon: Icon, testId }: (typeof tabs)[number]) {
+function NavItem({ to, label, icon: Icon, testId }: (typeof navItems)[number]) {
   return (
     <NavLink
       to={to}
       data-testid={testId}
       className={({ isActive }) =>
         `flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-transform duration-200 ${
-          isActive ? 'scale-110 text-primary' : 'text-outline hover:text-primary-container'
+          isActive ? 'scale-105 text-primary font-bold' : 'text-slate-400 hover:text-slate-600'
         }`
       }
     >
-      <Icon size={22} />
-      <span className="font-label-bold text-[10px] tracking-wide">{label}</span>
+      <Icon size={20} />
+      <span className="text-[10px] tracking-tight">{label}</span>
     </NavLink>
   );
 }
 
 export default function BottomNav() {
-  const { open } = useActionModal();
-
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 mx-auto flex h-20 w-full max-w-md items-center justify-around rounded-t-[24px] bg-surface-container-lowest px-2 shadow-[0px_-4px_20px_rgba(115,103,240,0.08)]"
+      className="fixed bottom-0 left-0 right-0 z-40 mx-auto flex h-16 w-full max-w-md items-center justify-around rounded-t-[24px] bg-white px-2 shadow-[0px_-4px_20px_rgba(84,69,207,0.08)] border-t border-slate-100"
       data-testid="bottom-nav"
     >
-      <div className="flex flex-1 items-center justify-around">
-        {tabs.map((t) => (
-          <NavItem key={t.to} {...t} />
-        ))}
-      </div>
-      <div className="relative -top-6 flex-shrink-0">
-        <button
-          onClick={open}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-glow transition-transform active:scale-90"
-          data-testid="fab-add-button"
-          aria-label="Quick add"
-        >
-          <Plus size={28} />
-        </button>
-      </div>
-      <div className="flex flex-1 items-center justify-around">
-        {tabsRight.map((t) => (
-          <NavItem key={t.to} {...t} />
-        ))}
-      </div>
+      {navItems.map((item) => (
+        <NavItem key={item.to} {...item} />
+      ))}
     </nav>
   );
 }

@@ -324,4 +324,56 @@ export interface LeaderboardResponse {
   tier: LeaderboardTier;
 }
 
+export type RelationshipType =
+  | 'Parent'
+  | 'Grandparent'
+  | 'Sibling'
+  | 'Child'
+  | 'Spouse'
+  | 'Relative';
+
+export interface MonitoredMember {
+  id: string; // subjectId
+  linkId: string;
+  name: string;
+  email?: string;
+  avatarUrl?: string;
+  relationshipType: RelationshipType;
+  accessLevel: 'VIEW_VITALS' | 'EMERGENCY_ONLY';
+  latestBp?: {
+    systolic?: number;
+    diastolic?: number;
+    pulse?: number;
+    category: string;
+    uiToken: string;
+    isCriticalAlert: boolean;
+    loggedAt: string;
+  } | null;
+  latestGlucose?: {
+    glucoseValue?: number;
+    glucoseUnit: string;
+    isFasting: boolean;
+    category: string;
+    uiToken: string;
+    isCriticalAlert: boolean;
+    loggedAt: string;
+  } | null;
+  hasActiveCrisis: boolean;
+  crisisMessage?: string | null;
+  lastSyncAt?: string | null;
+}
+
+export interface MemberVitalHistoryResponse {
+  subject: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string;
+  };
+  relationshipType: RelationshipType;
+  accessLevel: string;
+  readings: HealthMetric[];
+}
+
+
 

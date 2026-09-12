@@ -12,6 +12,7 @@ import MindfulnessPodcast from './features/wellness/MindfulnessPodcast';
 import HealthView from './features/health/HealthView';
 import MoveView from './features/move/MoveView';
 import TeamsView from './features/teams/TeamsView';
+import CareCircleView from './features/carecircle/CareCircleView';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/health" element={<HealthView />} />
         <Route path="/move" element={<MoveView />} />
         <Route path="/teams" element={<TeamsView />} />
+        <Route path="/care-circle" element={<CareCircleView />} />
         <Route path="/explore" element={<ExploreFitness />} />
         <Route path="/activity" element={<ActivityTracker />} />
         <Route path="/profile" element={<UserProfile />} />
