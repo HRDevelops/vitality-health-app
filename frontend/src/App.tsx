@@ -4,7 +4,7 @@ import ProtectedRoute from './core/components/ProtectedRoute';
 import SessionExpiryHandler from './core/components/SessionExpiryHandler';
 import AuthScreen from './features/auth/AuthScreen';
 import Dashboard from './features/dashboard/Dashboard';
-import ExploreFitness from './features/explore/ExploreFitness';
+import ExploreView from './features/explore/ExploreView';
 import ActivityTracker from './features/activity/ActivityTracker';
 import UserProfile from './features/profile/UserProfile';
 import NutritionJournal from './features/nutrition/NutritionJournal';
@@ -34,7 +34,7 @@ export default function App() {
         <Route path="/move" element={<MoveView />} />
         <Route path="/teams" element={<TeamsView />} />
         <Route path="/care-circle" element={<CareCircleView />} />
-        <Route path="/explore" element={<ExploreFitness />} />
+        <Route path="/explore" element={<ExploreView />} />
         <Route path="/activity" element={<ActivityTracker />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/nutrition" element={<NutritionJournal />} />

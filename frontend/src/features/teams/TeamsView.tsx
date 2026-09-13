@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Trophy,
   Users,
@@ -8,6 +9,7 @@ import {
   Plus,
   Leaf,
   ShieldAlert,
+  ArrowLeft,
 } from 'lucide-react';
 import {
   LeaderboardTier,
@@ -24,6 +26,7 @@ import LeaderboardItemRow from './components/LeaderboardItemRow';
 import JoinTeamModal from './components/JoinTeamModal';
 
 export default function TeamsView() {
+  const navigate = useNavigate();
   const [tier, setTier] = useState<LeaderboardTier>('INDIVIDUAL');
   const [timeframe, setTimeframe] = useState<LeaderboardTimeframe>('all_time');
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
@@ -59,12 +62,23 @@ export default function TeamsView() {
     <div className="relative mx-auto min-h-screen w-full max-w-md bg-[#fcf8ff] pb-36 px-4 pt-5" data-testid="teams-view">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
-            <Trophy size={13} />
-            3-Tier Campus League
-          </span>
-          <h1 className="font-heading text-xl font-black text-slate-900">Leaderboard</h1>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shrink-0 shadow-xs"
+            data-testid="teams-back-button"
+            aria-label="Back"
+          >
+            <ArrowLeft className="w-5 h-5 text-slate-700" />
+          </button>
+          <div>
+            <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
+              <Trophy size={13} />
+              3-Tier Campus League
+            </span>
+            <h1 className="font-heading text-xl font-black text-slate-900">Leaderboard</h1>
+          </div>
         </div>
 
         <button

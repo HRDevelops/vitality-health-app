@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   HeartHandshake,
   Plus,
@@ -9,6 +10,7 @@ import {
   ShieldAlert,
   Clock,
   PhoneCall,
+  ArrowLeft,
 } from 'lucide-react';
 import { MonitoredMember } from '../../types/domain';
 import { useCareCircleMembers } from '../../services/api/careCircle';
@@ -16,6 +18,7 @@ import ConnectRelativeModal from './components/ConnectRelativeModal';
 import FamilyMemberDetailModal from './components/FamilyMemberDetailModal';
 
 export default function CareCircleView() {
+  const navigate = useNavigate();
   const { data: members, isLoading } = useCareCircleMembers();
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<MonitoredMember | null>(null);
@@ -79,16 +82,27 @@ export default function CareCircleView() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-xl font-black text-slate-900">Care Circle</h1>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Monitor your family members' vital readings remotely with real-time clinical alerts.
-          </p>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shrink-0 shadow-xs"
+            data-testid="care-circle-back-button"
+            aria-label="Back"
+          >
+            <ArrowLeft className="w-5 h-5 text-slate-700" />
+          </button>
+          <div>
+            <h1 className="font-heading text-xl font-black text-slate-900">Care Circle</h1>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Monitor your family members' vital readings remotely with real-time clinical alerts.
+            </p>
+          </div>
         </div>
 
         <button
           onClick={() => setIsConnectModalOpen(true)}
-          className="flex items-center gap-1 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-primary/95 transition-all shrink-0"
+          className="flex items-center gap-1 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-primary/95 transition-all shrink-0 ml-2"
         >
           <Plus size={14} />
           <span>Connect</span>

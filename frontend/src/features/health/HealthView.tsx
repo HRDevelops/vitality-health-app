@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Activity,
   Droplets,
@@ -8,6 +8,7 @@ import {
   TrendingDown,
   Clock,
   Heart,
+  ArrowLeft,
 } from 'lucide-react';
 import { useHealthMetrics, useHealthMetricSummary } from '../../services/api/healthMetrics';
 import { HealthMetricType } from '../../types/domain';
@@ -17,6 +18,7 @@ import HealthMetricTrendChart from './components/HealthMetricTrendChart';
 
 export default function HealthView() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [initialModalType, setInitialModalType] = useState<HealthMetricType>('blood_pressure');
   const [lockModalType, setLockModalType] = useState(false);
@@ -49,13 +51,24 @@ export default function HealthView() {
     <div className="min-h-screen bg-[#fcf8ff] pb-28 text-slate-900" data-testid="health-screen">
       {/* Sticky Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-100 bg-white/90 px-container-margin py-4 backdrop-blur-md">
-        <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
-            Clinical Health Engine
-          </span>
-          <h1 className="font-manrope text-2xl font-extrabold tracking-tight text-slate-900">
-            Vitals &amp; Glycemic
-          </h1>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors shrink-0"
+            data-testid="health-back-button"
+            aria-label="Back"
+          >
+            <ArrowLeft className="w-5 h-5 text-slate-700" />
+          </button>
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+              Clinical Health Engine
+            </span>
+            <h1 className="font-manrope text-2xl font-extrabold tracking-tight text-slate-900">
+              Vitals &amp; Glycemic
+            </h1>
+          </div>
         </div>
         <button
           onClick={() => handleOpenLog('blood_pressure', false)}

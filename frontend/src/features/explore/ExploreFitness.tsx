@@ -96,7 +96,11 @@ const extraCategories: CategoryItem[] = [
   { id: 'sleep', label: 'Sleep', icon: Moon, bg: 'bg-secondary-fixed/50', fg: 'text-on-secondary-fixed' },
 ];
 
-export default function ExploreFitness() {
+export interface ExploreFitnessProps {
+  embedded?: boolean;
+}
+
+export default function ExploreFitness({ embedded = false }: ExploreFitnessProps = {}) {
   const navigate = useNavigate();
   const { data } = useDashboardMetrics();
   const [search, setSearch] = useState('');
@@ -143,22 +147,24 @@ export default function ExploreFitness() {
   };
 
   return (
-    <div data-testid="explore-screen">
-      <header className="sticky top-0 z-30 flex items-center justify-between bg-background px-container-margin py-4">
-        <div className="flex items-center gap-3">
-          {data?.avatarUrl && <img src={data.avatarUrl} alt="Profile" className="h-10 w-10 rounded-full object-cover shadow-sm" />}
-          <h1 className="font-headline-md text-headline-md text-on-surface">Hi, {data?.greetingName ?? 'Grace'}</h1>
-        </div>
-        <button
-          onClick={() => setNotificationsOpen(true)}
-          className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant"
-          data-testid="explore-notifications-button"
-        >
-          <Bell size={22} />
-        </button>
-      </header>
+    <div data-testid="explore-fitness-section">
+      {!embedded && (
+        <header className="sticky top-0 z-30 flex items-center justify-between bg-background px-container-margin py-4">
+          <div className="flex items-center gap-3">
+            {data?.avatarUrl && <img src={data.avatarUrl} alt="Profile" className="h-10 w-10 rounded-full object-cover shadow-sm" />}
+            <h1 className="font-headline-md text-headline-md text-on-surface">Hi, {data?.greetingName ?? 'Grace'}</h1>
+          </div>
+          <button
+            onClick={() => setNotificationsOpen(true)}
+            className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant"
+            data-testid="explore-notifications-button"
+          >
+            <Bell size={22} />
+          </button>
+        </header>
+      )}
 
-      <main className="flex flex-col gap-section-gap px-container-margin py-section-gap">
+      <main className={`flex flex-col gap-section-gap ${embedded ? 'px-0 py-2' : 'px-container-margin py-section-gap'}`}>
         <div className="relative w-full">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant" />
           <input
