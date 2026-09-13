@@ -58,7 +58,7 @@ export class HealthMetricService {
 
     if (systolic >= 140 || diastolic >= 90) {
       return {
-        category: 'Stage 2 Hypertension',
+        category: 'High — Stage 2',
         uiToken: 'Clay',
         isCriticalAlert: false,
       };
@@ -66,7 +66,7 @@ export class HealthMetricService {
 
     if (systolic >= 130 || diastolic >= 80) {
       return {
-        category: 'Stage 1 Hypertension',
+        category: 'High — Stage 1',
         uiToken: 'Saffron',
         isCriticalAlert: false,
       };

@@ -71,10 +71,10 @@ export default function LogHealthMetricModal({
       return { category: 'Hypertensive Crisis', uiToken: 'Clay', isCrisis: true };
     }
     if (s >= 140 || d >= 90) {
-      return { category: 'Stage 2 Hypertension', uiToken: 'Clay', isCrisis: false };
+      return { category: 'High — Stage 2', uiToken: 'Clay', isCrisis: false };
     }
     if (s >= 130 || d >= 80) {
-      return { category: 'Stage 1 Hypertension', uiToken: 'Saffron', isCrisis: false };
+      return { category: 'High — Stage 1', uiToken: 'Saffron', isCrisis: false };
     }
     if (s >= 120 && d < 80) {
       return { category: 'Elevated', uiToken: 'Saffron', isCrisis: false };

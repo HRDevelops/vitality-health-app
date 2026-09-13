@@ -217,8 +217,8 @@ export default function TeamsView() {
       )}
 
       {/* "My Rank" Persistent Sticky Bottom Card */}
-      <div className="fixed bottom-[88px] left-0 right-0 z-30 mx-auto w-full max-w-md px-3 pointer-events-none">
-        <div className="pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-lg shadow-indigo-500/5 rounded-2xl px-3.5 py-2.5 flex items-center justify-between">
+      <div className="fixed bottom-[84px] left-0 right-0 z-30 mx-auto w-full max-w-md px-3 pointer-events-none">
+        <div className="pointer-events-auto bg-white/95 backdrop-blur-md border border-indigo-100 shadow-xl shadow-indigo-900/10 rounded-2xl px-3.5 py-2.5 flex items-center justify-between">
           {activeCurrentPlacement ? (
             <>
               <div className="flex items-center min-w-0 flex-1 mr-2">

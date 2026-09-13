@@ -331,11 +331,12 @@ export default function HealthView() {
         </section>
 
         {/* Non-Diagnostic Educational Legal Guardrail */}
-        <section className="rounded-2xl border border-slate-200/60 bg-slate-100/70 p-4 text-center">
-          <p className="text-xs leading-relaxed text-slate-500 italic" data-testid="clinical-disclaimer">
-            Educational &amp; tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care.
-          </p>
-        </section>
+        <p
+          className="text-[11px] text-slate-400 text-center leading-relaxed px-4 pt-6 pb-4"
+          data-testid="clinical-disclaimer"
+        >
+          Educational &amp; tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care.
+        </p>
       </main>
 
       {/* Log Modal */}

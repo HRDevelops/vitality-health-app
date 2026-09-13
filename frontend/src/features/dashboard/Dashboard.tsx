@@ -240,13 +240,6 @@ export default function Dashboard() {
                   }}
                 />
               </div>
-
-              {/* Non-Diagnostic Educational Disclaimer */}
-              <div className="rounded-xl border border-slate-200/50 bg-slate-100/70 p-3 text-center">
-                <p className="text-[11px] leading-relaxed text-slate-500 italic" data-testid="clinical-disclaimer">
-                  Educational &amp; tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care.
-                </p>
-              </div>
             </div>
 
             {/* DASH Sodium Intake Monitor */}
@@ -256,6 +249,14 @@ export default function Dashboard() {
                 onOpenProductScanner={() => setProductScannerOpen(true)}
               />
             </div>
+
+            {/* Non-Diagnostic Educational Legal Guardrail */}
+            <p
+              className="text-[11px] text-slate-400 text-center leading-relaxed px-4 pt-6 pb-4"
+              data-testid="clinical-disclaimer"
+            >
+              Educational &amp; tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care.
+            </p>
           </>
         )}
       </main>

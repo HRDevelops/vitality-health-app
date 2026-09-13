@@ -272,13 +272,13 @@ export default function CareCircleView() {
         </div>
       )}
 
-      {/* Non-Diagnostic Educational Disclaimer */}
-      <div className="mt-6 rounded-2xl border border-slate-200/60 bg-white/80 p-3.5 shadow-2xs flex items-start gap-2.5">
-        <ShieldAlert size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
-        <p className="text-[10px] text-slate-500 leading-relaxed">
-          Educational &amp; tracking support only. Not a medical diagnosis. If your family member experiences severe symptoms, urge them to seek immediate emergency medical care.
-        </p>
-      </div>
+      {/* Non-Diagnostic Educational Legal Guardrail */}
+      <p
+        className="text-[11px] text-slate-400 text-center leading-relaxed px-4 pt-6 pb-4"
+        data-testid="clinical-disclaimer"
+      >
+        Educational &amp; tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care.
+      </p>
 
       {/* Connect Modal */}
       {isConnectModalOpen && (

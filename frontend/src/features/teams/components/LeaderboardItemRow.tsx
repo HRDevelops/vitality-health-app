@@ -8,10 +8,10 @@ interface LeaderboardItemRowProps {
 export default function LeaderboardItemRow({ entry }: LeaderboardItemRowProps) {
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl border bg-white p-3.5 shadow-sm transition-colors ${
+      className={`flex items-center justify-between rounded-2xl p-3 border bg-white shadow-sm shadow-indigo-500/5 hover:shadow-md transition-shadow ${
         entry.isCurrent
-          ? 'border-primary/40 bg-primary/[0.03] ring-1 ring-primary/30'
-          : 'border-slate-100 hover:border-slate-200'
+          ? 'border-primary/40 bg-indigo-50/20 ring-1 ring-primary/30'
+          : 'border-slate-100'
       }`}
     >
       <div className="flex items-center gap-3 min-w-0">

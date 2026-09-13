@@ -34,12 +34,12 @@ export default function DashSodiumCard({
 
   return (
     <div
-      className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm"
+      className="relative overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-br from-white via-white to-indigo-50/30 p-5 shadow-sm shadow-indigo-500/5 transition-all"
       data-testid="dash-sodium-card"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary shadow-2xs">
             <Utensils size={16} />
           </div>
           <div>
@@ -98,7 +98,7 @@ export default function DashSodiumCard({
         <button
           type="button"
           onClick={onOpenHeartPlate}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-primary/10 py-2 text-xs font-bold text-primary hover:bg-primary/15 transition-all"
+          className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-indigo-600 py-2.5 text-xs font-bold text-white shadow-sm shadow-primary/20 hover:opacity-95 active:scale-[0.98] transition-all"
         >
           <Utensils size={13} />
           <span>Scan Meal Plate</span>
@@ -107,7 +107,7 @@ export default function DashSodiumCard({
         <button
           type="button"
           onClick={onOpenProductScanner}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white py-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all"
         >
           <ScanBarcode size={13} />
           <span>Scan Product / OCR</span>

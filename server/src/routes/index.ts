@@ -30,6 +30,7 @@ router.use('/onboarding', onboardingRoutes);
 router.use('/nutrition', requireAuth, nutritionRoutes);
 router.use('/podcasts', podcastRoutes);
 router.use('/user', requireAuth, userRoutes);
+router.use('/users', requireAuth, userRoutes);
 router.use('/community', requireAuth, communityRoutes);
 router.use('/health-metrics', requireAuth, healthMetricRoutes);
 router.use('/auth', authRoutes);

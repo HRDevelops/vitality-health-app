@@ -128,7 +128,7 @@ export class OnboardingService {
     userId: string | Types.ObjectId,
     rating: number,
     feedback?: string
-  ): Promise<{ success: boolean; hasRatedApp: boolean }> {
+  ): Promise<{ success: boolean; hasRatedApp: boolean; rating?: number }> {
     const user = await User.findById(userId);
     if (!user) throw new Error('User not found');
 
@@ -146,7 +146,7 @@ export class OnboardingService {
       type: 'APP_RATED',
     });
 
-    return { success: true, hasRatedApp: true };
+    return { success: true, hasRatedApp: true, rating: Math.min(5, Math.max(1, rating)) };
   }
 }
 

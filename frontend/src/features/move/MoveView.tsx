@@ -354,6 +354,14 @@ export default function MoveView() {
             )}
           </div>
         </section>
+
+        {/* Non-Diagnostic Educational Legal Guardrail */}
+        <p
+          className="text-[11px] text-slate-400 text-center leading-relaxed px-4 pt-6 pb-4"
+          data-testid="clinical-disclaimer"
+        >
+          Educational &amp; tracking support only. Not a medical diagnosis. If you experience severe symptoms, seek immediate emergency medical care.
+        </p>
       </main>
 
       {/* Log Activity Modal */}

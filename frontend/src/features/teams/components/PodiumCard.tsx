@@ -38,10 +38,16 @@ export default function PodiumCard({ entries, tier }: PodiumCardProps) {
 
     const avatarSize = isFirst ? 'w-14 h-14' : 'w-11 h-11';
     const avatarRing = isFirst
-      ? 'ring-3 ring-amber-400 shadow-md'
+      ? 'ring-3 ring-amber-400 shadow-md shadow-amber-400/30'
       : isSecond
-      ? 'ring-2 ring-slate-300 shadow-sm'
-      : 'ring-2 ring-orange-300 shadow-sm';
+      ? 'ring-2 ring-slate-300'
+      : 'ring-2 ring-orange-300';
+
+    const cardBgAndBorder = isFirst
+      ? 'bg-gradient-to-b from-amber-500/10 via-white to-white border-2 border-amber-400/80 shadow-md shadow-amber-500/10'
+      : isSecond
+      ? 'bg-gradient-to-b from-slate-200/40 via-white to-white border border-slate-300 shadow-sm'
+      : 'bg-gradient-to-b from-orange-400/10 via-white to-white border border-orange-300 shadow-sm';
 
     return (
       <div className={`min-w-0 w-full flex flex-col items-center justify-end ${orderClass}`}>
@@ -74,8 +80,8 @@ export default function PodiumCard({ entries, tier }: PodiumCardProps) {
 
         {/* Pillar Card */}
         <div
-          className={`min-w-0 w-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 text-center shadow-xs flex flex-col justify-between ${heightClass} ${
-            entry.isCurrent ? 'ring-2 ring-primary bg-primary/[0.02]' : ''
+          className={`min-w-0 w-full overflow-hidden rounded-2xl p-2 text-center flex flex-col justify-between ${cardBgAndBorder} ${heightClass} ${
+            entry.isCurrent ? 'ring-2 ring-primary' : ''
           }`}
         >
           <div className="w-full overflow-hidden">
@@ -90,14 +96,14 @@ export default function PodiumCard({ entries, tier }: PodiumCardProps) {
             </p>
           </div>
 
-          <div className="mt-1 pt-1 border-t border-slate-100/80 w-full">
-            <div className="text-xs font-bold text-primary tabular-nums">
-              {entry.totalKm.toFixed(1)} <span className="text-[10px] font-normal text-slate-500">km</span>
-            </div>
-            <div className="flex items-center justify-center gap-0.5 text-[10px] text-emerald-700 font-medium tabular-nums truncate">
+          <div className="mt-1 pt-1.5 border-t border-slate-100/80 w-full flex flex-col items-center gap-1">
+            <span className="inline-flex items-center justify-center bg-indigo-50 text-primary font-extrabold px-2 py-0.5 rounded-full text-xs tabular-nums">
+              {entry.totalKm.toFixed(1)} <span className="text-[10px] font-normal text-slate-500 ml-0.5">km</span>
+            </span>
+            <span className="inline-flex items-center justify-center gap-0.5 text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full tabular-nums">
               <Leaf size={9} className="text-emerald-600 shrink-0" />
               <span>{entry.totalCo2Kg.toFixed(2)} kg</span>
-            </div>
+            </span>
           </div>
         </div>
       </div>
