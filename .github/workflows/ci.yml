@@ -1,0 +1,79 @@
+name: Y-CHAP CI Pipeline & Clinical Certification
+
+on:
+  push:
+    branches: [ main, "feat/**" ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-certify:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Python (3.11)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 1. Install Dependencies
+      - name: Install Root & Server Dependencies
+        run: |
+          npm install
+          cd server && npm install
+          cd ../frontend && npm install
+
+      # 2. Run Python Algorithmic Validation
+      - name: Run Python Clinical Engine Benchmark
+        if: hashFiles('test_clinical_engine.py') != ''
+        run: python -m unittest test_clinical_engine.py -v
+
+      # 3. Compile TypeScript Codebases
+      - name: Typecheck & Build Server
+        run: cd server && npm run build
+
+      - name: Typecheck & Build Frontend (Vite)
+        run: cd frontend && npm run build
+
+      # 4. Start Server and Run Automated E2E Certification
+      - name: Run E2E System Certification Suite (39 Assertions)
+        env:
+          PORT: 8010
+          MONGODB_URI: mongodb://127.0.0.1:27017/vitality_ci
+          JWT_SECRET: vitality_super_secret_local_dev_key_2026
+        run: |
+          # Seed baseline data
+          cd server
+          node dist/seed.js || true
+          node dist/seedLeaderboards.js || true
+          node dist/seedCareCircle.js || true
+          node dist/seedAchievements.js || true
+          
+          # Launch Express server in the background
+          node dist/index.js &
+          
+          # Wait for API to respond on /health
+          npx wait-on http://127.0.0.1:8010/api/v1/health --timeout 30000
+          
+          # Run full certification test runner
+          npm run certify

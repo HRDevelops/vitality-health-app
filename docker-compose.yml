@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: ychap-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: vitality
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ychap-app
+    restart: always
+    ports:
+      - "8010:8010"
+    environment:
+      PORT: 8010
+      MONGODB_URI: mongodb://mongodb:27017/vitality
+      JWT_SECRET: vitality_super_secret_local_dev_key_2026
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo_data:

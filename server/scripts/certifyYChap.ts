@@ -109,24 +109,44 @@ async function main() {
   console.log('       Y-CHAP UNIFIED END-TO-END CERTIFICATION TEST SUITE       ');
   console.log('================================================================\n');
 
-  // Authenticate primary test accounts
+  // Authenticate primary test accounts (with auto-register fallback for CI/pristine environments)
+  let graceToken = '';
   const graceLogin = await request('/auth/login', 'POST', {
     email: 'grace.user@email.com',
     password: '12345678',
   });
   if (graceLogin.status !== 200 || !graceLogin.body.token) {
-    throw new Error('Failed to log in as Grace User: ' + JSON.stringify(graceLogin.body));
+    const regGrace = await request('/auth/register', 'POST', {
+      name: 'Grace',
+      email: 'grace.user@email.com',
+      password: '12345678',
+    });
+    if (regGrace.status !== 201 || !regGrace.body.token) {
+      throw new Error('Failed to acquire Grace token: ' + JSON.stringify(regGrace.body));
+    }
+    graceToken = regGrace.body.token;
+  } else {
+    graceToken = graceLogin.body.token;
   }
-  const graceToken = graceLogin.body.token;
 
+  let liamToken = '';
   const liamLogin = await request('/auth/login', 'POST', {
     email: 'liam.carter@campus.edu',
     password: '12345678',
   });
   if (liamLogin.status !== 200 || !liamLogin.body.token) {
-    throw new Error('Failed to log in as Liam Carter: ' + JSON.stringify(liamLogin.body));
+    const regLiam = await request('/auth/register', 'POST', {
+      name: 'Liam Carter',
+      email: 'liam.carter@campus.edu',
+      password: '12345678',
+    });
+    if (regLiam.status !== 201 || !regLiam.body.token) {
+      throw new Error('Failed to acquire Liam token: ' + JSON.stringify(regLiam.body));
+    }
+    liamToken = regLiam.body.token;
+  } else {
+    liamToken = liamLogin.body.token;
   }
-  const liamToken = liamLogin.body.token;
 
   // -------------------------------------------------------------
   // Test Suite 1: Clinical Health Metric Engine (AHA/ACC & ADA Rules)
