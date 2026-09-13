@@ -26,6 +26,11 @@ export interface IUser extends Document {
   strikeCount: number;
   universityId?: Types.ObjectId | null;
   teamId?: Types.ObjectId | null;
+  accountStatus: 'UNREGISTERED_GUEST' | 'ACTIVE_USER';
+  isDemo: boolean;
+  onboardingCompleted: boolean;
+  hasRatedApp: boolean;
+  onboardingData?: Record<string, any>;
   resetPasswordToken: string | null;
   resetPasswordExpires: Date | null;
   createdAt: Date;
@@ -64,6 +69,16 @@ const UserSchema = new Schema<IUser>(
     strikeCount: { type: Number, default: 0 },
     universityId: { type: Schema.Types.ObjectId, ref: 'University', default: null, index: true },
     teamId: { type: Schema.Types.ObjectId, ref: 'Team', default: null, index: true },
+    accountStatus: {
+      type: String,
+      enum: ['UNREGISTERED_GUEST', 'ACTIVE_USER'],
+      default: 'ACTIVE_USER',
+      index: true,
+    },
+    isDemo: { type: Boolean, default: false },
+    onboardingCompleted: { type: Boolean, default: false },
+    hasRatedApp: { type: Boolean, default: false },
+    onboardingData: { type: Schema.Types.Mixed, default: {} },
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
   },

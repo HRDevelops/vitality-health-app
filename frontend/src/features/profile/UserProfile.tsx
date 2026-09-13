@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Bell, Pencil, Ruler, Cake, Weight, Award, TrendingUp, Settings, LogOut, ChevronRight, Sparkles, FileText, KeyRound } from 'lucide-react';
+import { Bell, Pencil, Ruler, Cake, Weight, Award, TrendingUp, Settings, LogOut, ChevronRight, Sparkles, FileText, KeyRound, Star } from 'lucide-react';
 import TopBar from '../../core/components/TopBar';
 import { useUserProfile } from '../../services/api/user';
 import { useLeaderboard, LeaderboardRange } from '../../services/api/community';
@@ -12,13 +12,15 @@ import LeaderboardCard from './components/LeaderboardCard';
 import RemindersCard from './components/RemindersCard';
 import EditWeightModal from './components/EditWeightModal';
 import SubscriptionPaywallModal from '../wellness/components/SubscriptionPaywallModal';
-import AchievementsModal from './components/AchievementsModal';
+import AchievementsModal from '../achievements/AchievementsModal';
 import HealthScoreModal from '../dashboard/components/HealthScoreModal';
 import WeeklyDigestModal from '../dashboard/components/WeeklyDigestModal';
 import NotificationsSheet from '../../components/ui/NotificationsSheet';
 import EditProfileModal from './components/EditProfileModal';
 import AppSettingsModal from './components/AppSettingsModal';
 import ChangePasswordModal from './components/ChangePasswordModal';
+import DemoModeToggle from '../onboarding/DemoModeToggle';
+import AppRatingModal from '../onboarding/AppRatingModal';
 
 export default function UserProfile() {
   const location = useLocation();
@@ -34,6 +36,7 @@ export default function UserProfile() {
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [appSettingsOpen, setAppSettingsOpen] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
   const [leaderboardRange, setLeaderboardRange] = useState<LeaderboardRange>('today');
 
   useEffect(() => {
@@ -223,6 +226,19 @@ export default function UserProfile() {
                   <ChevronRight size={18} className="text-outline" />
                 </button>
                 <button
+                  onClick={() => setRatingModalOpen(true)}
+                  className="flex items-center justify-between border-b border-outline-variant/10 p-card-padding transition-colors hover:bg-surface-container/50"
+                  data-testid="profile-rate-app-button"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+                      <Star size={18} />
+                    </div>
+                    <span className="font-body-lg text-body-lg font-semibold text-on-surface">Rate Y-CHAP &amp; Feedback</span>
+                  </div>
+                  <ChevronRight size={18} className="text-outline" />
+                </button>
+                <button
                   onClick={() => setChangePasswordOpen(true)}
                   className="flex items-center justify-between p-card-padding transition-colors hover:bg-surface-container/50"
                   data-testid="profile-change-password-button"
@@ -236,12 +252,18 @@ export default function UserProfile() {
                   <ChevronRight size={18} className="text-outline" />
                 </button>
               </div>
+
+              {/* Demo Sandbox Mode Switcher */}
+              <div className="mt-4">
+                <DemoModeToggle />
+              </div>
+
               <button
                 onClick={() => {
                   logout();
                   navigate('/login', { replace: true });
                 }}
-                className="flex w-full items-center justify-center gap-2 rounded-DEFAULT bg-error-container px-6 py-4 font-label-bold text-label-bold uppercase text-on-error-container shadow-sm transition-opacity hover:opacity-90"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-DEFAULT bg-error-container px-6 py-4 font-label-bold text-label-bold uppercase text-on-error-container shadow-sm transition-opacity hover:opacity-90"
                 data-testid="profile-logout-button"
               >
                 <LogOut size={18} />
@@ -254,13 +276,14 @@ export default function UserProfile() {
 
       {weightModalOpen && user && <EditWeightModal currentWeightKg={user.currentWeightKg} onClose={() => setWeightModalOpen(false)} />}
       {paywallOpen && <SubscriptionPaywallModal onClose={() => setPaywallOpen(false)} />}
-      {achievementsOpen && <AchievementsModal onClose={() => setAchievementsOpen(false)} />}
+      <AchievementsModal isOpen={achievementsOpen} onClose={() => setAchievementsOpen(false)} />
       {healthScoreModalOpen && user && <HealthScoreModal score={user.healthScore} onClose={() => setHealthScoreModalOpen(false)} />}
       {weeklyDigestOpen && <WeeklyDigestModal onClose={() => setWeeklyDigestOpen(false)} />}
       {notificationsOpen && <NotificationsSheet onClose={() => setNotificationsOpen(false)} />}
       {editProfileOpen && user && <EditProfileModal user={user} onClose={() => setEditProfileOpen(false)} />}
       {appSettingsOpen && <AppSettingsModal onClose={() => setAppSettingsOpen(false)} />}
       {changePasswordOpen && <ChangePasswordModal onClose={() => setChangePasswordOpen(false)} />}
+      <AppRatingModal isOpen={ratingModalOpen} onClose={() => setRatingModalOpen(false)} />
     </div>
   );
 }

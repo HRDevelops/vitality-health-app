@@ -131,6 +131,11 @@ export interface UserProfile {
   podcastStreakCount: number;
   streakFreezeAvailable: boolean;
   streakFreezeEquipped: boolean;
+  accountStatus?: 'UNREGISTERED_GUEST' | 'ACTIVE_USER';
+  isDemo?: boolean;
+  onboardingCompleted?: boolean;
+  hasRatedApp?: boolean;
+  onboardingData?: Record<string, any>;
 }
 
 export interface LeaderboardEntry {
@@ -375,5 +380,73 @@ export interface MemberVitalHistoryResponse {
   readings: HealthMetric[];
 }
 
+export type ScanType = 'HEART_PLATE' | 'PRODUCT';
+export type DashCompliance = 'OPTIMAL' | 'MODERATE' | 'EXCEEDS_LIMIT';
 
+export interface ProductScan {
+  id: string;
+  userId: string;
+  scanType: ScanType;
+  name: string;
+  imageUrl?: string;
+  ocrRawText?: string;
+  sodiumMg: number;
+  calories: number;
+  dashCompliance: DashCompliance;
+  labVerifiedScore: number;
+  healthNotes?: string;
+  cookingMode?: boolean;
+  scannedAt: string;
+}
 
+export interface DailyNutritionSummary {
+  todaySodiumMg: number;
+  dailyOptimalBenchmarkMg: number;
+  dailyUpperLimitMg: number;
+  sodiumRemainingOptimalMg: number;
+  sodiumRemainingLimitMg: number;
+  complianceStatus: DashCompliance;
+  uiToken: 'Fern' | 'Saffron' | 'Clay';
+  caloriesToday: number;
+  scansTodayCount: number;
+  recentScans: ProductScan[];
+  disclaimer: string;
+}
+
+export type AchievementCategory = 'CLINICAL' | 'MOVE' | 'NUTRITION' | 'COMMUNITY' | 'MILESTONE';
+export type RarityTier = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
+
+export interface EvaluatedAchievement {
+  id: number;
+  key: string;
+  title: string;
+  description: string;
+  category: AchievementCategory;
+  rarity: RarityTier;
+  iconName: string;
+  isUnlocked: boolean;
+  unlockedAt: string | null;
+  progressPercentage: number;
+}
+
+export interface AchievementSummaryResponse {
+  totalUnlocked: number;
+  totalAvailable: number;
+  unlockedRatio: number;
+  byRarity: Record<
+    string,
+    {
+      total: number;
+      unlocked: number;
+    }
+  >;
+  achievements: EvaluatedAchievement[];
+}
+
+export interface OnboardingData {
+  campusName?: string;
+  targetDailyDistanceKm?: number;
+  hasHypertensionHistory?: boolean;
+  notifyCrisisAlerts?: boolean;
+  preferredActivityMode?: 'WALKATHON' | 'CYCLING';
+}

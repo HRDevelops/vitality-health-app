@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { MoveActivity, IMoveActivity, MoveActivityType } from '../models/MoveActivity';
 import { User } from '../models/User';
+import { AchievementService } from './AchievementService';
 
 export interface LogMoveActivityDto {
   activityType: MoveActivityType;
@@ -96,6 +97,15 @@ export class MoveActivityService {
 
     if (evaluation.isFlagged) {
       await User.findByIdAndUpdate(userId, { $inc: { strikeCount: 1 } });
+    } else {
+      if (data.activityType === 'CYCLING') {
+        await AchievementService.checkAndUnlock(userId, { type: 'MOVE_CYCLING', value: distanceKm });
+      } else if (data.activityType === 'WALKATHON') {
+        await AchievementService.checkAndUnlock(userId, { type: 'MOVE_WALKATHON', value: distanceKm });
+      }
+      if (evaluation.co2SavingsKg > 0) {
+        await AchievementService.checkAndUnlock(userId, { type: 'CO2_OFFSET', value: evaluation.co2SavingsKg });
+      }
     }
 
     return doc;

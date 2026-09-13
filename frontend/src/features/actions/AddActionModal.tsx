@@ -1,5 +1,8 @@
-import { Scale, Droplet, Utensils, Dumbbell, AlarmClock, ChevronRight, X, Activity, Droplets } from 'lucide-react';
+import { useState } from 'react';
+import { Scale, Droplet, Utensils, Dumbbell, AlarmClock, ChevronRight, X, Activity, Droplets, ScanBarcode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import HeartPlateScannerModal from '../scanner/HeartPlateScannerModal';
+import ProductScannerModal from '../scanner/ProductScannerModal';
 
 interface AddActionModalProps {
   onClose: () => void;
@@ -7,6 +10,8 @@ interface AddActionModalProps {
 
 export default function AddActionModal({ onClose }: AddActionModalProps) {
   const navigate = useNavigate();
+  const [heartPlateOpen, setHeartPlateOpen] = useState(false);
+  const [productScannerOpen, setProductScannerOpen] = useState(false);
 
   const handleLogBP = () => {
     onClose();
@@ -130,6 +135,28 @@ export default function AddActionModal({ onClose }: AddActionModalProps) {
             <span className="font-headline-md text-headline-md text-on-surface transition-colors group-hover:text-primary">Add Workout</span>
           </button>
           <button
+            onClick={() => setHeartPlateOpen(true)}
+            className="group flex flex-col items-center justify-center rounded-2xl border border-transparent bg-surface-container-low p-card-padding shadow-sm transition-all duration-200 hover:border-primary-fixed-dim hover:bg-surface-container hover:shadow-md"
+            data-testid="action-scan-heart-plate"
+          >
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-fern to-emerald-600 shadow-lg transition-transform duration-200 group-hover:scale-110 text-white">
+              <Utensils size={28} />
+            </div>
+            <span className="font-headline-md text-headline-md text-on-surface transition-colors group-hover:text-fern">Scan Meal</span>
+            <span className="mt-0.5 text-[11px] text-on-surface-variant">DASH Sodium Meter</span>
+          </button>
+          <button
+            onClick={() => setProductScannerOpen(true)}
+            className="group flex flex-col items-center justify-center rounded-2xl border border-transparent bg-surface-container-low p-card-padding shadow-sm transition-all duration-200 hover:border-secondary-fixed-dim hover:bg-surface-container hover:shadow-md"
+            data-testid="action-scan-product"
+          >
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-teal-700 shadow-lg transition-transform duration-200 group-hover:scale-110 text-white">
+              <ScanBarcode size={28} />
+            </div>
+            <span className="font-headline-md text-headline-md text-on-surface transition-colors group-hover:text-teal-700">Scan Product</span>
+            <span className="mt-0.5 text-[11px] text-on-surface-variant">OCR Label &amp; Score</span>
+          </button>
+          <button
             onClick={handleSetReminder}
             className="group col-span-2 mt-2 flex items-center justify-between rounded-2xl border border-transparent bg-surface-container-low p-card-padding shadow-sm transition-all duration-200 hover:border-outline-variant hover:bg-surface-container hover:shadow-md"
             data-testid="action-set-reminder"
@@ -147,6 +174,21 @@ export default function AddActionModal({ onClose }: AddActionModalProps) {
           </button>
         </div>
       </div>
+
+      <HeartPlateScannerModal
+        isOpen={heartPlateOpen}
+        onClose={() => {
+          setHeartPlateOpen(false);
+          onClose();
+        }}
+      />
+      <ProductScannerModal
+        isOpen={productScannerOpen}
+        onClose={() => {
+          setProductScannerOpen(false);
+          onClose();
+        }}
+      />
     </div>
   );
 }

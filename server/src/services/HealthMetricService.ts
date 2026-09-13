@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { HealthMetric, IHealthMetric, HealthMetricType, HealthMetricUiToken, GlucoseUnit } from '../models/HealthMetric';
+import { AchievementService } from './AchievementService';
 
 export interface CreateHealthMetricDto {
   type: HealthMetricType;
@@ -207,6 +208,18 @@ export class HealthMetricService {
       notes: data.notes ? String(data.notes).slice(0, 280) : undefined,
       loggedAt: data.loggedAt ? new Date(data.loggedAt) : new Date(),
     });
+
+    if (data.type === 'blood_pressure') {
+      await AchievementService.checkAndUnlock(userId, {
+        type: 'CLINICAL_BP_LOG',
+        metadata: { uiToken, systolic: data.systolic, diastolic: data.diastolic },
+      });
+    } else if (data.type === 'blood_glucose') {
+      await AchievementService.checkAndUnlock(userId, {
+        type: 'CLINICAL_GLUCOSE_LOG',
+        metadata: { isFasting: Boolean(data.isFasting), uiToken, glucoseValue: storedGlucoseValue },
+      });
+    }
 
     return doc;
   }

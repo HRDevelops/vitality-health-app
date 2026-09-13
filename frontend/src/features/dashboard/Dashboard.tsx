@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Bell, Sun, Droplet, Footprints, Scale, Flame, ChevronRight, HeartPulse } from 'lucide-react';
+import { Bell, Sun, Droplet, Footprints, Scale, Flame, ChevronRight, HeartPulse, Trophy, Sparkles, GraduationCap } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '../../services/api/dashboard';
 import { useHealthMetricSummary } from '../../services/api/healthMetrics';
+import { useUserProfile } from '../../services/api/user';
+import { useAchievements } from '../../services/api/achievements';
 import { HealthMetricType } from '../../types/domain';
 import { useAuth } from '../../core/context/AuthContext';
 import { useUnits } from '../../core/context/UnitsContext';
@@ -16,6 +18,12 @@ import WeeklyDigestModal from './components/WeeklyDigestModal';
 import LogWaterModal from './components/LogWaterModal';
 import HealthMetricCard from '../health/components/HealthMetricCard';
 import LogHealthMetricModal from '../health/components/LogHealthMetricModal';
+import ClaimAccountBanner from '../onboarding/ClaimAccountBanner';
+import DashSodiumCard from '../scanner/DashSodiumCard';
+import HeartPlateScannerModal from '../scanner/HeartPlateScannerModal';
+import ProductScannerModal from '../scanner/ProductScannerModal';
+import AchievementsModal from '../achievements/AchievementsModal';
+import OnboardingFlowModal from '../onboarding/OnboardingFlowModal';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -24,6 +32,9 @@ export default function Dashboard() {
   const { formatWeight, formatVolume } = useUnits();
   const { data, isLoading, isError } = useDashboardMetrics();
   const { data: healthSummary } = useHealthMetricSummary();
+  const { data: user } = useUserProfile();
+  const { data: achievementsData } = useAchievements();
+
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [healthScoreModalOpen, setHealthScoreModalOpen] = useState(false);
   const [weeklyDigestOpen, setWeeklyDigestOpen] = useState(false);
@@ -31,6 +42,11 @@ export default function Dashboard() {
   const [healthModalOpen, setHealthModalOpen] = useState(false);
   const [healthModalType, setHealthModalType] = useState<HealthMetricType>('blood_pressure');
   const [healthModalLock, setHealthModalLock] = useState(false);
+
+  const [heartPlateOpen, setHeartPlateOpen] = useState(false);
+  const [productScannerOpen, setProductScannerOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   useEffect(() => {
     if ((location.state as any)?.openWeeklyDigest) {
@@ -82,8 +98,52 @@ export default function Dashboard() {
         )}
         {data && (
           <>
+            {user?.accountStatus === 'UNREGISTERED_GUEST' && <ClaimAccountBanner />}
+            {user && !user.onboardingCompleted && (
+              <div className="mb-4 flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 p-3.5 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-white">
+                    <GraduationCap size={16} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Cardiovascular Baseline Needed</h4>
+                    <p className="text-[10px] text-slate-500">Complete 3-step setup to calibrate clinical goals</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOnboardingOpen(true)}
+                  className="rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-primary/95"
+                >
+                  Start
+                </button>
+              </div>
+            )}
             <HealthScoreCard score={data.healthScore} note={data.healthScoreNote} onReadMore={() => setHealthScoreModalOpen(true)} />
             <WeeklyRecapBanner onViewDigest={() => setWeeklyDigestOpen(true)} />
+
+            {/* Achievements Quick Banner */}
+            <div
+              onClick={() => setAchievementsOpen(true)}
+              className="mb-4 flex cursor-pointer items-center justify-between rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50/70 to-orange-50/70 p-3.5 shadow-2xs transition-all hover:border-amber-300"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400 text-amber-950 shadow-xs">
+                  <Trophy size={18} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">100 Achievements Engine</h4>
+                  <p className="text-[10px] text-slate-600">
+                    {achievementsData ? `${achievementsData.totalUnlocked} of 100 unlocked` : 'View trophy showcase'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-xs font-bold text-amber-900">
+                <span>View</span>
+                <ChevronRight size={14} />
+              </div>
+            </div>
+
             <div className="mb-element-gap flex items-center justify-between">
               <h2 className="font-headline-md text-headline-md text-on-surface">Metrics</h2>
             </div>
@@ -188,6 +248,14 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
+
+            {/* DASH Sodium Intake Monitor */}
+            <div className="mt-5">
+              <DashSodiumCard
+                onOpenHeartPlate={() => setHeartPlateOpen(true)}
+                onOpenProductScanner={() => setProductScannerOpen(true)}
+              />
+            </div>
           </>
         )}
       </main>
@@ -201,6 +269,22 @@ export default function Dashboard() {
         onClose={() => setHealthModalOpen(false)}
         initialType={healthModalType}
         lockType={healthModalLock}
+      />
+      <HeartPlateScannerModal
+        isOpen={heartPlateOpen}
+        onClose={() => setHeartPlateOpen(false)}
+      />
+      <ProductScannerModal
+        isOpen={productScannerOpen}
+        onClose={() => setProductScannerOpen(false)}
+      />
+      <AchievementsModal
+        isOpen={achievementsOpen}
+        onClose={() => setAchievementsOpen(false)}
+      />
+      <OnboardingFlowModal
+        isOpen={onboardingOpen}
+        onClose={() => setOnboardingOpen(false)}
       />
     </div>
   );
