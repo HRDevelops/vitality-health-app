@@ -30,7 +30,7 @@ function AppleIcon() {
 
 export default function AuthScreen({ mode }: AuthScreenProps) {
   const navigate = useNavigate();
-  const { login, signup, loginAsDemo, socialLogin, rememberMe, setRememberMe, displayName, setDisplayName } = useAuth();
+  const { login, signup, loginAsDemo, loginAsGuest, socialLogin, rememberMe, setRememberMe, displayName, setDisplayName } = useAuth();
   const { showToast } = useToast();
   const isSignup = mode === 'signup';
 
@@ -45,6 +45,7 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
   const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
   const [demoLoading, setDemoLoading] = useState(false);
   const [fillDemoLoading, setFillDemoLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
 
   const validate = (): string | null => {
@@ -103,6 +104,19 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
       setError(err.response?.data?.message ?? 'Something went wrong. Please try again.');
     } finally {
       setFillDemoLoading(false);
+    }
+  };
+
+  const handleContinueAsGuest = async () => {
+    setGuestLoading(true);
+    try {
+      await loginAsGuest();
+      showToast('Welcome! You are exploring as a guest.', { duration: 3000 });
+      navigate('/', { replace: true });
+    } catch {
+      setError('Could not initialize guest session. Please try again.');
+    } finally {
+      setGuestLoading(false);
     }
   };
 
@@ -283,12 +297,23 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
           <button
             type="button"
             onClick={handleFillDemo}
-            disabled={fillDemoLoading || submitting}
+            disabled={fillDemoLoading || submitting || guestLoading}
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-dashed border-primary/40 py-2.5 font-body-sm text-body-sm text-primary transition-colors hover:bg-primary-container/10 disabled:opacity-60"
             data-testid="auth-fill-demo-button"
           >
             {fillDemoLoading && <Loader2 size={14} className="animate-spin" />}
             Fill Demo Credentials ({DEMO_EMAIL} / {DEMO_PASSWORD})
+          </button>
+
+          <button
+            type="button"
+            onClick={handleContinueAsGuest}
+            disabled={guestLoading || submitting || fillDemoLoading}
+            className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white/70 py-2.5 font-body-sm text-body-sm text-slate-700 transition-colors hover:bg-white disabled:opacity-60"
+            data-testid="auth-guest-button"
+          >
+            {guestLoading && <Loader2 size={14} className="animate-spin" />}
+            Continue as Guest (No Registration Required)
           </button>
 
           <p className="mt-6 text-center font-body-sm text-body-sm text-on-surface-variant">

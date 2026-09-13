@@ -1,4 +1,5 @@
-module.exports = {
+/** @type {import('tailwindcss').Config} */
+export default {
   darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
@@ -51,9 +52,17 @@ module.exports = {
         background: '#fcf8ff',
         'on-background': '#1c1a27',
         'surface-variant': '#e5e0f3',
+        // Y-CHAP 6-Token Clinical Palette
+        pine: '#0B2B26',
+        fern: '#1E5E4D',
+        mist: '#E3EFE9',
+        bone: '#F8F9F5',
+        saffron: '#E29528',
+        clay: '#C2452D',
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['Manrope', '"Plus Jakarta Sans"', 'sans-serif'],
+        manrope: ['Manrope', 'sans-serif'],
       },
       fontSize: {
         'headline-lg': ['32px', { lineHeight: '40px', letterSpacing: '-0.02em', fontWeight: '700' }],

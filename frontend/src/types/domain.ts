@@ -131,6 +131,11 @@ export interface UserProfile {
   podcastStreakCount: number;
   streakFreezeAvailable: boolean;
   streakFreezeEquipped: boolean;
+  accountStatus?: 'UNREGISTERED_GUEST' | 'ACTIVE_USER';
+  isDemo?: boolean;
+  onboardingCompleted?: boolean;
+  hasRatedApp?: boolean;
+  onboardingData?: Record<string, any>;
 }
 
 export interface LeaderboardEntry {
@@ -187,4 +192,261 @@ export interface IntensityTrend {
   zones: IntensityZone[];
   totalMinutes: number;
   totalWorkouts: number;
+}
+
+export type HealthMetricType = 'blood_pressure' | 'blood_glucose';
+export type HealthMetricUiToken = 'Fern' | 'Saffron' | 'Clay';
+export type GlucoseUnit = 'MG_DL' | 'MMOL_L';
+
+export interface HealthMetric {
+  id: string;
+  userId: string;
+  type: HealthMetricType;
+  systolic?: number;
+  diastolic?: number;
+  pulse?: number;
+  glucoseValue?: number; // stored in mg/dL
+  glucoseUnit: GlucoseUnit;
+  isFasting: boolean;
+  category: string;
+  uiToken: HealthMetricUiToken;
+  isCriticalAlert: boolean;
+  notes?: string;
+  loggedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface HealthMetricSummary {
+  latestBp: HealthMetric | null;
+  latestGlucose: HealthMetric | null;
+  averages: {
+    avgSystolic: number | null;
+    avgDiastolic: number | null;
+    avgPulse: number | null;
+    avgGlucose: number | null;
+  };
+  categoryDistributions: {
+    bloodPressure: Record<string, number>;
+    bloodGlucose: Record<string, number>;
+  };
+  highestRiskFlag: HealthMetricUiToken;
+  totalReadings: number;
+}
+
+export interface CreateHealthMetricInput {
+  type: HealthMetricType;
+  systolic?: number;
+  diastolic?: number;
+  pulse?: number;
+  glucoseValue?: number;
+  glucoseUnit?: GlucoseUnit;
+  isFasting?: boolean;
+  notes?: string;
+  loggedAt?: string;
+}
+
+export type MoveActivityType = 'WALKATHON' | 'CYCLING';
+
+export interface MoveActivity {
+  id: string;
+  userId: string;
+  activityType: MoveActivityType;
+  distanceKm: number;
+  durationMinutes: number;
+  co2SavingsKg: number;
+  averagePaceKmh: number;
+  isFlagged: boolean;
+  flagReason?: string;
+  loggedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MoveSummary {
+  totalVerifiedDistanceKm: number;
+  totalCo2SavingsKg: number;
+  walkathonKm: number;
+  cyclingKm: number;
+  totalActivities: number;
+  verifiedActivitiesCount: number;
+  flaggedActivitiesCount: number;
+  activeStrikes: number;
+}
+
+export interface LogMoveActivityInput {
+  activityType: MoveActivityType;
+  distanceKm: number;
+  durationMinutes: number;
+  loggedAt?: string;
+}
+
+export type LeaderboardTier = 'INDIVIDUAL' | 'TEAMS' | 'UNIVERSITIES';
+export type LeaderboardTimeframe = 'weekly' | 'all_time';
+
+export interface University {
+  id: string;
+  name: string;
+  shortCode: string;
+  logoUrl?: string;
+  totalKm: number;
+  totalCo2Kg: number;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  universityId: string | University;
+  captainId?: string;
+  memberCount: number;
+  totalKm: number;
+  totalCo2Kg: number;
+}
+
+export interface CampusLeaderboardEntry {
+  rank: number;
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  logoUrl?: string;
+  subtitle?: string;
+  universityName?: string;
+  universityShortCode?: string;
+  teamName?: string;
+  memberCount?: number;
+  totalKm: number;
+  totalCo2Kg: number;
+  activityCount: number;
+  isCurrent?: boolean;
+}
+
+export interface LeaderboardResponse {
+  entries: CampusLeaderboardEntry[];
+  currentUserEntry?: CampusLeaderboardEntry | null;
+  currentTeamEntry?: CampusLeaderboardEntry | null;
+  currentUniversityEntry?: CampusLeaderboardEntry | null;
+  timeframe: LeaderboardTimeframe;
+  tier: LeaderboardTier;
+}
+
+export type RelationshipType =
+  | 'Parent'
+  | 'Grandparent'
+  | 'Sibling'
+  | 'Child'
+  | 'Spouse'
+  | 'Relative';
+
+export interface MonitoredMember {
+  id: string; // subjectId
+  linkId: string;
+  name: string;
+  email?: string;
+  avatarUrl?: string;
+  relationshipType: RelationshipType;
+  accessLevel: 'VIEW_VITALS' | 'EMERGENCY_ONLY';
+  latestBp?: {
+    systolic?: number;
+    diastolic?: number;
+    pulse?: number;
+    category: string;
+    uiToken: string;
+    isCriticalAlert: boolean;
+    loggedAt: string;
+  } | null;
+  latestGlucose?: {
+    glucoseValue?: number;
+    glucoseUnit: string;
+    isFasting: boolean;
+    category: string;
+    uiToken: string;
+    isCriticalAlert: boolean;
+    loggedAt: string;
+  } | null;
+  hasActiveCrisis: boolean;
+  crisisMessage?: string | null;
+  lastSyncAt?: string | null;
+}
+
+export interface MemberVitalHistoryResponse {
+  subject: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string;
+  };
+  relationshipType: RelationshipType;
+  accessLevel: string;
+  readings: HealthMetric[];
+}
+
+export type ScanType = 'HEART_PLATE' | 'PRODUCT';
+export type DashCompliance = 'OPTIMAL' | 'MODERATE' | 'EXCEEDS_LIMIT';
+
+export interface ProductScan {
+  id: string;
+  userId: string;
+  scanType: ScanType;
+  name: string;
+  imageUrl?: string;
+  ocrRawText?: string;
+  sodiumMg: number;
+  calories: number;
+  dashCompliance: DashCompliance;
+  labVerifiedScore: number;
+  healthNotes?: string;
+  cookingMode?: boolean;
+  scannedAt: string;
+}
+
+export interface DailyNutritionSummary {
+  todaySodiumMg: number;
+  dailyOptimalBenchmarkMg: number;
+  dailyUpperLimitMg: number;
+  sodiumRemainingOptimalMg: number;
+  sodiumRemainingLimitMg: number;
+  complianceStatus: DashCompliance;
+  uiToken: 'Fern' | 'Saffron' | 'Clay';
+  caloriesToday: number;
+  scansTodayCount: number;
+  recentScans: ProductScan[];
+  disclaimer: string;
+}
+
+export type AchievementCategory = 'CLINICAL' | 'MOVE' | 'NUTRITION' | 'COMMUNITY' | 'MILESTONE';
+export type RarityTier = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHIC';
+
+export interface EvaluatedAchievement {
+  id: number;
+  key: string;
+  title: string;
+  description: string;
+  category: AchievementCategory;
+  rarity: RarityTier;
+  iconName: string;
+  isUnlocked: boolean;
+  unlockedAt: string | null;
+  progressPercentage: number;
+}
+
+export interface AchievementSummaryResponse {
+  totalUnlocked: number;
+  totalAvailable: number;
+  unlockedRatio: number;
+  byRarity: Record<
+    string,
+    {
+      total: number;
+      unlocked: number;
+    }
+  >;
+  achievements: EvaluatedAchievement[];
+}
+
+export interface OnboardingData {
+  campusName?: string;
+  targetDailyDistanceKm?: number;
+  hasHypertensionHistory?: boolean;
+  notifyCrisisAlerts?: boolean;
+  preferredActivityMode?: 'WALKATHON' | 'CYCLING';
 }

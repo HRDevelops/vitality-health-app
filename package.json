@@ -6,7 +6,8 @@
     "dev": "concurrently -n CLIENT,SERVER -c blue,green \"yarn --cwd frontend dev\" \"yarn --cwd server dev\"",
     "dev:client": "yarn --cwd frontend dev",
     "dev:server": "yarn --cwd server dev",
-    "seed": "yarn --cwd server seed"
+    "seed": "yarn --cwd server seed",
+    "certify": "npm --prefix server run certify"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

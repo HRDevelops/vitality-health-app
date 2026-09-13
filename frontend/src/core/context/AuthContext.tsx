@@ -23,6 +23,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   loginAsDemo: () => Promise<void>;
+  loginAsGuest: () => Promise<void>;
   socialLogin: (provider: 'google' | 'apple') => Promise<void>;
   logout: () => void;
 }
@@ -96,6 +97,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persist(data);
   };
 
+  const loginAsGuest = async () => {
+    const { data } = await apiClient.post<AuthSession>('/onboarding/guest-session');
+    persist(data);
+  };
+
   const socialLogin = async (provider: 'google' | 'apple') => {
     const { data } = await apiClient.post<AuthSession>('/auth/social', { provider });
     persist(data);
@@ -133,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         loginAsDemo,
+        loginAsGuest,
         socialLogin,
         logout,
       }}
